@@ -1,0 +1,50 @@
+UNUSED FILES TO DELETE FROM MOVIE BOOKING APP FRONTEND
+========================================================
+
+SERVICES (4 files):
+- src\services\clerkSyncService.js
+- src\services\axios.js
+- src\services\clerkService.js
+- src\services\showsService.js
+
+COMPONENTS - COMMON (9 files):
+- src\components\common\AdvancedLoader.js
+- src\components\common\AdvancedLoader.css
+- src\components\common\BrandIntro.js
+- src\components\common\ClerkUserSync.js
+- src\components\common\GridMotion.js
+- src\components\common\GridMotion.css
+- src\components\common\LoadingScreen.js
+- src\components\common\LoadingSpinner.js
+- src\components\common\LoadingSpinner.css
+- src\components\common\TheaterLoadingSkeleton.js
+- src\components\common\UserDebug.js
+
+COMPONENTS - BOOKING (1 file):
+- src\components\booking\ScrollIndicator.js
+
+COMPONENTS - SHOWS (1 file):
+- src\components\shows\ShowsListNew.js
+
+COMPONENTS - ADMIN (1 file):
+- src\components\admin\SyncClerkUsers.js
+
+COMPONENTS - LIB (1 folder):
+- src\components\lib\ (empty folder)
+
+STYLES (1 file):
+- src\styles\screen-design.css
+
+UTILS (1 file):
+- src\utils\clerkAuth.js
+
+TOTAL: ~20 files/folders can be safely deleted
+
+REASON FOR DELETION:
+- Not imported in any component
+- Not used in routing
+- Commented out code
+- Empty folders
+- Duplicate functionality
+
+SAFE TO DELETE: These files don't affect any current functionality

@@ -1,0 +1,177 @@
+/* Admin Theater Management Styles */
+
+/* Main background and text colors */
+.theater-management-container {
+  background-color: #1f2025;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* Card styles */
+.theater-card {
+  background-color: #1f2025 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.theater-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Form styles */
+.theater-form-control {
+  background-color: #1f2025 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.theater-form-control:focus {
+  background-color: #1f2025 !important;
+  border-color: #f84565 !important;
+  box-shadow: 0 0 0 0.25rem rgba(248, 69, 101, 0.25) !important;
+}
+
+/* Modal styles */
+.theater-modal .modal-content {
+  background-color: #1f2025 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.theater-modal .modal-header {
+  background-color: #1f2025 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.theater-modal .modal-footer {
+  background-color: #1f2025 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Tab styles */
+.theater-tabs .nav-link {
+  color: #fff !important;
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin-right: 10px;
+  border-radius: 5px;
+}
+
+.theater-tabs .nav-link.active {
+  background-color: #f84565 !important;
+  border-color: #f84565 !important;
+  color: #fff !important;
+}
+
+/* Table styles */
+.theater-table {
+  background-color: #1f2025 !important;
+}
+
+.theater-table thead th {
+  background-color: #f84565 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.theater-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Button styles */
+.theater-btn-primary {
+  background-color: #f84565 !important;
+  border-color: #f84565 !important;
+  color: #fff !important;
+}
+
+.theater-btn-primary:hover {
+  background-color: #e63956 !important;
+  border-color: #e63956 !important;
+}
+
+.theater-btn-outline {
+  background-color: transparent !important;
+  border-color: #f84565 !important;
+  color: #f84565 !important;
+}
+
+.theater-btn-outline:hover {
+  background-color: #f84565 !important;
+  color: #fff !important;
+}
+
+/* Screen layout builder */
+.seat-layout-container {
+  background-color: #1f2025 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.seat-grid {
+  background-color: #2a2d35 !important;
+  border-radius: 5px;
+  padding: 20px;
+}
+
+.seat {
+  background-color: #3a3f4b !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.seat.selected {
+  background-color: #f84565 !important;
+  border-color: #f84565 !important;
+}
+
+/* Badge styles */
+.theater-badge-success {
+  background-color: #10b981 !important;
+}
+
+.theater-badge-danger {
+  background-color: #ef4444 !important;
+}
+
+.theater-badge-info {
+  background-color: #3b82f6 !important;
+}
+
+/* Screen type badges */
+.screen-type-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.screen-type-2d {
+  background-color: #3b82f6 !important;
+  color: #fff !important;
+}
+
+.screen-type-3d {
+  background-color: #8b5cf6 !important;
+  color: #fff !important;
+}
+
+.screen-type-imax {
+  background-color: #f59e0b !important;
+  color: #fff !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .theater-card {
+    margin-bottom: 15px;
+  }
+  
+  .theater-tabs .nav-link {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+}

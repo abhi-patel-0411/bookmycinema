@@ -1,0 +1,146 @@
+/* Admin Dashboard Mobile Fixes */
+
+/* Performance Card Mobile Layout */
+@media (max-width: 768px) {
+  .card-body .row.align-items-center {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  
+  .card-body .col {
+    width: 100% !important;
+    margin-bottom: 1rem;
+  }
+  
+  .card-body .col-auto {
+    width: 100% !important;
+  }
+  
+  .card-body .d-flex.flex-wrap.gap-4 {
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+    justify-content: space-between !important;
+  }
+  
+  .card-body .d-flex.flex-wrap.gap-4 > div {
+    flex: 1 1 calc(50% - 0.5rem) !important;
+    min-width: 120px !important;
+    text-align: center !important;
+  }
+  
+  .card-body .text-center {
+    padding: 0.5rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .card-body .h4 {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .card-body small {
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-body .d-flex.flex-wrap.gap-4 > div {
+    flex: 1 1 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .card-body .text-center {
+    padding: 0.75rem !important;
+  }
+  
+  .card-body .h4 {
+    font-size: 1.1rem !important;
+  }
+  
+  .card-body small {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* General Admin Dashboard Mobile Improvements */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 0.5rem !important;
+  }
+  
+  .card {
+    margin-bottom: 1rem !important;
+  }
+  
+  .card-body {
+    padding: 1rem !important;
+  }
+  
+  .card-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  /* Fix table responsiveness */
+  .table-responsive {
+    border: none !important;
+  }
+  
+  .table {
+    font-size: 0.85rem !important;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Fix button groups */
+  .btn-group {
+    flex-wrap: wrap !important;
+  }
+  
+  .btn-sm {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+}
+
+/* Performance metrics specific fixes */
+.performance-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .performance-metrics {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .performance-metrics > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .performance-metrics .metric-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .performance-metrics .metric-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+}

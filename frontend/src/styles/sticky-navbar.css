@@ -1,0 +1,52 @@
+.navbar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+
+/* Ensure navbar is always visible */
+.custom-navbar {
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+/* Add glass effect when scrolled */
+.custom-navbar.scrolled {
+  background-color: rgba(17, 17, 23, 0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+/* Enhance mobile navbar visibility */
+@media (max-width: 991px) {
+  .navbar-wrapper {
+    background-color: transparent;
+  }
+  
+  /* Ensure mobile menu appears above other content */
+  .navbar-menu.mobile-open {
+    z-index: 1100;
+  }
+}
+
+/* Add padding to body to prevent content from hiding under navbar */
+body {
+  padding-top: 0;
+}
+
+/* Smooth transition for navbar elements */
+.navbar-container {
+  transition: all 0.3s ease;
+}
+
+/* Remove bottom gradient for fully transparent navbar */
+.navbar-wrapper:after {
+  display: none;
+}
+.custom-navbar{
+  background-color: rgba(17, 17, 23, 0.7) !important;
+}

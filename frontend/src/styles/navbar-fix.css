@@ -1,0 +1,281 @@
+/* Professional Navbar UI Fix */
+
+/* Reset and base styles */
+.navbar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1050;
+  background: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-navbar {
+  width: 100%;
+  background: rgba(31, 32, 37, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.custom-navbar.scrolled {
+  background: rgba(31, 32, 37, 0.95);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Container layout */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 60px;
+}
+
+/* Logo styling */
+.navbar-logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Desktop menu */
+.navbar-menu {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+}
+
+.nav-link:hover {
+  color: #e63946;
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  background: rgba(230, 57, 70, 0.1);
+  transform: translateY(-1px);
+}
+
+.nav-link.admin-link {
+  background: linear-gradient(135deg, #e63946, #f84565);
+  color: white;
+  font-weight: 600;
+}
+
+.nav-link.admin-link:hover {
+  background: linear-gradient(135deg, #f84565, #e63946);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+}
+
+/* Navbar actions */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.auth-buttons .btn {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  border-color: #e63946;
+  color: #e63946;
+  background: rgba(230, 57, 70, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #e63946, #f84565);
+  border: none;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #f84565, #e63946);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+}
+
+/* User button styling */
+.user-button {
+  display: flex;
+  align-items: center;
+}
+
+/* Audio button */
+.navbar-actions button[aria-label="Toggle background audio"] {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.navbar-actions button[aria-label="Toggle background audio"]:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Desktop responsive */
+@media (min-width: 768px) {
+  .navbar-container {
+    padding: 0.75rem 2rem;
+  }
+  
+  .navbar-menu {
+    display: flex;
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar-container {
+    padding: 0.75rem 3rem;
+  }
+  
+  .navbar-menu {
+    gap: 0.75rem;
+    padding: 0.6rem 1.2rem;
+  }
+  
+  .nav-link {
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .navbar-container {
+    padding: 0.75rem 4rem;
+  }
+  
+  .navbar-menu {
+    gap: 1rem;
+    padding: 0.7rem 1.5rem;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  .navbar-container {
+    padding: 0.5rem 1rem;
+    min-height: 55px;
+  }
+  
+  .navbar-menu {
+    display: none;
+  }
+  
+  .auth-buttons {
+    display: none;
+  }
+  
+  .navbar-actions {
+    gap: 0.5rem;
+  }
+  
+  .navbar-actions button[aria-label="Toggle background audio"] {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}
+
+/* Mobile bottom navigation spacing */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 80px;
+  }
+  
+  .theaters-container,
+  .netflix-home,
+  .movies-container,
+  .booking-container {
+    padding-bottom: 100px;
+  }
+}
+
+/* Smooth animations */
+.navbar-wrapper * {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus states for accessibility */
+.nav-link:focus,
+.navbar-actions .btn:focus {
+  outline: 2px solid #e63946;
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.navbar-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .custom-navbar {
+    background: rgba(0, 0, 0, 0.9);
+    border-bottom: 2px solid white;
+  }
+  
+  .nav-link {
+    color: white;
+  }
+  
+  .navbar-menu {
+    border: 2px solid white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .navbar-wrapper,
+  .navbar-wrapper *,
+  .custom-navbar,
+  .nav-link,
+  .navbar-actions .btn {
+    transition: none;
+    animation: none;
+  }
+}

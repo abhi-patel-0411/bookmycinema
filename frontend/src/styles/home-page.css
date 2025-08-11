@@ -1,0 +1,65 @@
+Home page positioning
+.home-page-container {
+  position: relative;
+  width: 100%;
+  z-index: 1;
+  overflow-x: hidden;
+  background-color: #1f2025;
+}
+
+/* Remove all borders and set background color */
+.home-page-container div,
+.home-page-container section,
+.home-page-container .card,
+.home-page-container .container,
+.home-page-container .container-fluid {
+  border: none !important;
+  /* background-color: #1f2025; */
+}
+
+/* Ensure hero section is positioned correctly */
+.home-page-container section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Ensure navbar appears above home content */
+.navbar-wrapper {
+  z-index: 1001;
+}
+
+/* Mobile responsiveness fixes */
+@media (max-width: 767px) {
+  .home-page-container {
+    overflow-x: hidden;
+  }
+  
+  /* .home-page-container section {
+    padding-left: 15px;
+    padding-right: 15px;
+  } */
+  
+  /* Fix container width on mobile */
+  .home-page-container .container-fluid {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+  
+  /* Fix movie cards on mobile */
+  .home-page-container .card {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+}
+
+/* Fix carousel scrolling on mobile */
+.carousel-container {
+  transition: transform 0.3s ease;
+}
+
+@media (max-width: 576px) {
+  .carousel-container {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}

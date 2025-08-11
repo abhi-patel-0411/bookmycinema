@@ -1,0 +1,68 @@
+.custom-footer {
+    background-color: black !important;
+    color: #d1d5db !important;
+    width: 100% !important;
+}
+
+.footer-logo {
+    width: auto !important;
+    height: 40px !important;
+    object-fit: contain !important;
+}
+
+.footer-brand-text {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: white !important;
+}
+
+.footer-text {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 0 !important;
+}
+
+.app-download-btn {
+    height: 40px !important;
+    width: auto !important;
+    border: 1px solid white !important;
+    border-radius: 4px !important;
+}
+
+.footer-heading {
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+    color: white !important;
+}
+
+.footer-links {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.footer-links li {
+    margin-bottom: 8px !important;
+}
+
+.footer-links a {
+    color: #d1d5db !important;
+    text-decoration: none !important;
+    font-size: 14px !important;
+}
+
+.footer-links a:hover {
+    color: white !important;
+}
+
+.footer-contact p {
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+    color: #d1d5db !important;
+}
+
+.footer-copyright {
+    font-size: 14px !important;
+    margin: 0 !important;
+    color: #d1d5db !important;
+}

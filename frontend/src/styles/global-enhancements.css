@@ -1,0 +1,70 @@
+ Global Enhancements 
+
+:root {
+  --color-primary: #f84565;
+  --color-secondary: #1e293b;
+  --color-accent: #06b6d4;
+  --dark-bg: #0f172a;
+  --card-bg: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+}
+
+body {
+  background-color: #1f2025 !important;
+  color: #ffffff !important;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.App, #root, html {
+  background-color: #1f2025 !important;
+  color: #ffffff !important;
+}
+
+ Utility Classes 
+.text-primary-custom {
+  color: var(--color-primary) !important;
+}
+
+.bg-dark-custom {
+  background-color: #1f2025 !important;
+}
+
+.border-bottom-custom {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+ Button Styles 
+.btn-primary-custom {
+  background: linear-gradient(135deg, var(--color-primary), #ff6b35);
+  border: none;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-primary-custom:hover {
+  background: linear-gradient(135deg, #ff6b35, var(--color-primary));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(248, 69, 101, 0.3);
+}
+
+ Card Styles 
+.card-dark {
+  background-color: rgba(31, 32, 37, 0.8);
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+ Form Styles 
+.form-control-dark {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.form-control-dark:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: none;
+}

@@ -1,0 +1,218 @@
+/* Admin Users Page Styling */
+
+/* Pagination styling */
+.pagination-custom .page-item .page-link {
+  background-color: #2a2d35;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.pagination-custom .page-item.active .page-link {
+  background: linear-gradient(135deg, #e63946, #f84565);
+  border-color: #e63946;
+  color: white;
+}
+
+.pagination-custom .page-item .page-link:hover {
+  background-color: #3a3d45;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.pagination-custom .page-item.disabled .page-link {
+  background-color: #1f2025;
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+/* Table styling */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: rgba(230, 57, 70, 0.5);
+  border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 57, 70, 0.7);
+}
+
+.table-dark {
+  background-color: #1f2025;
+}
+
+.table-dark thead th {
+  background: linear-gradient(135deg, #e63946, #f84565);
+  color: white;
+  border-bottom: none;
+  padding: 15px 10px;
+  font-weight: 600;
+}
+
+.table-dark tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table-dark tbody tr:hover {
+  background-color: rgba(230, 57, 70, 0.1) !important;
+}
+
+/* Card styling */
+.stats-card {
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Badge styling */
+.badge {
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-weight: 500;
+}
+
+/* Form control styling */
+.form-control, .form-select {
+  background-color: #2a2d35;
+  border-color: #6c757d;
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 15px;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: #2a2d35;
+  border-color: #e63946;
+  color: #fff;
+  box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.25);
+}
+
+/* Button styling */
+.btn-primary {
+  background: linear-gradient(135deg, #e63946, #f84565);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(232, 57, 70, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(232, 57, 70, 0.4);
+  background: linear-gradient(135deg, #f84565, #e63946);
+}
+
+/* User avatar styling */
+.user-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar-admin {
+  background: linear-gradient(135deg, #e63946, #f84565);
+}
+
+.user-avatar-clerk {
+  background: linear-gradient(135deg, #f953c6, #b91d73);
+}
+
+.user-avatar-user {
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+}
+
+/* Modal styling */
+.modal-content {
+  border-radius: 15px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+  
+  .badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+  
+  .user-avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+  
+  /* Enhanced mobile scrolling */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+  }
+  
+  .table-responsive > .table {
+    white-space: nowrap;
+  }
+  
+  /* Custom scrollbar for better UX */
+  .table-responsive::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .table-responsive::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  
+  .table-responsive::-webkit-scrollbar-thumb {
+    background: rgba(230, 57, 70, 0.5);
+    border-radius: 3px;
+  }
+  
+  /* Visual indicator for scrollable tables */
+  .table-responsive::after {
+    content: "→";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    color: rgba(230, 57, 70, 0.7);
+    font-size: 20px;
+    animation: fadeInOut 1.5s infinite;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+}

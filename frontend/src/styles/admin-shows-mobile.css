@@ -1,0 +1,248 @@
+/* Admin Shows Management Mobile Responsive Styles */
+
+/* Header Section Mobile Fixes */
+@media (max-width: 768px) {
+  .admin-shows-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+  
+  .admin-shows-header .d-flex.justify-content-between.align-items-center {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    gap: 1rem !important;
+  }
+  
+  .admin-shows-header > div:first-child {
+    width: 100% !important;
+  }
+  
+  .admin-shows-header > div:last-child {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+  
+  .admin-shows-header h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .admin-shows-header p {
+    font-size: 0.9rem !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Button Group Mobile Styles */
+@media (max-width: 768px) {
+  .admin-shows-controls {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0.75rem !important;
+  }
+  
+  .btn-group {
+    flex-shrink: 0 !important;
+  }
+  
+  .btn-group .btn {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .btn-group .btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  /* Add New Show Button Mobile */
+  .btn-add-show-mobile {
+    flex: 1 !important;
+    max-width: 200px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #e63946, #f84565) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3) !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .btn-add-show-mobile:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4) !important;
+  }
+  
+  .btn-add-show-mobile svg {
+    width: 14px !important;
+    height: 14px !important;
+    margin-right: 0.5rem !important;
+  }
+}
+
+/* Very Small Devices */
+@media (max-width: 576px) {
+  .admin-shows-controls {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+  
+  .btn-group {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .btn-group .btn {
+    flex: 1 !important;
+    min-width: 60px !important;
+  }
+  
+  .btn-add-show-mobile {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 1rem !important;
+    font-size: 1rem !important;
+  }
+  
+  .admin-shows-header h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  .admin-shows-header p {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Professional Button Styling */
+.btn-beautiful-outline,
+.btn-beautiful-primary {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  border-width: 1px !important;
+}
+
+.btn-beautiful-outline {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.btn-beautiful-outline:hover {
+  background: rgba(230, 57, 70, 0.1) !important;
+  border-color: #e63946 !important;
+  color: #e63946 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-beautiful-outline.active,
+.btn-beautiful-primary {
+  background: linear-gradient(135deg, #e63946, #f84565) !important;
+  border-color: #e63946 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3) !important;
+}
+
+.btn-beautiful-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4) !important;
+}
+
+/* Card View and Table View Icons */
+.view-toggle-btn {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.view-toggle-btn::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent) !important;
+  transition: left 0.5s ease !important;
+}
+
+.view-toggle-btn:hover::before {
+  left: 100% !important;
+}
+
+/* Responsive Text Adjustments */
+@media (max-width: 768px) {
+  .admin-page-title {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+  }
+  
+  .admin-page-subtitle {
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+    opacity: 0.8 !important;
+  }
+}
+
+/* Loading States */
+.btn-loading {
+  position: relative !important;
+  pointer-events: none !important;
+}
+
+.btn-loading::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 16px !important;
+  height: 16px !important;
+  top: 50% !important;
+  left: 50% !important;
+  margin-left: -8px !important;
+  margin-top: -8px !important;
+  border: 2px solid transparent !important;
+  border-top: 2px solid currentColor !important;
+  border-radius: 50% !important;
+  animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Focus States for Accessibility */
+.btn:focus,
+.btn:focus-visible {
+  outline: 2px solid #e63946 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2) !important;
+}
+
+/* Dark Theme Enhancements */
+.admin-shows-container {
+  background: #1f2025 !important;
+  color: #ffffff !important;
+}
+
+.admin-shows-header {
+  padding: 1.5rem 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+@media (max-width: 768px) {
+  .admin-shows-header {
+    padding: 1rem 0 !important;
+    margin-bottom: 1rem !important;
+  }
+}

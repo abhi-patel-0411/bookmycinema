@@ -1,0 +1,115 @@
+/* Global Admin Styles */
+.admin-page-wrapper {
+  background: #1f2025 !important;
+  color: #fff;
+}
+
+.admin-page-wrapper h1,
+.admin-page-wrapper h2,
+.admin-page-wrapper h3,
+.admin-page-wrapper h4,
+.admin-page-wrapper h5,
+.admin-page-wrapper h6 {
+  color: #fff !important;
+}
+
+.admin-page-wrapper .text-secondary {
+  color: #9ca3af !important;
+}
+
+.admin-page-wrapper .text-light {
+  color: #e5e7eb !important;
+}
+
+.admin-page-wrapper .card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff;
+}
+
+.admin-page-wrapper .table {
+  color: #fff;
+}
+
+.admin-page-wrapper .table th {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+.admin-page-wrapper .table td {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.admin-page-wrapper .form-control {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.admin-page-wrapper .form-control:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+  color: #fff;
+}
+
+.admin-page-wrapper .form-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.admin-page-wrapper .modal-content {
+  background: #1f2025;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-page-wrapper .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-page-wrapper .modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Override text-muted globally for admin pages */
+.admin-page-wrapper .text-muted {
+  color: #ffffff !important;
+}
+
+/* Fix placeholder text color globally */
+.admin-page-wrapper .form-control::placeholder {
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+
+.admin-page-wrapper .form-select::placeholder {
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+
+/* Ensure all form inputs have white text */
+.admin-page-wrapper .form-control {
+  color: #ffffff !important;
+}
+
+.admin-page-wrapper .form-select {
+  color: #ffffff !important;
+}
+
+/* Fix select dropdown options */
+.admin-page-wrapper .form-select option {
+  background-color: #1f2025 !important;
+  color: #ffffff !important;
+}
+
+/* Hide scrollbars globally */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
