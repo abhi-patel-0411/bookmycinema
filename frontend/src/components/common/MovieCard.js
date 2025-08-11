@@ -62,7 +62,10 @@ const MovieCard = ({ movie, index = 0 }) => {
             style={{ overflow: 'hidden' }}
           >
             <img
-              src={getMoviePosterUrl(movie)}
+              src={movie.poster ? 
+                (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
+                'https://picsum.photos/300/450?random=30'
+              }
               alt={movie.title}
               className="movie-poster"
               style={{ height: '220px', width: '100%', objectFit: 'cover' }}

@@ -35,7 +35,10 @@ const AdminMoviesTable = ({ movies, onEdit, onDelete, onView }) => {
             >
               <td className="text-center">
                 <Image
-                  src={getMoviePosterUrl(movie)}
+                  src={movie.poster ? 
+                    (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
+                    `https://via.placeholder.com/60x80/1e293b/ffffff?text=${encodeURIComponent(movie.title.charAt(0))}`
+                  }
                   alt={movie.title}
                   className="movie-poster-small"
                   style={{
@@ -130,7 +133,10 @@ const AdminMoviesTable = ({ movies, onEdit, onDelete, onView }) => {
             <div className="card-body p-3">
               <div className="d-flex align-items-start mb-3">
                 <img
-                  src={getMoviePosterUrl(movie)}
+                  src={movie.poster ? 
+                    (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
+                    `https://via.placeholder.com/60x80/1e293b/ffffff?text=${encodeURIComponent(movie.title.charAt(0))}`
+                  }
                   alt={movie.title}
                   className="me-3"
                   style={{

@@ -290,7 +290,9 @@ const MovieDetails = () => {
         className="d-none d-md-block"
         style={{
           backgroundImage: `linear-gradient(90deg, rgb(26, 26, 26) 24.97%, rgb(26, 26, 26) 38.3%, rgba(26, 26, 26, 0.04) 97.47%, rgb(26, 26, 26) 100%), url(${
-            movie.poster ? `${API_BASE_URL}${movie.poster}` : "https://picsum.photos/1200/600"
+            movie.poster ? 
+              (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
+              "https://picsum.photos/1200/600"
           })`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -311,7 +313,10 @@ const MovieDetails = () => {
                       style={{ borderRadius: "16px 16px 0px 0px" }}
                     >
                       <img
-                        src={movie.poster ? `${API_BASE_URL}${movie.poster}` : "https://picsum.photos/280/416"}
+                        src={movie.poster ? 
+                          (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
+                          "https://picsum.photos/280/416"
+                        }
                         alt={movie.title}
                         style={{
                           width: "280px",
@@ -522,7 +527,10 @@ const MovieDetails = () => {
               }}
             >
               <img
-                src={movie.poster ? `${API_BASE_URL}${movie.poster}` : "https://picsum.photos/300/400"}
+                src={movie.poster ? 
+                  (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
+                  "https://picsum.photos/300/400"
+                }
                 alt="multimedia-trailers"
                 style={{
                   opacity: 1,
@@ -838,10 +846,11 @@ const MovieDetails = () => {
                   <div className="mb-2">
                     <img
                       src={
-                        actor.image ? `${API_BASE_URL}${actor.image}` :
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          actor.name || actor
-                        )}&background=random&color=fff&size=80`
+                        actor.image ? 
+                          (actor.image.startsWith('http') ? actor.image : `http://localhost:5000${actor.image}`) :
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            actor.name || actor
+                          )}&background=random&color=fff&size=80`
                       }
                       alt={actor.name || actor}
                       className="rounded-circle"

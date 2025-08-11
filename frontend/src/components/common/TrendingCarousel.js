@@ -78,7 +78,9 @@ const TrendingCarousel = ({ movies = [], title = "Recommended Movies" }) => {
             // Ensure movie has a title
             const movieTitle = movie.title || 'Untitled Movie';
             // Ensure movie has an image
-            const movieImage = movie.poster ? `${API_BASE_URL}${movie.poster}` : (movie.image || 'https://picsum.photos/200/280?random=20');
+            const movieImage = movie.poster ? 
+              (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
+              (movie.image || 'https://picsum.photos/200/280?random=20');
             // Ensure movie has a genre
             const movieGenre = Array.isArray(movie.genre) ? movie.genre.join(', ') : (movie.genre || 'Drama');
             

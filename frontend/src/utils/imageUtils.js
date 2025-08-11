@@ -19,17 +19,21 @@ export const getImageUrl = (imagePath, fallbackUrl = null) => {
 };
 
 export const getMoviePosterUrl = (movie, fallbackText = null) => {
-  if (movie.poster) {
+  if (movie && movie.poster) {
     // If it's already a full URL, return as is
     if (movie.poster.startsWith('http://') || movie.poster.startsWith('https://')) {
       return movie.poster;
     }
-    // Otherwise, construct the full URL
-    return getImageUrl(movie.poster);
+    // If it's a relative path, construct the full URL
+    if (movie.poster.startsWith('/')) {
+      return `${API_BASE_URL}${movie.poster}`;
+    }
+    // If it doesn't start with /, add it
+    return `${API_BASE_URL}/${movie.poster}`;
   }
   
   // Generate placeholder with movie title initial
-  const initial = fallbackText || movie.title?.charAt(0) || 'M';
+  const initial = fallbackText || (movie && movie.title ? movie.title.charAt(0) : 'M');
   return `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(initial)}`;
 };
 
