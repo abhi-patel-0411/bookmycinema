@@ -238,8 +238,8 @@ const AdminMovies = () => {
             movieFormData.append("poster", formData.poster);
           }
         } else if (key === "posterUrl") {
-          // Skip posterUrl if we have a file upload
-          if (formData.posterUrl && !(formData.poster instanceof File)) {
+          // Only use posterUrl if no file is uploaded
+          if (formData.posterUrl && !formData.poster) {
             movieFormData.append("poster", formData.posterUrl);
           }
         } else if (
@@ -392,7 +392,7 @@ const AdminMovies = () => {
   const handlePosterChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, poster: file });
+      setFormData({ ...formData, poster: file, posterUrl: '' });
       const previewUrl = URL.createObjectURL(file);
       setPosterPreview(previewUrl);
     }
@@ -1582,10 +1582,7 @@ const AdminMovies = () => {
                       <Form.Control
                         type="file"
                         accept="image/*"
-                        onChange={(e) => {
-                          handlePosterChange(e);
-                          setFormData({ ...formData, posterUrl: '' });
-                        }}
+                        onChange={handlePosterChange}
                         style={{
                           backgroundColor: "#2a2d35",
                           borderColor: "#6c757d",

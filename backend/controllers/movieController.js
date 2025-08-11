@@ -93,9 +93,10 @@ const createMovie = async (req, res) => {
     const movieData = { ...req.body };
     if (req.file) {
       movieData.poster = `/uploads/${req.file.filename}`;
+      console.log('File uploaded:', req.file.filename);
     } else if (movieData.poster && (movieData.poster.startsWith('http://') || movieData.poster.startsWith('https://'))) {
       // Keep the URL as is if it's a full URL
-      movieData.poster = movieData.poster;
+      console.log('Using URL:', movieData.poster);
     } else {
       // Clear poster if no valid input
       delete movieData.poster;
@@ -136,6 +137,8 @@ const createMovie = async (req, res) => {
 
     console.log("Creating movie with data:", {
       title: movieData.title,
+      poster: movieData.poster,
+      hasFile: !!req.file,
       isUpcoming: movieData.isUpcoming,
       startDate: movieData.startDate,
       endDate: movieData.endDate,
@@ -156,9 +159,10 @@ const updateMovie = async (req, res) => {
     const updateData = { ...req.body };
     if (req.file) {
       updateData.poster = `/uploads/${req.file.filename}`;
+      console.log('File uploaded for update:', req.file.filename);
     } else if (updateData.poster && (updateData.poster.startsWith('http://') || updateData.poster.startsWith('https://'))) {
       // Keep the URL as is if it's a full URL
-      updateData.poster = updateData.poster;
+      console.log('Using URL for update:', updateData.poster);
     }
 
     if (updateData.genre && typeof updateData.genre === "string") {

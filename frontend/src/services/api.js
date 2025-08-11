@@ -12,6 +12,11 @@ const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use(async (config) => {
+  // Don't set Content-Type for FormData - let browser set it with boundary
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+  
   // Try to get Clerk token from window (if available)
   if (window.Clerk && window.Clerk.session) {
     try {
@@ -44,20 +49,10 @@ export const moviesAPI = {
   getById: (id) => api.get(`/movies/${id}`),
   getShows: (id, params) => api.get(`/movies/${id}/shows`, { params }),
   create: (formData) => {
-    // Use FormData for file uploads
-    return api.post('/movies', formData, {
-      headers: { 
-        'Content-Type': 'multipart/form-data' 
-      }
-    });
+    return api.post('/movies', formData);
   },
   update: (id, formData) => {
-    // Use FormData for file uploads
-    return api.put(`/movies/${id}`, formData, {
-      headers: { 
-        'Content-Type': 'multipart/form-data' 
-      }
-    });
+    return api.put(`/movies/${id}`, formData);
   },
   delete: (id) => api.delete(`/movies/${id}`),
   softDelete: (id) => api.put(`/movies/${id}/deactivate`)
