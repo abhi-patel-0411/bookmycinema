@@ -1,4 +1,9 @@
-const { clerkClient } = require('@clerk/clerk-sdk-node');
+const { createClerkClient } = require('@clerk/clerk-sdk-node');
+
+// Initialize Clerk client
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
 const User = require('../models/User');
 
 /**
@@ -14,11 +19,18 @@ class UserSyncService {
       console.log('Starting sync of all users from Clerk...');
       
       // Get all users from Clerk
-      const clerkUsers = await clerkClient.users.getUserList({
+      console.log('Fetching users from Clerk...');
+      const clerkResponse = await clerkClient.users.getUserList({
         limit: 100,
       });
       
-      console.log(`Found ${clerkUsers.length} users in Clerk`);
+      console.log('Clerk response type:', typeof clerkResponse);
+      console.log('Clerk response keys:', Object.keys(clerkResponse || {}));
+      
+      // Handle different response structures between SDK versions
+      const clerkUsers = clerkResponse.data || clerkResponse || [];
+      
+      console.log(`Found ${clerkUsers?.length || 'undefined'} users in Clerk`);
       
       // Get all users from database
       const dbUsers = await User.find();
@@ -36,6 +48,12 @@ class UserSyncService {
       // Find users in Clerk that are not in the database
       let newUsers = 0;
       let updatedUsers = 0;
+      
+      // Ensure clerkUsers is iterable
+      if (!Array.isArray(clerkUsers)) {
+        console.error('clerkUsers is not an array:', typeof clerkUsers, clerkUsers);
+        throw new Error('Failed to get users from Clerk - invalid response format');
+      }
       
       for (const clerkUser of clerkUsers) {
         // Get primary email
