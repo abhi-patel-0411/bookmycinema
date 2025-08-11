@@ -3,9 +3,8 @@ import { Table, Button, Badge, Image } from 'react-bootstrap';
 import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import moment from 'moment';
+import { getMoviePosterUrl } from '../../utils/imageUtils';
 import '../../styles/admin-responsive-tables.css';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const AdminMoviesTable = ({ movies, onEdit, onDelete, onView }) => {
   return (
@@ -36,7 +35,7 @@ const AdminMoviesTable = ({ movies, onEdit, onDelete, onView }) => {
             >
               <td className="text-center">
                 <Image
-                  src={movie.poster ? `${API_BASE_URL}${movie.poster}` : `https://via.placeholder.com/60x80/1e293b/ffffff?text=${encodeURIComponent(movie.title.charAt(0))}`}
+                  src={getMoviePosterUrl(movie)}
                   alt={movie.title}
                   className="movie-poster-small"
                   style={{
@@ -131,7 +130,7 @@ const AdminMoviesTable = ({ movies, onEdit, onDelete, onView }) => {
             <div className="card-body p-3">
               <div className="d-flex align-items-start mb-3">
                 <img
-                  src={movie.poster ? `${API_BASE_URL}${movie.poster}` : `https://via.placeholder.com/60x80/1e293b/ffffff?text=${encodeURIComponent(movie.title.charAt(0))}`}
+                  src={getMoviePosterUrl(movie)}
                   alt={movie.title}
                   className="me-3"
                   style={{

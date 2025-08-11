@@ -20,6 +20,11 @@ export const getImageUrl = (imagePath, fallbackUrl = null) => {
 
 export const getMoviePosterUrl = (movie, fallbackText = null) => {
   if (movie.poster) {
+    // If it's already a full URL, return as is
+    if (movie.poster.startsWith('http://') || movie.poster.startsWith('https://')) {
+      return movie.poster;
+    }
+    // Otherwise, construct the full URL
     return getImageUrl(movie.poster);
   }
   

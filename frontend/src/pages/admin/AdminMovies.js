@@ -1551,8 +1551,9 @@ const AdminMovies = () => {
                         type="url"
                         value={formData.posterUrl || ''}
                         onChange={(e) => {
-                          setFormData({ ...formData, posterUrl: e.target.value });
-                          setPosterPreview('');
+                          const url = e.target.value;
+                          setFormData({ ...formData, posterUrl: url, poster: null });
+                          setPosterPreview(url);
                         }}
                         placeholder="https://example.com/movie-poster.jpg"
                         style={{
