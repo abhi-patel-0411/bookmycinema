@@ -238,8 +238,9 @@ const AdminMovies = () => {
             movieFormData.append("poster", formData.poster);
           }
         } else if (key === "posterUrl") {
-          if (formData.posterUrl) {
-            movieFormData.append("posterUrl", formData.posterUrl);
+          // Skip posterUrl if we have a file upload
+          if (formData.posterUrl && !(formData.poster instanceof File)) {
+            movieFormData.append("poster", formData.posterUrl);
           }
         } else if (
           key === "genre" &&

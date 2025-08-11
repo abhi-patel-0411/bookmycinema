@@ -50,4 +50,22 @@ router.put('/:id/deactivate', softDeleteMovie);
 // Upload cast image
 router.post('/upload-cast-image', upload.single('image'), uploadCastImage);
 
+// Test upload endpoint
+router.post('/test-upload', upload.single('poster'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    res.json({ 
+      success: true, 
+      filename: req.file.filename,
+      path: `/uploads/${req.file.filename}`,
+      originalName: req.file.originalname,
+      size: req.file.size
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

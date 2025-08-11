@@ -90,9 +90,17 @@ const getMovieById = async (req, res) => {
 // Create movie
 const createMovie = async (req, res) => {
   try {
+    console.log('Creating movie - File:', req.file ? req.file.filename : 'No file');
+    console.log('Creating movie - Body poster:', req.body.poster);
+    
     const movieData = { ...req.body };
     if (req.file) {
       movieData.poster = `/uploads/${req.file.filename}`;
+      console.log('Set poster from file:', movieData.poster);
+    } else if (movieData.poster && movieData.poster.startsWith('http')) {
+      // Keep the URL as is if it's a full URL
+      movieData.poster = movieData.poster;
+      console.log('Set poster from URL:', movieData.poster);
     }
 
     if (movieData.genre && typeof movieData.genre === "string") {
@@ -147,9 +155,17 @@ const createMovie = async (req, res) => {
 // Update movie
 const updateMovie = async (req, res) => {
   try {
+    console.log('Updating movie - File:', req.file ? req.file.filename : 'No file');
+    console.log('Updating movie - Body poster:', req.body.poster);
+    
     const updateData = { ...req.body };
     if (req.file) {
       updateData.poster = `/uploads/${req.file.filename}`;
+      console.log('Set poster from file:', updateData.poster);
+    } else if (updateData.poster && updateData.poster.startsWith('http')) {
+      // Keep the URL as is if it's a full URL
+      updateData.poster = updateData.poster;
+      console.log('Set poster from URL:', updateData.poster);
     }
 
     if (updateData.genre && typeof updateData.genre === "string") {
