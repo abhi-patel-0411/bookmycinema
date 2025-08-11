@@ -62,15 +62,12 @@ const MovieCard = ({ movie, index = 0 }) => {
             style={{ overflow: 'hidden' }}
           >
             <img
-              src={movie.poster ? 
-                (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
-                'https://picsum.photos/300/450?random=30'
-              }
+              src={getMoviePosterUrl(movie.poster, movie.title)}
               alt={movie.title}
               className="movie-poster"
               style={{ height: '220px', width: '100%', objectFit: 'cover' }}
               onError={(e) => {
-                e.target.src = 'https://picsum.photos/300/450?random=31';
+                e.target.src = `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(movie.title.charAt(0))}`;
               }}
             />
           </motion.div>

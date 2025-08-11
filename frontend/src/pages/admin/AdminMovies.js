@@ -31,6 +31,7 @@ import { moviesAPI } from "../../services/api";
 import AdminLayout from "../../components/admin/AdminLayout";
 import ModernLoader from "../../components/common/ModernLoader";
 import { useSocket } from "../../contexts/SocketContext";
+import { getMoviePosterUrl } from "../../utils/imageUtils";
 import moment from "moment";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -357,7 +358,7 @@ const AdminMovies = () => {
     });
 
     if (movie.poster) {
-      setPosterPreview(movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`);
+      setPosterPreview(getMoviePosterUrl(movie.poster, movie.title));
     } else {
       setPosterPreview("");
     }
@@ -685,13 +686,7 @@ const AdminMovies = () => {
                         </td>
                         <td>
                           <img
-                            src={
-                              movie.poster ? 
-                                (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) :
-                                `https://via.placeholder.com/60x90/1e293b/ffffff?text=${encodeURIComponent(
-                                  movie.title.charAt(0)
-                                )}`
-                            }
+                            src={getMoviePosterUrl(movie.poster, movie.title)}
                             alt={movie.title}
                             className="img-fluid"
                             style={{
@@ -1505,12 +1500,7 @@ const AdminMovies = () => {
                   <div className="position-relative">
                     {posterPreview || editingMovie?.poster || formData.posterUrl ? (
                       <img
-                        src={posterPreview || 
-                          (editingMovie?.poster ? 
-                            (editingMovie.poster.startsWith('http') ? editingMovie.poster : `http://localhost:5000${editingMovie.poster}`) : 
-                            formData.posterUrl
-                          )
-                        }
+                        src={posterPreview || getMoviePosterUrl(editingMovie?.poster) || formData.posterUrl}
                         alt="Poster Preview"
                         className="rounded"
                         style={{

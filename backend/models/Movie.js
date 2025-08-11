@@ -17,7 +17,7 @@ const movieSchema = new mongoose.Schema({
   language: { type: String, required: true },
   releaseDate: { type: Date, required: true },
   rating: { type: Number, min: 0, max: 5, default: 0 },
-  poster: { type: String, required: true },
+  poster: { type: String, required: false },
   trailer: { type: String },
   youtubeUrl: { type: String },
   cast: [
