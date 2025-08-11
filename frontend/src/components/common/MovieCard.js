@@ -13,7 +13,8 @@ const MovieCard = ({ movie, index = 0 }) => {
   useEffect(() => {
     const fetchMovieRating = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/ratings/movie/${movie._id}`);
+        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_URL}/ratings/movie/${movie._id}`);
         if (response.ok) {
           const data = await response.json();
           setMovieRating({

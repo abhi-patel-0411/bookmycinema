@@ -34,7 +34,7 @@ import { useSocket } from "../../contexts/SocketContext";
 import { getMoviePosterUrl } from "../../utils/imageUtils";
 import moment from "moment";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
 
 const AdminMovies = () => {
   const [movies, setMovies] = useState([]);
@@ -138,8 +138,9 @@ const AdminMovies = () => {
       // Fetch ratings for each movie
       const ratingsPromises = moviesData.map(async (movie) => {
         try {
+          const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
           const ratingResponse = await fetch(
-            `http://localhost:5000/api/ratings/movie/${movie._id}`
+            `${API_URL}/ratings/movie/${movie._id}`
           );
           if (ratingResponse.ok) {
             const ratingData = await ratingResponse.json();

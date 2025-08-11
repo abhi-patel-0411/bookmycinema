@@ -1,5 +1,12 @@
 // Utility function to construct proper image URLs
-const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const getApiBaseUrl = () => {
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL.replace('/api', '');
+  }
+  return 'http://localhost:5000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const getImageUrl = (imagePath, fallbackUrl = null) => {
   if (!imagePath) return fallbackUrl;

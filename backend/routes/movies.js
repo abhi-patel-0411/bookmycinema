@@ -36,10 +36,26 @@ router.get('/:id/shows', async (req, res) => {
 });
 
 // Add movie (made public for demo)
-router.post('/', upload.single('poster'), createMovie);
+router.post('/', (req, res, next) => {
+  upload.single('poster')(req, res, (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ message: err.message });
+    }
+    next();
+  });
+}, createMovie);
 
 // Update movie (made public for demo)
-router.put('/:id', upload.single('poster'), updateMovie);
+router.put('/:id', (req, res, next) => {
+  upload.single('poster')(req, res, (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ message: err.message });
+    }
+    next();
+  });
+}, updateMovie);
 
 // Delete movie permanently (made public for demo)
 router.delete('/:id', deleteMovie);

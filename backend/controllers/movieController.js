@@ -90,18 +90,26 @@ const getMovieById = async (req, res) => {
 // Create movie
 const createMovie = async (req, res) => {
   try {
+    console.log('Create movie request body:', req.body);
+    console.log('Create movie file:', req.file);
+    
     const movieData = { ...req.body };
+    
+    // Handle poster upload/URL
     if (req.file) {
       movieData.poster = `/uploads/${req.file.filename}`;
       console.log('File uploaded:', req.file.filename);
-      console.log('Poster path set to:', movieData.poster);
     } else if (movieData.poster && (movieData.poster.startsWith('http://') || movieData.poster.startsWith('https://'))) {
-      // Keep the URL as is if it's a full URL
       console.log('Using URL:', movieData.poster);
     } else {
-      // Clear poster if no valid input
       delete movieData.poster;
     }
+    
+    // Set defaults for required fields if missing
+    if (!movieData.description) movieData.description = '';
+    if (!movieData.duration) movieData.duration = 120;
+    if (!movieData.language) movieData.language = 'English';
+    if (!movieData.releaseDate) movieData.releaseDate = new Date();
 
     if (movieData.genre && typeof movieData.genre === "string") {
       movieData.genre = movieData.genre.split(",").map((g) => g.trim());
@@ -153,20 +161,24 @@ const createMovie = async (req, res) => {
     emitToUsers("movie-added", movie);
     res.status(201).json(movie);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error creating movie:', error);
+    res.status(500).json({ message: error.message, details: error.errors });
   }
 };
 
 // Update movie
 const updateMovie = async (req, res) => {
   try {
+    console.log('Update movie request body:', req.body);
+    console.log('Update movie file:', req.file);
+    
     const updateData = { ...req.body };
+    
+    // Handle poster upload/URL
     if (req.file) {
       updateData.poster = `/uploads/${req.file.filename}`;
       console.log('File uploaded for update:', req.file.filename);
-      console.log('Poster path set to:', updateData.poster);
     } else if (updateData.poster && (updateData.poster.startsWith('http://') || updateData.poster.startsWith('https://'))) {
-      // Keep the URL as is if it's a full URL
       console.log('Using URL for update:', updateData.poster);
     }
 
@@ -258,7 +270,8 @@ const updateMovie = async (req, res) => {
     emitToUsers("movie-updated", movie);
     res.json(movie);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error updating movie:', error);
+    res.status(500).json({ message: error.message, details: error.errors });
   }
 };
 

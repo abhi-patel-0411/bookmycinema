@@ -11,11 +11,11 @@ const reviewSchema = new mongoose.Schema({
 
 const movieSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: { type: String, required: true },
-  genre: [{ type: String, required: true }],
-  duration: { type: Number, required: true },
-  language: { type: String, required: true },
-  releaseDate: { type: Date, required: true },
+  description: { type: String, required: false },
+  genre: [{ type: String }],
+  duration: { type: Number, required: false },
+  language: { type: String, required: false },
+  releaseDate: { type: Date, required: false },
   rating: { type: Number, min: 0, max: 5, default: 0 },
   poster: { type: String, required: false },
   trailer: { type: String },
