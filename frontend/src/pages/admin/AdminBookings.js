@@ -880,10 +880,10 @@ const AdminBookings = () => {
                 />
               </div>
 
-              {/* Enhanced Pagination */}
+              {/* Mobile-Optimized Pagination */}
               {pagination.totalPages > 1 && (
                 <motion.div 
-                  className="pagination-container mt-4 p-3"
+                  className="pagination-container mt-4 p-2 p-md-3"
                   style={{ 
                     background: 'rgba(255, 255, 255, 0.05)', 
                     borderRadius: '12px',
@@ -893,160 +893,98 @@ const AdminBookings = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                  <div className="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3">
-                    {/* Pagination Info */}
-                    <div className="pagination-info d-flex flex-column flex-sm-row align-items-center gap-2">
-                      <div className="text-light small">
-                        Showing <strong className="text-primary">{(pagination.currentPage - 1) * 20 + 1}</strong> to{" "}
-                        <strong className="text-primary">
-                          {Math.min(pagination.currentPage * 20, pagination.totalBookings)}
-                        </strong>{" "}
-                        of <strong className="text-success">{pagination.totalBookings}</strong> bookings
+                  <div className="d-flex flex-column gap-3">
+                    {/* Mobile Info */}
+                    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                      <div className="text-light small text-center text-sm-start">
+                        <strong className="text-primary">{(pagination.currentPage - 1) * 20 + 1}-{Math.min(pagination.currentPage * 20, pagination.totalBookings)}</strong> of <strong className="text-success">{pagination.totalBookings}</strong>
                       </div>
-                      <div className="d-flex align-items-center gap-2">
-                        <span className="text-secondary small">Page</span>
-                        <Badge bg="primary" className="px-2 py-1">
-                          {pagination.currentPage} / {pagination.totalPages}
-                        </Badge>
-                      </div>
+                      <Badge bg="primary" className="px-2 py-1">
+                        {pagination.currentPage} / {pagination.totalPages}
+                      </Badge>
                     </div>
                     
-                    {/* Pagination Controls */}
-                    <div className="pagination-controls d-flex align-items-center gap-1">
-                      {/* First Page */}
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          variant="outline-light"
-                          size="sm"
-                          disabled={pagination.currentPage === 1 || loading}
-                          onClick={() => fetchBookings(1)}
-                          className="px-3"
-                          title="First Page"
-                        >
-                          ««
-                        </Button>
-                      </motion.div>
+                    {/* Mobile Controls */}
+                    <div className="d-flex justify-content-center align-items-center gap-1 flex-wrap">
+                      <Button
+                        variant="outline-light"
+                        size="sm"
+                        disabled={pagination.currentPage === 1 || loading}
+                        onClick={() => fetchBookings(1)}
+                        className="d-none d-sm-inline"
+                      >
+                        ««
+                      </Button>
                       
-                      {/* Previous Page */}
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          variant="outline-light"
-                          size="sm"
-                          disabled={!pagination.hasPrev || loading}
-                          onClick={() => fetchBookings(pagination.currentPage - 1)}
-                          className="px-3"
-                          title="Previous Page"
-                        >
-                          ‹ Prev
-                        </Button>
-                      </motion.div>
+                      <Button
+                        variant="outline-light"
+                        size="sm"
+                        disabled={!pagination.hasPrev || loading}
+                        onClick={() => fetchBookings(pagination.currentPage - 1)}
+                      >
+                        ‹
+                      </Button>
 
-                      {/* Page Numbers with Smart Display */}
+                      {/* Smart Page Numbers for Mobile */}
                       {(() => {
                         const current = pagination.currentPage;
                         const total = pagination.totalPages;
+                        const isMobile = window.innerWidth < 768;
+                        const maxPages = isMobile ? 3 : 5;
                         const pages = [];
                         
-                        // Always show first page
-                        if (current > 3) {
-                          pages.push(1);
-                          if (current > 4) pages.push('...');
-                        }
-                        
-                        // Show pages around current
-                        const start = Math.max(1, current - 1);
-                        const end = Math.min(total, current + 1);
-                        
-                        for (let i = start; i <= end; i++) {
-                          pages.push(i);
-                        }
-                        
-                        // Always show last page
-                        if (current < total - 2) {
-                          if (current < total - 3) pages.push('...');
-                          pages.push(total);
+                        if (total <= maxPages) {
+                          for (let i = 1; i <= total; i++) pages.push(i);
+                        } else {
+                          if (current <= 2) {
+                            for (let i = 1; i <= Math.min(maxPages, total); i++) pages.push(i);
+                            if (total > maxPages) pages.push('...', total);
+                          } else if (current >= total - 1) {
+                            pages.push(1, '...');
+                            for (let i = Math.max(1, total - maxPages + 1); i <= total; i++) pages.push(i);
+                          } else {
+                            pages.push(1, '...', current - 1, current, current + 1, '...', total);
+                          }
                         }
                         
                         return pages.map((page, index) => {
                           if (page === '...') {
-                            return (
-                              <span key={`ellipsis-${index}`} className="text-secondary px-2">
-                                ...
-                              </span>
-                            );
+                            return <span key={`ellipsis-${index}`} className="text-secondary px-1 d-none d-sm-inline">...</span>;
                           }
                           
                           return (
-                            <motion.div 
-                              key={page} 
-                              whileHover={{ scale: 1.05 }} 
-                              whileTap={{ scale: 0.95 }}
+                            <Button
+                              key={page}
+                              variant={page === current ? "primary" : "outline-light"}
+                              size="sm"
+                              disabled={loading}
+                              onClick={() => fetchBookings(page)}
+                              style={{ minWidth: isMobile ? '32px' : '40px', fontSize: isMobile ? '0.75rem' : '0.875rem' }}
                             >
-                              <Button
-                                variant={page === current ? "primary" : "outline-light"}
-                                size="sm"
-                                disabled={loading}
-                                onClick={() => fetchBookings(page)}
-                                className="px-3"
-                                style={{ minWidth: '40px' }}
-                              >
-                                {page}
-                              </Button>
-                            </motion.div>
+                              {page}
+                            </Button>
                           );
                         });
                       })()}
 
-                      {/* Next Page */}
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          variant="outline-light"
-                          size="sm"
-                          disabled={!pagination.hasNext || loading}
-                          onClick={() => fetchBookings(pagination.currentPage + 1)}
-                          className="px-3"
-                          title="Next Page"
-                        >
-                          Next ›
-                        </Button>
-                      </motion.div>
-                      
-                      {/* Last Page */}
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          variant="outline-light"
-                          size="sm"
-                          disabled={pagination.currentPage === pagination.totalPages || loading}
-                          onClick={() => fetchBookings(pagination.totalPages)}
-                          className="px-3"
-                          title="Last Page"
-                        >
-                          »»
-                        </Button>
-                      </motion.div>
-                    </div>
-                  </div>
-                  
-                  {/* Quick Jump */}
-                  <div className="d-flex justify-content-center mt-3 pt-3 border-top border-secondary">
-                    <div className="d-flex align-items-center gap-2">
-                      <span className="text-secondary small">Jump to page:</span>
-                      <Form.Control
-                        type="number"
+                      <Button
+                        variant="outline-light"
                         size="sm"
-                        min="1"
-                        max={pagination.totalPages}
-                        value={pagination.currentPage}
-                        onChange={(e) => {
-                          const page = parseInt(e.target.value);
-                          if (page >= 1 && page <= pagination.totalPages) {
-                            fetchBookings(page);
-                          }
-                        }}
-                        style={{ width: '80px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}
-                        className="text-center"
-                      />
-                      <span className="text-secondary small">of {pagination.totalPages}</span>
+                        disabled={!pagination.hasNext || loading}
+                        onClick={() => fetchBookings(pagination.currentPage + 1)}
+                      >
+                        ›
+                      </Button>
+                      
+                      <Button
+                        variant="outline-light"
+                        size="sm"
+                        disabled={pagination.currentPage === pagination.totalPages || loading}
+                        onClick={() => fetchBookings(pagination.totalPages)}
+                        className="d-none d-sm-inline"
+                      >
+                        »»
+                      </Button>
                     </div>
                   </div>
                 </motion.div>

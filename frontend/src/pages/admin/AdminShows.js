@@ -8,7 +8,6 @@ import {
   Modal,
   Form,
   Badge,
-  Pagination,
   InputGroup,
   Table,
 } from "react-bootstrap";
@@ -979,42 +978,56 @@ const AdminShows = () => {
               </div>
             )}
 
-            {/* Pagination */}
+            {/* Mobile-Optimized Pagination */}
             {totalPages > 1 && (
-              <div
-                className="pagination-container mb-4 pb-3"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
-              >
-                <div className="d-flex justify-content-center mt-4">
-                  <Pagination className="custom-pagination">
-                    <Pagination.First
-                      onClick={() => setCurrentPage(1)}
-                      disabled={currentPage === 1}
-                    />
-                    <Pagination.Prev
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                    />
-
-                    {[...Array(totalPages)].map((_, index) => (
-                      <Pagination.Item
-                        key={index + 1}
-                        active={index + 1 === currentPage}
-                        onClick={() => setCurrentPage(index + 1)}
-                      >
-                        {index + 1}
-                      </Pagination.Item>
-                    ))}
-
-                    <Pagination.Next
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                    />
-                    <Pagination.Last
-                      onClick={() => setCurrentPage(totalPages)}
-                      disabled={currentPage === totalPages}
-                    />
-                  </Pagination>
+              <div className="mt-4 p-3" style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
+                <div className="d-flex flex-column gap-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div className="text-white small">
+                      <strong>{indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredShows.length)}</strong> of <strong>{filteredShows.length}</strong>
+                    </div>
+                    <Badge bg="primary">{currentPage} / {totalPages}</Badge>
+                  </div>
+                  <div className="d-flex justify-content-center align-items-center gap-1 flex-wrap">
+                    <Button variant="outline-light" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(1)} className="d-none d-sm-inline">««</Button>
+                    <Button variant="outline-light" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>‹</Button>
+                    {(() => {
+                      const isMobile = window.innerWidth < 768;
+                      const maxPages = isMobile ? 3 : 5;
+                      const pages = [];
+                      
+                      if (totalPages <= maxPages) {
+                        for (let i = 1; i <= totalPages; i++) pages.push(i);
+                      } else {
+                        if (currentPage <= 2) {
+                          for (let i = 1; i <= Math.min(maxPages, totalPages); i++) pages.push(i);
+                          if (totalPages > maxPages) pages.push('...', totalPages);
+                        } else if (currentPage >= totalPages - 1) {
+                          pages.push(1, '...');
+                          for (let i = Math.max(1, totalPages - maxPages + 1); i <= totalPages; i++) pages.push(i);
+                        } else {
+                          pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                        }
+                      }
+                      
+                      return pages.map((page, index) => {
+                        if (page === '...') return <span key={index} className="text-secondary px-1 d-none d-sm-inline">...</span>;
+                        return (
+                          <Button
+                            key={page}
+                            variant={page === currentPage ? "primary" : "outline-light"}
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            style={{ minWidth: isMobile ? '32px' : '40px', fontSize: isMobile ? '0.75rem' : '0.875rem' }}
+                          >
+                            {page}
+                          </Button>
+                        );
+                      });
+                    })()}
+                    <Button variant="outline-light" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>›</Button>
+                    <Button variant="outline-light" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)} className="d-none d-sm-inline">»»</Button>
+                  </div>
                 </div>
               </div>
             )}
