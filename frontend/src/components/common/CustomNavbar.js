@@ -192,8 +192,9 @@ const CustomNavbar = () => {
             </SignedIn>
 
             <SignedOut>
-              <div className="auth-buttons d-none d-md-flex gap-2">
+              <div className="auth-buttons d-flex gap-2">
                 <Link to="/sign-in" className="btn btn-outline-primary btn-sm">
+                  <FaUser className="me-1" size={14} />
                   Login
                 </Link>
                 <Link to="/sign-up" className="btn btn-primary btn-sm">
@@ -303,20 +304,7 @@ const CustomNavbar = () => {
                       </Link>
                     </SignedIn>
                     
-                    <SignedOut>
-                      <Link
-                        to="/sign-in"
-                        className="d-flex align-items-center px-3 py-2 text-decoration-none border-bottom"
-                        style={{ 
-                          color: "#9ca3af",
-                          borderColor: "rgba(255,255,255,0.1)"
-                        }}
-                        onClick={() => setShowMobileDropdown(false)}
-                      >
-                        <FaUser className="me-2" size={16} />
-                        <span>Login</span>
-                      </Link>
-                    </SignedOut>
+                    {/* Login option removed from mobile dropdown */}
                     
                     {user?.publicMetadata?.role === "admin" && (
                       <button
