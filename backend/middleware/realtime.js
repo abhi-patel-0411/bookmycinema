@@ -5,9 +5,18 @@ let io;
 const userSocketMap = new Map();
 
 const initializeSocket = (server) => {
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    process.env.FRONTEND_URL,
+    "https://your-movie-booking-app.vercel.app",
+    "https://movie-booking-app.vercel.app",
+    /\.vercel\.app$/,
+  ].filter(Boolean);
+
   io = socketIO(server, {
     cors: {
-      origin: 'http://localhost:3000',
+      origin: allowedOrigins,
       methods: ['GET', 'POST'],
       credentials: true
     }

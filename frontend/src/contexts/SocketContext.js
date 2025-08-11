@@ -12,7 +12,7 @@ export const SocketProvider = ({ children }) => {
   const { userId, isSignedIn } = useAuth();
 
   useEffect(() => {
-    const socketInstance = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000');
+    const socketInstance = io(process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000');
     
     socketInstance.on('connect', () => {
       console.log('Socket connected');
