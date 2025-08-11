@@ -44,7 +44,7 @@ const Home = () => {
   const [currentMovies, setCurrentMovies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [iframeLoading, setIframeLoading] = useState(true);
+
   const [stats, setStats] = useState({ movies: 0, theaters: 0, users: 1250 });
 
   const [trendingScrollPosition, setTrendingScrollPosition] = useState(0);
@@ -226,16 +226,11 @@ const Home = () => {
         className="position-relative"
         style={{ height: "100vh", overflow: "hidden", maxWidth: "100vw" }}
       >
-        {/* 3D Background with Loader */}
+        {/* 3D Background */}
         <div
           className="position-absolute w-100 h-100"
           style={{ overflow: "hidden" }}
         >
-          {iframeLoading && (
-            <div className="position-absolute w-100 h-100" style={{ zIndex: 10 }}>
-              <ModernLoader text="Loading 3D Experience" />
-            </div>
-          )}
           <iframe
             src="https://my.spline.design/themuseum-5zE6ddpT8N0iDKbWn1DyGAZD/"
             frameBorder="0"
@@ -243,36 +238,7 @@ const Home = () => {
             height="100%"
             style={{ border: "none", maxWidth: "100%" }}
             title="3D Background"
-            onLoad={() => setIframeLoading(false)}
           ></iframe>
-        </div>
-
-        {/* Explore Button - Position changes based on device size */}
-        <div
-          className="position-absolute"
-          style={{
-            bottom: window.innerWidth <= 768 ? "80px" : "18px",
-            right: window.innerWidth <= 768 ? "50%" : "10px",
-            transform: window.innerWidth <= 768 ? "translateX(50%)" : "none",
-          }}
-        >
-          <Button
-            variant="primary"
-            size={window.innerWidth <= 768 ? "sm" : "lg"}
-            className="px-1 py-1"
-            onClick={() => navigate("/movies")}
-            style={{
-              background: "linear-gradient(135deg, #e63946, #f84565)",
-              border: "none",
-              boxShadow: "0 8px 20px rgba(232, 57, 70, 0.4)",
-              fontWeight: "normal",
-              borderRadius: "20px",
-              minWidth: window.innerWidth <= 768 ? "150px" : "200px",
-            }}
-          >
-            Explore Movies
-            <FaArrowRight className="ms-2" />
-          </Button>
         </div>
       </section>
 
