@@ -93,7 +93,14 @@ const AdminBookings = () => {
   
   const fetchTheaters = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/theaters');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/theaters`, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         const theatersData = Array.isArray(data) ? data : data.theaters || [];
@@ -117,8 +124,17 @@ const AdminBookings = () => {
         ...(theaterFilter && { theater: theaterFilter }),
       });
 
+      const timestamp = new Date().getTime();
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(
-        `http://localhost:5000/api/bookings?${params}`
+        `${apiUrl}/bookings?${params}&_t=${timestamp}`,
+        {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        }
       );
 
       if (!response.ok) {
@@ -154,12 +170,14 @@ const AdminBookings = () => {
 
   const handleStatusUpdate = async (bookingId, newStatus) => {
     try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(
-        `http://localhost:5000/api/bookings/${bookingId}`,
+        `${apiUrl}/bookings/${bookingId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
           },
           body: JSON.stringify({ status: newStatus }),
         }
@@ -184,10 +202,14 @@ const AdminBookings = () => {
       )
     ) {
       try {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
         const response = await fetch(
-          `http://localhost:5000/api/bookings/${id}`,
+          `${apiUrl}/bookings/${id}`,
           {
             method: "DELETE",
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+            }
           }
         );
 
@@ -1369,12 +1391,14 @@ const AdminBookings = () => {
                       onClick={async () => {
                         if (window.confirm("Are you sure you want to cancel this booking? This will free up the seats and cannot be undone.")) {
                           try {
+                            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
                             const response = await fetch(
-                              `http://localhost:5000/api/bookings/${selectedBooking._id}/cancel`,
+                              `${apiUrl}/bookings/${selectedBooking._id}/cancel`,
                               {
                                 method: "PUT",
                                 headers: {
                                   "Content-Type": "application/json",
+                                  'Cache-Control': 'no-cache, no-store, must-revalidate',
                                 },
                               }
                             );

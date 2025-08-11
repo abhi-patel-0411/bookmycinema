@@ -38,10 +38,15 @@ const MyBookings = () => {
       }
       
       const token = await getToken();
-      const response = await fetch('http://localhost:5000/api/bookings/my-bookings', {
+      const timestamp = new Date().getTime();
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/bookings/my-bookings?_t=${timestamp}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       
@@ -71,11 +76,13 @@ const MyBookings = () => {
     setCancelling(true);
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:5000/api/bookings/${cancelModal.booking._id}/cancel`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/bookings/${cancelModal.booking._id}/cancel`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
         }
       });
       
@@ -365,8 +372,8 @@ const MyBookings = () => {
           onHide={() => setCancelModal({ show: false, booking: null })}
           centered
         >
-          <div className="bg-secondary">
-            <Modal.Header className="border-secondary bg-secondary">
+          <div style={{ backgroundColor: '#1f2025' }}>
+            <Modal.Header className="border-secondary" style={{ backgroundColor: '#1f2025' }}>
               <div className="d-flex align-items-center">
                 <FaExclamationTriangle className="text-warning me-3" size={24} />
                 <div>
@@ -376,7 +383,7 @@ const MyBookings = () => {
               </div>
             </Modal.Header>
             
-            <Modal.Body className="bg-secondary">
+            <Modal.Body style={{ backgroundColor: '#1f2025' }}>
               {cancelModal.booking && (
                 <>
                   <div className="mb-4">
@@ -409,7 +416,7 @@ const MyBookings = () => {
               )}
             </Modal.Body>
             
-            <Modal.Footer className="border-secondary bg-secondary">
+            <Modal.Footer className="border-secondary" style={{ backgroundColor: '#1f2025' }}>
               <Button 
                 variant="outline-light"
                 onClick={() => setCancelModal({ show: false, booking: null })}

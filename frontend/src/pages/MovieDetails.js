@@ -97,8 +97,17 @@ const MovieDetails = () => {
 
   const fetchRatings = async () => {
     try {
+      const timestamp = new Date().getTime();
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(
-        `http://localhost:5000/api/ratings/movie/${id}`
+        `${apiUrl}/ratings/movie/${id}?_t=${timestamp}`,
+        {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -121,11 +130,13 @@ const MovieDetails = () => {
   const fetchUserRating = async () => {
     try {
       const token = await getToken();
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(
-        `http://localhost:5000/api/ratings/movie/${id}/user`,
+        `${apiUrl}/ratings/movie/${id}/user`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
           },
         }
       );
@@ -175,13 +186,15 @@ const MovieDetails = () => {
 
       const userImageUrl = user?.imageUrl || user?.profileImageUrl || null;
 
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(
-        `http://localhost:5000/api/ratings/movie/${id}`,
+        `${apiUrl}/ratings/movie/${id}`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
           },
           body: JSON.stringify({
             rating: newReview.rating,

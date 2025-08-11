@@ -4,6 +4,13 @@
     width: 100% !important;
 }
 
+/* Hide footer on small devices */
+@media (max-width: 768px) {
+    .custom-footer {
+        display: none !important;
+    }
+}
+
 .footer-logo {
     width: auto !important;
     height: 40px !important;
