@@ -2,12 +2,13 @@ import React from 'react';
 import { SignIn } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
+import GridMotion from '../components/common/GridMotion';
 
 const customStyles = `
   .cl-internal-1dauvpw { display: none !important; }
   .cl-internal-1hp5nqm { display: none !important; }
   .cl-footer { background: white !important; }
-  .cl-rootBox { border-radius: 30px !important;display:flex;justify-contant:center;align-items:center;  }
+  .cl-rootBox { border-radius: 30px !important;display:flex;justify-contant:center;align-items:center; margin-top:60px; }
 `;
 
 const ClerkSignIn = () => {
@@ -20,9 +21,9 @@ const ClerkSignIn = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem',
-      backgroundColor: '#1f2025',
       position: 'relative'
     }}>
+      <GridMotion gradientColor="#1f2025" />
       <button
         onClick={() => navigate('/')}
         style={{
@@ -40,7 +41,8 @@ const ClerkSignIn = () => {
           color: '#ffffff',
           cursor: 'pointer',
           transition: 'all 0.3s ease',
-          backdropFilter: 'blur(10px)'
+          backdropFilter: 'blur(10px)',
+          zIndex: 1001
         }}
         onMouseEnter={(e) => {
           e.target.style.background = 'rgba(255, 255, 255, 0.2)';
@@ -55,7 +57,8 @@ const ClerkSignIn = () => {
       </button>
       
       <style>{customStyles}</style>
-      <SignIn 
+      <div style={{ position: 'relative', zIndex: 1000 }}>
+        <SignIn 
         routing="path" 
         path="/sign-in" 
         redirectUrl="/"
@@ -73,7 +76,8 @@ const ClerkSignIn = () => {
             borderRadius: "8px"
           }
         }}
-      />
+        />
+      </div>
     </div>
   );
 };
