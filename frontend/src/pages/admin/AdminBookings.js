@@ -880,114 +880,28 @@ const AdminBookings = () => {
                 />
               </div>
 
-              {/* Mobile-Optimized Pagination */}
+              {/* Professional Mobile Pagination */}
               {pagination.totalPages > 1 && (
-                <motion.div 
-                  className="pagination-container mt-4 p-2 p-md-3"
-                  style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)', 
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <div className="d-flex flex-column gap-3">
-                    {/* Mobile Info */}
-                    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-                      <div className="text-light small text-center text-sm-start">
-                        <strong className="text-primary">{(pagination.currentPage - 1) * 20 + 1}-{Math.min(pagination.currentPage * 20, pagination.totalBookings)}</strong> of <strong className="text-success">{pagination.totalBookings}</strong>
-                      </div>
-                      <Badge bg="primary" className="px-2 py-1">
-                        {pagination.currentPage} / {pagination.totalPages}
-                      </Badge>
-                    </div>
-                    
-                    {/* Mobile Controls */}
-                    <div className="d-flex justify-content-center align-items-center gap-1 flex-wrap">
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        disabled={pagination.currentPage === 1 || loading}
-                        onClick={() => fetchBookings(1)}
-                        className="d-none d-sm-inline"
-                      >
-                        ««
-                      </Button>
-                      
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        disabled={!pagination.hasPrev || loading}
-                        onClick={() => fetchBookings(pagination.currentPage - 1)}
-                      >
-                        ‹
-                      </Button>
-
-                      {/* Smart Page Numbers for Mobile */}
-                      {(() => {
-                        const current = pagination.currentPage;
-                        const total = pagination.totalPages;
-                        const isMobile = window.innerWidth < 768;
-                        const maxPages = isMobile ? 3 : 5;
-                        const pages = [];
-                        
-                        if (total <= maxPages) {
-                          for (let i = 1; i <= total; i++) pages.push(i);
-                        } else {
-                          if (current <= 2) {
-                            for (let i = 1; i <= Math.min(maxPages, total); i++) pages.push(i);
-                            if (total > maxPages) pages.push('...', total);
-                          } else if (current >= total - 1) {
-                            pages.push(1, '...');
-                            for (let i = Math.max(1, total - maxPages + 1); i <= total; i++) pages.push(i);
-                          } else {
-                            pages.push(1, '...', current - 1, current, current + 1, '...', total);
-                          }
-                        }
-                        
-                        return pages.map((page, index) => {
-                          if (page === '...') {
-                            return <span key={`ellipsis-${index}`} className="text-secondary px-1 d-none d-sm-inline">...</span>;
-                          }
-                          
-                          return (
-                            <Button
-                              key={page}
-                              variant={page === current ? "primary" : "outline-light"}
-                              size="sm"
-                              disabled={loading}
-                              onClick={() => fetchBookings(page)}
-                              style={{ minWidth: isMobile ? '32px' : '40px', fontSize: isMobile ? '0.75rem' : '0.875rem' }}
-                            >
-                              {page}
-                            </Button>
-                          );
-                        });
-                      })()}
-
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        disabled={!pagination.hasNext || loading}
-                        onClick={() => fetchBookings(pagination.currentPage + 1)}
-                      >
-                        ›
-                      </Button>
-                      
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        disabled={pagination.currentPage === pagination.totalPages || loading}
-                        onClick={() => fetchBookings(pagination.totalPages)}
-                        className="d-none d-sm-inline"
-                      >
-                        »»
-                      </Button>
-                    </div>
+                <div className="mt-3 p-2 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <small className="text-light">{(pagination.currentPage - 1) * 20 + 1}-{Math.min(pagination.currentPage * 20, pagination.totalBookings)} of {pagination.totalBookings}</small>
+                    <small className="text-primary">{pagination.currentPage}/{pagination.totalPages}</small>
                   </div>
-                </motion.div>
+                  <div className="d-flex justify-content-center gap-1">
+                    <button className="btn btn-outline-light btn-sm" disabled={pagination.currentPage === 1} onClick={() => fetchBookings(pagination.currentPage - 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>‹</button>
+                    {(() => {
+                      const c = pagination.currentPage, t = pagination.totalPages;
+                      if (t <= 5) return Array.from({length: t}, (_, i) => i + 1);
+                      if (c <= 3) return [1, 2, 3, '...', t];
+                      if (c >= t - 2) return [1, '...', t - 2, t - 1, t];
+                      return [1, '...', c - 1, c, c + 1, '...', t];
+                    })().map((p, i) => 
+                      p === '...' ? <span key={i} className="px-1 text-secondary">...</span> :
+                      <button key={p} className={`btn btn-sm ${p === pagination.currentPage ? 'btn-primary' : 'btn-outline-light'}`} onClick={() => fetchBookings(p)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '12px' }}>{p}</button>
+                    )}
+                    <button className="btn btn-outline-light btn-sm" disabled={pagination.currentPage === pagination.totalPages} onClick={() => fetchBookings(pagination.currentPage + 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>›</button>
+                  </div>
+                </div>
               )}
             </>
           ) : (

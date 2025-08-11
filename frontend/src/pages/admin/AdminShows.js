@@ -978,56 +978,26 @@ const AdminShows = () => {
               </div>
             )}
 
-            {/* Mobile-Optimized Pagination */}
+            {/* Professional Mobile Pagination */}
             {totalPages > 1 && (
-              <div className="mt-4 p-3" style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
-                <div className="d-flex flex-column gap-3">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div className="text-white small">
-                      <strong>{indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredShows.length)}</strong> of <strong>{filteredShows.length}</strong>
-                    </div>
-                    <Badge bg="primary">{currentPage} / {totalPages}</Badge>
-                  </div>
-                  <div className="d-flex justify-content-center align-items-center gap-1 flex-wrap">
-                    <Button variant="outline-light" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(1)} className="d-none d-sm-inline">««</Button>
-                    <Button variant="outline-light" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>‹</Button>
-                    {(() => {
-                      const isMobile = window.innerWidth < 768;
-                      const maxPages = isMobile ? 3 : 5;
-                      const pages = [];
-                      
-                      if (totalPages <= maxPages) {
-                        for (let i = 1; i <= totalPages; i++) pages.push(i);
-                      } else {
-                        if (currentPage <= 2) {
-                          for (let i = 1; i <= Math.min(maxPages, totalPages); i++) pages.push(i);
-                          if (totalPages > maxPages) pages.push('...', totalPages);
-                        } else if (currentPage >= totalPages - 1) {
-                          pages.push(1, '...');
-                          for (let i = Math.max(1, totalPages - maxPages + 1); i <= totalPages; i++) pages.push(i);
-                        } else {
-                          pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-                        }
-                      }
-                      
-                      return pages.map((page, index) => {
-                        if (page === '...') return <span key={index} className="text-secondary px-1 d-none d-sm-inline">...</span>;
-                        return (
-                          <Button
-                            key={page}
-                            variant={page === currentPage ? "primary" : "outline-light"}
-                            size="sm"
-                            onClick={() => setCurrentPage(page)}
-                            style={{ minWidth: isMobile ? '32px' : '40px', fontSize: isMobile ? '0.75rem' : '0.875rem' }}
-                          >
-                            {page}
-                          </Button>
-                        );
-                      });
-                    })()}
-                    <Button variant="outline-light" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>›</Button>
-                    <Button variant="outline-light" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)} className="d-none d-sm-inline">»»</Button>
-                  </div>
+              <div className="mt-3 p-2 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <small className="text-light">{indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredShows.length)} of {filteredShows.length}</small>
+                  <small className="text-primary">{currentPage}/{totalPages}</small>
+                </div>
+                <div className="d-flex justify-content-center gap-1">
+                  <button className="btn btn-outline-light btn-sm" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>‹</button>
+                  {(() => {
+                    const c = currentPage, t = totalPages;
+                    if (t <= 5) return Array.from({length: t}, (_, i) => i + 1);
+                    if (c <= 3) return [1, 2, 3, '...', t];
+                    if (c >= t - 2) return [1, '...', t - 2, t - 1, t];
+                    return [1, '...', c - 1, c, c + 1, '...', t];
+                  })().map((p, i) => 
+                    p === '...' ? <span key={i} className="px-1 text-secondary">...</span> :
+                    <button key={p} className={`btn btn-sm ${p === currentPage ? 'btn-primary' : 'btn-outline-light'}`} onClick={() => setCurrentPage(p)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '12px' }}>{p}</button>
+                  )}
+                  <button className="btn btn-outline-light btn-sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>›</button>
                 </div>
               </div>
             )}
