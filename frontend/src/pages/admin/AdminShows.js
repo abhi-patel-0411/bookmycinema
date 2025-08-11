@@ -113,9 +113,18 @@ const AdminShows = () => {
   const fetchShows = async () => {
     try {
       setLoading(true);
-      // Use direct API call to ensure we get all shows including past ones for admin
+      // Add timestamp to prevent mobile caching
+      const timestamp = new Date().getTime();
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       const response = await fetch(
-        "http://localhost:5000/api/shows?includeBookingClosed=true&admin=true"
+        `${apiUrl}/shows?includeBookingClosed=true&admin=true&_t=${timestamp}`,
+        {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        }
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
