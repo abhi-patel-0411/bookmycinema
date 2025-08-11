@@ -63,6 +63,7 @@ const AdminMovies = () => {
     price: "199",
     youtubeUrl: "",
     poster: null,
+    posterUrl: "",
   });
 
   const [castMember, setCastMember] = useState({
@@ -235,6 +236,10 @@ const AdminMovies = () => {
           if (formData.poster instanceof File) {
             movieFormData.append("poster", formData.poster);
           }
+        } else if (key === "posterUrl") {
+          if (formData.posterUrl) {
+            movieFormData.append("posterUrl", formData.posterUrl);
+          }
         } else if (
           key === "genre" &&
           formData[key] &&
@@ -249,8 +254,8 @@ const AdminMovies = () => {
           if (formData[key]) {
             movieFormData.append(key, formData[key]);
           }
-        } else if (key !== "isUpcoming" && key !== "isActive") {
-          // Skip isUpcoming and isActive as we already added them
+        } else if (key !== "isUpcoming" && key !== "isActive" && key !== "posterUrl") {
+          // Skip isUpcoming, isActive, and posterUrl as we already handled them
           movieFormData.append(key, formData[key]);
         }
       });
@@ -346,6 +351,7 @@ const AdminMovies = () => {
       price: movie.price || "",
       youtubeUrl: movie.youtubeUrl || "",
       poster: null,
+      posterUrl: movie.poster && movie.poster.startsWith('http') ? movie.poster : "",
     });
 
     if (movie.poster) {
@@ -376,6 +382,7 @@ const AdminMovies = () => {
       price: "199",
       youtubeUrl: "",
       poster: null,
+      posterUrl: "",
     });
     setPosterPreview("");
   };
@@ -1557,9 +1564,9 @@ const AdminMovies = () => {
                 </Form.Label>
                 <div className="d-flex gap-4 align-items-center">
                   <div className="position-relative">
-                    {posterPreview || editingMovie?.poster ? (
+                    {posterPreview || editingMovie?.poster || formData.posterUrl ? (
                       <img
-                        src={posterPreview || editingMovie?.poster}
+                        src={posterPreview || editingMovie?.poster || formData.posterUrl}
                         alt="Poster Preview"
                         className="rounded"
                         style={{
@@ -1599,13 +1606,41 @@ const AdminMovies = () => {
                       }}
                     >
                       <div className="d-flex align-items-center mb-3">
+                        <FaImage className="text-primary me-2" />
+                        <span className="text-white">Image URL (Recommended)</span>
+                      </div>
+                      <Form.Control
+                        type="url"
+                        value={formData.posterUrl || ''}
+                        onChange={(e) => {
+                          setFormData({ ...formData, posterUrl: e.target.value });
+                          setPosterPreview('');
+                        }}
+                        placeholder="https://example.com/movie-poster.jpg"
+                        style={{
+                          backgroundColor: "#2a2d35",
+                          borderColor: "#6c757d",
+                          color: "#fff",
+                          borderRadius: "10px",
+                          marginBottom: "15px",
+                        }}
+                      />
+                      
+                      <div className="text-center text-white mb-3">
+                        <span>OR</span>
+                      </div>
+                      
+                      <div className="d-flex align-items-center mb-3">
                         <FaUpload className="text-primary me-2" />
                         <span className="text-white">Upload Movie Poster</span>
                       </div>
                       <Form.Control
                         type="file"
                         accept="image/*"
-                        onChange={handlePosterChange}
+                        onChange={(e) => {
+                          handlePosterChange(e);
+                          setFormData({ ...formData, posterUrl: '' });
+                        }}
                         style={{
                           backgroundColor: "#2a2d35",
                           borderColor: "#6c757d",
@@ -1616,8 +1651,8 @@ const AdminMovies = () => {
                       />
                       <small className="text-white d-block mt-2">
                         <ul className="ps-3 mb-0">
-                          <li>Supported formats: JPG, PNG, WebP</li>
-                          <li>Maximum file size: 5MB</li>
+                          <li>Image URL is faster and recommended</li>
+                          <li>File upload: JPG, PNG, WebP (max 5MB)</li>
                           <li>Recommended size: 300x450 pixels</li>
                         </ul>
                       </small>
