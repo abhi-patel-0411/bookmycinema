@@ -33,6 +33,8 @@ import ModernLoader from "../../components/common/ModernLoader";
 import { useSocket } from "../../contexts/SocketContext";
 import moment from "moment";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
 const AdminMovies = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -354,7 +356,7 @@ const AdminMovies = () => {
     });
 
     if (movie.poster) {
-      setPosterPreview(movie.poster);
+      setPosterPreview(movie.poster.startsWith('http') ? movie.poster : `${API_BASE_URL}${movie.poster}`);
     } else {
       setPosterPreview("");
     }
@@ -683,7 +685,7 @@ const AdminMovies = () => {
                         <td>
                           <img
                             src={
-                              movie.poster ||
+                              movie.poster ? `${API_BASE_URL}${movie.poster}` :
                               `https://via.placeholder.com/60x90/1e293b/ffffff?text=${encodeURIComponent(
                                 movie.title.charAt(0)
                               )}`
@@ -1501,7 +1503,7 @@ const AdminMovies = () => {
                   <div className="position-relative">
                     {posterPreview || editingMovie?.poster || formData.posterUrl ? (
                       <img
-                        src={posterPreview || editingMovie?.poster || formData.posterUrl}
+                        src={posterPreview || (editingMovie?.poster ? `${API_BASE_URL}${editingMovie.poster}` : formData.posterUrl)}
                         alt="Poster Preview"
                         className="rounded"
                         style={{

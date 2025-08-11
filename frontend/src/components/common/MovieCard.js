@@ -5,6 +5,8 @@ import { FaStar, FaPlay, FaClock, FaCalendarAlt, FaMapMarkerAlt } from 'react-ic
 import { useNavigate } from 'react-router-dom';
 import ReactStars from 'react-rating-stars-component';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
 const MovieCard = ({ movie, index = 0 }) => {
   const navigate = useNavigate();
   const [movieRating, setMovieRating] = useState({ averageRating: 0, totalRatings: 0 });
@@ -61,7 +63,7 @@ const MovieCard = ({ movie, index = 0 }) => {
             style={{ overflow: 'hidden' }}
           >
             <img
-              src={movie.poster || 'https://picsum.photos/300/450?random=30'}
+              src={movie.poster ? `${API_BASE_URL}${movie.poster}` : 'https://picsum.photos/300/450?random=30'}
               alt={movie.title}
               className="movie-poster"
               style={{ height: '220px', width: '100%', objectFit: 'cover' }}

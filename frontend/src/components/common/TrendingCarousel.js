@@ -3,6 +3,8 @@ import { FaChevronLeft, FaChevronRight, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/trending-carousel.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
 const TrendingCarousel = ({ movies = [], title = "Recommended Movies" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(4);
@@ -76,7 +78,7 @@ const TrendingCarousel = ({ movies = [], title = "Recommended Movies" }) => {
             // Ensure movie has a title
             const movieTitle = movie.title || 'Untitled Movie';
             // Ensure movie has an image
-            const movieImage = movie.image || movie.poster || 'https://picsum.photos/200/280?random=20';
+            const movieImage = movie.poster ? `${API_BASE_URL}${movie.poster}` : (movie.image || 'https://picsum.photos/200/280?random=20');
             // Ensure movie has a genre
             const movieGenre = Array.isArray(movie.genre) ? movie.genre.join(', ') : (movie.genre || 'Drama');
             

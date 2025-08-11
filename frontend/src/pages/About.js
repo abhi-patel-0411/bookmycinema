@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaFilm, FaTicketAlt, FaShieldAlt, FaMobile, FaMapMarkerAlt, FaStar, FaUsers, FaClock, FaHeart } from 'react-icons/fa';
 import './About.css';
+import BrandLogo from '../components/common/BrandLogo';
 
 const About = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -81,7 +82,7 @@ const About = () => {
             <div className="col-lg-8">
               <div className="hero-content">
                 <h1 className="hero-title">
-                  Welcome to <span className="brand-highlight">CineBook</span>
+                  <BrandLogo/>
                 </h1>
                 <p className="hero-subtitle">
                   Your premier destination for seamless movie booking experiences
