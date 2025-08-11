@@ -97,9 +97,9 @@ const About = () => {
           <div className="row justify-content-center text-center">
             <div className="col-lg-8">
               <div className="hero-content">
-                <h1 className="hero-title text-center">
+                <div className="hero-title text-center d-flex justify-content-center">
                   <BrandLogo />
-                </h1>
+                </div>
                 <p className="hero-subtitle">
                   Your premier destination for seamless movie booking
                   experiences
