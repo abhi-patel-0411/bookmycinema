@@ -30,6 +30,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { moviesAPI } from "../services/api";
 import ModernLoader from "../components/common/ModernLoader";
 import { useAuth } from "@clerk/clerk-react";
+import { getMoviePosterUrl, getCastImageUrl } from "../utils/imageUtils";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -289,11 +290,7 @@ const MovieDetails = () => {
       <section
         className="d-none d-md-block"
         style={{
-          backgroundImage: `linear-gradient(90deg, rgb(26, 26, 26) 24.97%, rgb(26, 26, 26) 38.3%, rgba(26, 26, 26, 0.04) 97.47%, rgb(26, 26, 26) 100%), url(${
-            movie.poster ? 
-              (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
-              "https://picsum.photos/1200/600"
-          })`,
+          backgroundImage: `linear-gradient(90deg, rgb(26, 26, 26) 24.97%, rgb(26, 26, 26) 38.3%, rgba(26, 26, 26, 0.04) 97.47%, rgb(26, 26, 26) 100%), url(${getMoviePosterUrl(movie.poster, movie.title)})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -313,15 +310,15 @@ const MovieDetails = () => {
                       style={{ borderRadius: "16px 16px 0px 0px" }}
                     >
                       <img
-                        src={movie.poster ? 
-                          (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
-                          "https://picsum.photos/280/416"
-                        }
+                        src={getMoviePosterUrl(movie.poster, movie.title)}
                         alt={movie.title}
                         style={{
                           width: "280px",
                           height: "416px",
                           objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          e.target.src = "https://picsum.photos/280/416";
                         }}
                       />
                     </div>
@@ -527,16 +524,16 @@ const MovieDetails = () => {
               }}
             >
               <img
-                src={movie.poster ? 
-                  (movie.poster.startsWith('http') ? movie.poster : `http://localhost:5000${movie.poster}`) : 
-                  "https://picsum.photos/300/400"
-                }
+                src={getMoviePosterUrl(movie.poster, movie.title)}
                 alt="multimedia-trailers"
                 style={{
                   opacity: 1,
                   objectFit: "cover",
                   width: "100%",
                   height: "240px",
+                }}
+                onError={(e) => {
+                  e.target.src = "https://picsum.photos/300/400";
                 }}
               />
             </div>
@@ -845,19 +842,18 @@ const MovieDetails = () => {
                 >
                   <div className="mb-2">
                     <img
-                      src={
-                        actor.image ? 
-                          (actor.image.startsWith('http') ? actor.image : `http://localhost:5000${actor.image}`) :
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            actor.name || actor
-                          )}&background=random&color=fff&size=80`
-                      }
+                      src={getCastImageUrl(actor)}
                       alt={actor.name || actor}
                       className="rounded-circle"
                       style={{
                         width: "80px",
                         height: "80px",
                         objectFit: "cover",
+                      }}
+                      onError={(e) => {
+                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          actor.name || actor
+                        )}&background=random&color=fff&size=80`;
                       }}
                     />
                   </div>

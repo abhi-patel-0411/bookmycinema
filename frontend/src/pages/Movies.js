@@ -25,10 +25,8 @@ import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import ModernLoader from "../components/common/ModernLoader";
 import api from "../services/api";
-// import "../styles/bootstrap-enhancements.css";
-// import "../styles/movies-page-only.css";
+import { getMoviePosterUrl } from "../utils/imageUtils";
 import "../styles/movies-cards-simple.css";
-// Bootstrap styling only
 
 const Movies = () => {
   const navigate = useNavigate();
@@ -859,14 +857,12 @@ const Movies = () => {
                         >
                           <div className="movie-poster-simple">
                             <img
-                              src={
-                                movie.poster ||
-                                `https://via.placeholder.com/200x300/333/fff?text=${encodeURIComponent(
-                                  movie.title
-                                )}`
-                              }
+                              src={getMoviePosterUrl(movie.poster, movie.title)}
                               alt={movie.title}
                               loading="lazy"
+                              onError={(e) => {
+                                e.target.src = `https://via.placeholder.com/200x300/333/fff?text=${encodeURIComponent(movie.title)}`;
+                              }}
                             />
                             
                             <div className="movie-rating-simple">
