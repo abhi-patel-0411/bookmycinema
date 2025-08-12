@@ -24,34 +24,29 @@ export const filterMoviesByStatus = (movies) => {
     // Always add to featured first
     featured.push(movie);
     
-    // Check if movie has valid dates first (priority over isUpcoming flag)
-    if (movie.startDate && movie.endDate) {
+    // Check if movie has valid start date first (priority over isUpcoming flag)
+    if (movie.startDate) {
       const startDate = new Date(movie.startDate);
-      const endDate = new Date(movie.endDate);
       startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
       
       // Upcoming movies (start date is in the future)
       if (startDate > today) {
         upcoming.push(movie);
         console.log('Added upcoming movie by date:', movie.title);
       }
-      // Current movies (today is same as start date OR between start and end date)
-      else if (today >= startDate && today <= endDate) {
+      // Current movies (start date is today or in the past)
+      else {
         current.push(movie);
         console.log('Added current movie:', movie.title);
-      } else {
-        // If dates are in the past, still add to current for display
-        current.push(movie);
       }
     }
-    // Only check isUpcoming flag if no dates are provided
+    // Only check isUpcoming flag if no start date is provided
     else if (movie.isUpcoming === true || movie.isUpcoming === 'true') {
       upcoming.push(movie);
       console.log('Added upcoming movie by flag:', movie.title);
     }
     else {
-      // If no dates and not marked as upcoming, add to current
+      // If no start date and not marked as upcoming, add to current
       current.push(movie);
     }
     

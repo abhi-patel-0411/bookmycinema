@@ -24,20 +24,20 @@ const ShowTimes = () => {
   const [selectedTheaterId, setSelectedTheaterId] = useState('');
 
   useEffect(() => {
+    // Clear any localStorage that might interfere
+    localStorage.removeItem('selectedTheaterCity');
+    
     fetchMovieDetails();
     fetchCities();
     generateAvailableDates();
     
-    // Check for city and theaterId in query params or localStorage
+    // Check for city and theaterId in query params only
     const queryParams = new URLSearchParams(location.search);
     const cityFromQuery = queryParams.get('city');
     const theaterIdFromQuery = queryParams.get('theaterId');
-    const cityFromStorage = localStorage.getItem('selectedTheaterCity');
     
     if (cityFromQuery) {
       setSelectedCity(cityFromQuery);
-    } else if (cityFromStorage) {
-      setSelectedCity(cityFromStorage);
     }
     
     if (theaterIdFromQuery) {
@@ -46,11 +46,10 @@ const ShowTimes = () => {
   }, [movieId, location.search]);
   
   useEffect(() => {
-    if (selectedCity && selectedDate && movieId) {
+    if (selectedDate && movieId) {
       fetchShows();
     } else {
       console.log('Missing required data for fetching shows:', { 
-        selectedCity, 
         selectedDate: selectedDate?.id, 
         movieId 
       });
@@ -187,8 +186,8 @@ const ShowTimes = () => {
       
       const response = await showsService.getShowsByMovieAndDate({
         movieId,
-        city: selectedCity,
-        date: formattedDate
+        date: formattedDate,
+        ...(selectedCity && { city: selectedCity })
       });
       
       const showsData = response.data || [];
@@ -251,7 +250,7 @@ const ShowTimes = () => {
         acc[theaterId].shows.push({
           id: show._id,
           time: formatShowTime(show.showTime),
-          price: show.price || 150,
+          price: show.pricing?.silver || show.price || 150,
           availableSeats: show.availableSeats || (totalSeats - (show.bookedSeats?.length || 0)),
           totalSeats: totalSeats,
           screenNumber: show.screenNumber || 1,
@@ -371,6 +370,7 @@ const ShowTimes = () => {
                 <h6 className="text-white mb-0 fw-semibold">Select City</h6>
               </div>
               <Form.Select 
+                key={`city-select-${movieId}`}
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
                 className="border-secondary text-white"
@@ -439,24 +439,12 @@ const ShowTimes = () => {
 
         {/* Theater List */}
         <AnimatePresence>
-          {!selectedCity ? (
-            <motion.div
-              className="text-center py-5 rounded-3 shadow"
-              style={{ backgroundColor: '#1f2025' }}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-            >
-              <FaMapMarkerAlt size={60} className="text-muted mb-4" />
-              <h4 className="text-white mb-3 fw-bold">Select Your City</h4>
-              <p className="text-light mb-0">Choose a city from the dropdown above to view available showtimes</p>
-            </motion.div>
-          ) : theaters && theaters.length > 0 ? (
+          {theaters && theaters.length > 0 ? (
             <div>
               <div className="d-flex align-items-center justify-content-between mb-4">
                 <h5 className="text-white fw-bold mb-0">
                   <FaTicketAlt className="text-danger me-2" />
-                  Available Shows in {selectedCity}
+                  Available Shows{selectedCity ? ` in ${selectedCity}` : ' (All Cities)'}
                 </h5>
                 <Badge bg="success" className="px-3 py-2">
                   {theaters.reduce((total, theater) => total + theater.shows.length, 0)} Shows Available
@@ -528,7 +516,7 @@ const ShowTimes = () => {
                               <div style={{ fontSize: '10px', opacity: 0.9 }}>
                                 Screen {show.screenNumber} • {show.format}
                               </div>
-                              <div style={{ fontSize: '11px', fontWeight: '600' }}>₹{show.price || 150}</div>
+                              <div style={{ fontSize: '11px', fontWeight: '600' }}>₹{show.pricing?.silver || show.price || 150}</div>
                               <div style={{ fontSize: '9px', opacity: 0.8 }}>
                                 {availableSeats} seats left
                               </div>

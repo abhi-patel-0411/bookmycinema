@@ -1,6 +1,41 @@
 const Movie = require("../models/Movie");
 const { emitToUsers } = require("../middleware/realtime");
 
+// Auto-update coming soon movies to now showing based on start date
+const updateComingSoonMovies = async () => {
+  try {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    
+    // Force update all movies with start dates
+    const movies = await Movie.find({ startDate: { $exists: true } });
+    let updatedCount = 0;
+    
+    for (const movie of movies) {
+      const startDate = new Date(movie.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const shouldBeUpcoming = startDate > currentDate;
+      
+      if (movie.isUpcoming !== shouldBeUpcoming) {
+        await Movie.updateOne(
+          { _id: movie._id },
+          { isUpcoming: shouldBeUpcoming }
+        );
+        updatedCount++;
+        console.log(`Updated ${movie.title}: ${movie.isUpcoming} -> ${shouldBeUpcoming}`);
+      }
+    }
+    
+    if (updatedCount > 0) {
+      console.log(`Updated ${updatedCount} movies coming soon status`);
+      emitToUsers("movies-updated", { type: "coming-soon-update", count: updatedCount });
+    }
+  } catch (error) {
+    console.error('Error updating coming soon movies:', error);
+  }
+};
+
 // Get all movies
 const getAllMovies = async (req, res) => {
   try {
@@ -137,11 +172,22 @@ const createMovie = async (req, res) => {
       }
     }
 
-    // Handle isUpcoming flag
-    if (movieData.isUpcoming === "true" || movieData.isUpcoming === true) {
-      movieData.isUpcoming = true;
+    // Handle isUpcoming flag automatically based on showing period start date
+    if (movieData.startDate) {
+      const startDate = new Date(movieData.startDate);
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      startDate.setHours(0, 0, 0, 0);
+      
+      if (startDate > currentDate) {
+        movieData.isUpcoming = true;
+        console.log('Movie set as upcoming - showing starts in future');
+      } else {
+        movieData.isUpcoming = false;
+        console.log('Movie set as now showing - showing starts today or already started');
+      }
     } else {
-      movieData.isUpcoming = false;
+      movieData.isUpcoming = movieData.isUpcoming === "true" || movieData.isUpcoming === true;
     }
 
     console.log("Creating movie with data:", {
@@ -208,11 +254,22 @@ const updateMovie = async (req, res) => {
       }
     }
 
-    // Handle isUpcoming flag
-    if (updateData.isUpcoming === "true" || updateData.isUpcoming === true) {
-      updateData.isUpcoming = true;
+    // Handle isUpcoming flag automatically based on showing period start date
+    if (updateData.startDate) {
+      const startDate = new Date(updateData.startDate);
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      startDate.setHours(0, 0, 0, 0);
+      
+      if (startDate > currentDate) {
+        updateData.isUpcoming = true;
+        console.log('Movie updated as upcoming - showing starts in future');
+      } else {
+        updateData.isUpcoming = false;
+        console.log('Movie updated as now showing - showing starts today or already started');
+      }
     } else {
-      updateData.isUpcoming = false;
+      updateData.isUpcoming = updateData.isUpcoming === "true" || updateData.isUpcoming === true;
     }
 
     console.log("Updating movie with data:", {
@@ -411,5 +468,6 @@ module.exports = {
   deleteMovie,
   softDeleteMovie,
   checkMovieStatus,
-  uploadCastImage
+  uploadCastImage,
+  updateComingSoonMovies
 };

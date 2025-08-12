@@ -119,6 +119,7 @@ mongoose
     // Start auto cleanup for expired shows
     const { startAutoCleanup } = require("./controllers/showController");
     const { runFullCleanup } = require("./controllers/cleanupController");
+    const { updateComingSoonMovies } = require("./controllers/movieController");
 
     // Run full cleanup on startup
     try {
@@ -136,6 +137,24 @@ mongoose
 
     // Start user sync scheduler (sync every 30 minutes)
     scheduleUserSync(1);
+    
+    // Update coming soon movies on startup
+    try {
+      await updateComingSoonMovies();
+      console.log('✅ Coming soon movies updated on startup');
+    } catch (error) {
+      console.error('❌ Error updating coming soon movies:', error.message);
+    }
+    
+    // Schedule daily coming soon updates (every 24 hours)
+    setInterval(async () => {
+      try {
+        await updateComingSoonMovies();
+      } catch (error) {
+        console.error('❌ Error in scheduled coming soon update:', error.message);
+      }
+    }, 24 * 60 * 60 * 1000); // 24 hours
+    console.log('🎬 Coming soon auto-update scheduler started');
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);

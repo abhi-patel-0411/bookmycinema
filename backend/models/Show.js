@@ -28,9 +28,9 @@ const showSchema = new mongoose.Schema({
     required: true 
   },
   pricing: {
-    silver: { type: Number, default: function() { return this.price; } },
-    gold: { type: Number, default: function() { return Math.round(this.price * 1.3); } },
-    premium: { type: Number, default: function() { return Math.round(this.price * 1.8); } }
+    silver: { type: Number, required: true },
+    gold: { type: Number, default: function() { return Math.round(this.pricing.silver * 1.3); } },
+    premium: { type: Number, default: function() { return Math.round(this.pricing.silver * 1.8); } }
   },
   availableSeats: { 
     type: Number, 
@@ -75,6 +75,25 @@ showSchema.virtual('isPast').get(function() {
   const [hours, minutes] = this.showTime.split(':');
   showDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10));
   return now > showDateTime;
+});
+
+// Pre-save middleware to sync base price with silver price
+showSchema.pre('save', function(next) {
+  if (this.pricing && this.pricing.silver) {
+    this.price = this.pricing.silver;
+  }
+  next();
+});
+
+// Pre-update middleware to sync base price with silver price
+showSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function(next) {
+  const update = this.getUpdate();
+  if (update.pricing && update.pricing.silver) {
+    update.price = update.pricing.silver;
+  } else if (update['pricing.silver']) {
+    update.price = update['pricing.silver'];
+  }
+  next();
 });
 
 module.exports = mongoose.model('Show', showSchema);

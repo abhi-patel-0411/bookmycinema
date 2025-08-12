@@ -91,7 +91,7 @@ const AdminShowCard = ({ show, onEdit, onDelete, index }) => {
           <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary">
             <div className="d-flex align-items-center">
               <FaRupeeSign className="text-success me-1" size={12} />
-              <span className="text-success fw-bold" style={{ fontSize: '0.9rem' }}>₹{show.price}</span>
+              <span className="text-success fw-bold" style={{ fontSize: '0.9rem' }}>₹{show.pricing?.silver || show.price}</span>
             </div>
             <div className="d-flex gap-1">
               <Badge bg="info" style={{ fontSize: '0.65rem' }}>S:₹{show.pricing?.silver || show.price}</Badge>

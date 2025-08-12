@@ -240,7 +240,7 @@ const About = () => {
                   <div className="decoration-line"></div>
                 </div>
                 <p className="copyright">
-                  © 2024 CineBook. All rights reserved. Made with{" "}
+                  © 2025 Book My Cinema. All rights reserved. Made with{" "}
                   <FaHeart className="heart-icon" /> for movie lovers.
                 </p>
               </div>

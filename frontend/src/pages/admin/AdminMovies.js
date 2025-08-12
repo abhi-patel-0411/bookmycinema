@@ -1233,13 +1233,16 @@ const AdminMovies = () => {
                       value={formData.startDate}
                       onChange={(e) => {
                         const startDate = e.target.value;
+                        const currentDate = new Date().toISOString().split('T')[0];
+                        const isUpcoming = startDate > currentDate;
+                        
                         // Calculate end date (7 days after start date)
                         const endDate = startDate
                           ? moment(startDate)
                               .add(7, "days")
                               .format("YYYY-MM-DD")
                           : "";
-                        setFormData({ ...formData, startDate, endDate });
+                        setFormData({ ...formData, startDate, endDate, isUpcoming });
                       }}
                       style={{
                         backgroundColor: "#2a2d35",
@@ -1295,7 +1298,7 @@ const AdminMovies = () => {
                     <Form.Check
                       type="switch"
                       id="upcoming-switch"
-                      label="Mark as Upcoming Movie"
+                      label="Mark as Upcoming Movie (Auto-detected)"
                       checked={formData.isUpcoming}
                       onChange={(e) =>
                         setFormData({
@@ -1304,9 +1307,13 @@ const AdminMovies = () => {
                         })
                       }
                       className="mt-2"
+                      disabled={!!formData.startDate}
                     />
                     <small className="text-white d-block mb-2">
-                      Will appear in the Upcoming section
+                      {formData.startDate ? 
+                        'Auto-detected based on showing period start date' : 
+                        'Will appear in the Upcoming section'
+                      }
                     </small>
 
                     {editingMovie && (

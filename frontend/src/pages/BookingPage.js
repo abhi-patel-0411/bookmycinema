@@ -426,7 +426,7 @@ const BookingPage = () => {
                 {show.theater?.type || "2D"}
               </Badge>
               <div className="text-light small">Starting from</div>
-              <div className="text-white h4 fw-bold">₹{show.price}</div>
+              <div className="text-white h4 fw-bold">₹{show.pricing?.silver || show.price}</div>
             </Col>
           </Row>
         </motion.div>

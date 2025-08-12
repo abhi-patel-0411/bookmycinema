@@ -56,7 +56,6 @@ const AdminShows = () => {
     theater: "",
     date: "",
     time: "",
-    price: "199",
     silverPrice: "150",
     goldPrice: "200",
     premiumPrice: "300",
@@ -185,22 +184,18 @@ const AdminShows = () => {
     }
 
     try {
+      const silverPrice = parseInt(formData.silverPrice) || 150;
       const showData = {
         movie: formData.movie,
         theater: formData.theater,
         showDate: formData.date,
         showTime: formData.time,
-        price: parseInt(formData.price) || 199,
+        price: silverPrice,
         screenNumber: parseInt(formData.screenNumber) || 1,
         pricing: {
-          silver:
-            parseInt(formData.silverPrice) || parseInt(formData.price) || 150,
-          gold:
-            parseInt(formData.goldPrice) ||
-            Math.round((parseInt(formData.price) || 199) * 1.3),
-          premium:
-            parseInt(formData.premiumPrice) ||
-            Math.round((parseInt(formData.price) || 199) * 1.8),
+          silver: silverPrice,
+          gold: parseInt(formData.goldPrice) || Math.round(silverPrice * 1.3),
+          premium: parseInt(formData.premiumPrice) || Math.round(silverPrice * 1.8),
         },
       };
 
@@ -229,7 +224,6 @@ const AdminShows = () => {
       theater: show.theater?._id || "",
       date: new Date(show.showDate).toISOString().split("T")[0],
       time: show.showTime,
-      price: show.price.toString(),
       silverPrice: show.pricing?.silver?.toString() || show.price.toString(),
       goldPrice:
         show.pricing?.gold?.toString() ||
@@ -293,7 +287,6 @@ const AdminShows = () => {
       theater: "",
       date: "",
       time: "",
-      price: "199",
       silverPrice: "150",
       goldPrice: "200",
       premiumPrice: "300",
@@ -573,22 +566,7 @@ const AdminShows = () => {
                       )}
                     </Form.Group>
                   </Col>
-                  <Col md={3}>
-                    <Form.Group className="mb-3">
-                      <Form.Label className="text-white">
-                        Base Price (₹)
-                      </Form.Label>
-                      <Form.Control
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) =>
-                          setFormData({ ...formData, price: e.target.value })
-                        }
-                        className="bg-dark border-secondary text-white"
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
+
                 </Row>
                 <Row>
                   <Col md={4}>
@@ -1167,22 +1145,7 @@ const AdminShows = () => {
                     </Form.Select>
                   </Form.Group>
                 </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="text-white">
-                      Base Price (₹)
-                    </Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      className="bg-dark border-secondary text-white"
-                      required
-                    />
-                  </Form.Group>
-                </Col>
+
               </Row>
               <Row>
                 <Col md={4}>

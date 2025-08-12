@@ -25,9 +25,17 @@ router.get('/:id/shows', async (req, res) => {
       query.showDate = { $gte: startDate, $lt: endDate };
     }
 
-    const shows = await Show.find(query)
+    let shows = await Show.find(query)
       .populate('theater', 'name location city')
       .sort({ showDate: 1, showTime: 1 });
+    
+    // Filter by city after population if city is provided
+    if (city) {
+      shows = shows.filter(show => 
+        show.theater && show.theater.city && 
+        show.theater.city.toLowerCase() === city.toLowerCase()
+      );
+    }
     
     res.json(shows);
   } catch (error) {
@@ -65,6 +73,42 @@ router.put('/:id/deactivate', softDeleteMovie);
 
 // Upload cast image
 router.post('/upload-cast-image', upload.single('image'), uploadCastImage);
+
+// Manual update coming soon movies
+router.post('/update-coming-soon', async (req, res) => {
+  try {
+    const Movie = require('../models/Movie');
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    
+    // Update all movies with start dates
+    const movies = await Movie.find({ startDate: { $exists: true } });
+    let updatedCount = 0;
+    
+    for (const movie of movies) {
+      const startDate = new Date(movie.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const shouldBeUpcoming = startDate > currentDate;
+      
+      if (movie.isUpcoming !== shouldBeUpcoming) {
+        await Movie.updateOne(
+          { _id: movie._id },
+          { isUpcoming: shouldBeUpcoming }
+        );
+        updatedCount++;
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Updated ${updatedCount} movies`,
+      total: movies.length
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 // Test upload endpoint
 router.post('/test-upload', upload.single('poster'), (req, res) => {

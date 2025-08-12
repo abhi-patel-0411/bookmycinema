@@ -10,8 +10,14 @@ const showsService = {
   // Get shows by movie and date
   getShowsByMovieAndDate: async ({ movieId, city, date }) => {
     try {
-      console.log(`Fetching shows for movie ${movieId} in ${city} on ${date}`);
-      const response = await api.get(`/shows/movie/${movieId}?city=${encodeURIComponent(city)}&date=${encodeURIComponent(date)}`);
+      const params = new URLSearchParams();
+      if (date) params.append('date', encodeURIComponent(date));
+      if (city) params.append('city', encodeURIComponent(city));
+      
+      const url = `/shows/movie/${movieId}${params.toString() ? '?' + params.toString() : ''}`;
+      console.log(`Fetching shows for movie ${movieId}${city ? ` in ${city}` : ' (all cities)'} on ${date}`);
+      
+      const response = await api.get(url);
       console.log(`Received ${response.data?.length || 0} shows from API`);
       return response;
     } catch (error) {
