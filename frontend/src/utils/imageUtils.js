@@ -11,6 +11,11 @@ const API_BASE_URL = getApiBaseUrl();
 export const getImageUrl = (imagePath, fallbackUrl = null) => {
   if (!imagePath) return fallbackUrl;
   
+  // If it's a base64 image, return as is
+  if (imagePath.startsWith('data:image/')) {
+    return imagePath;
+  }
+  
   // If it's already a full URL, return as is
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
     return imagePath;
@@ -27,6 +32,10 @@ export const getImageUrl = (imagePath, fallbackUrl = null) => {
 
 export const getMoviePosterUrl = (posterPath, movieTitle = null) => {
   if (posterPath) {
+    // If it's a base64 image, return as is
+    if (posterPath.startsWith('data:image/')) {
+      return posterPath;
+    }
     // If it's already a full URL, return as is
     if (posterPath.startsWith('http://') || posterPath.startsWith('https://')) {
       return posterPath;
@@ -46,6 +55,10 @@ export const getMoviePosterUrl = (posterPath, movieTitle = null) => {
 
 export const getCastImageUrl = (castMember) => {
   if (castMember.image) {
+    // If it's a base64 image, return as is
+    if (castMember.image.startsWith('data:image/')) {
+      return castMember.image;
+    }
     return getImageUrl(castMember.image);
   }
   

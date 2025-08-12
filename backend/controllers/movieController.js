@@ -132,8 +132,10 @@ const createMovie = async (req, res) => {
     
     // Handle poster upload/URL
     if (req.file) {
-      movieData.poster = `/uploads/${req.file.filename}`;
-      console.log('File uploaded:', req.file.filename);
+      // Convert uploaded file to base64 for cloud deployment
+      const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      movieData.poster = base64Image;
+      console.log('File uploaded and converted to base64');
     } else if (movieData.poster && (movieData.poster.startsWith('http://') || movieData.poster.startsWith('https://'))) {
       console.log('Using URL:', movieData.poster);
     } else {
@@ -222,8 +224,10 @@ const updateMovie = async (req, res) => {
     
     // Handle poster upload/URL
     if (req.file) {
-      updateData.poster = `/uploads/${req.file.filename}`;
-      console.log('File uploaded for update:', req.file.filename);
+      // Convert uploaded file to base64 for cloud deployment
+      const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      updateData.poster = base64Image;
+      console.log('File uploaded and converted to base64 for update');
     } else if (updateData.poster && (updateData.poster.startsWith('http://') || updateData.poster.startsWith('https://'))) {
       console.log('Using URL for update:', updateData.poster);
     }
@@ -451,9 +455,9 @@ const uploadCastImage = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No image file provided' });
     }
     
-    // Return the path to the uploaded image
-    const imagePath = `/uploads/${req.file.filename}`;
-    res.json({ success: true, imagePath });
+    // Convert uploaded file to base64 for cloud deployment
+    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    res.json({ success: true, imagePath: base64Image });
   } catch (error) {
     console.error('Error uploading cast image:', error);
     res.status(500).json({ success: false, message: error.message });

@@ -1591,9 +1591,10 @@ const AdminMovies = () => {
                       />
                       <small className="text-white d-block mt-2">
                         <ul className="ps-3 mb-0">
-                          <li>Image URL is faster and recommended</li>
-                          <li>File upload: JPG, PNG, WebP (max 5MB)</li>
+                          <li><strong>Image URL is recommended</strong> for better performance</li>
+                          <li>File upload: JPG, PNG, WebP (max 5MB) - works on all devices</li>
                           <li>Recommended size: 300x450 pixels</li>
+                          <li>Uploaded images work across all devices and platforms</li>
                         </ul>
                       </small>
                     </div>
