@@ -131,7 +131,7 @@ const CustomNavbar = () => {
                 className="nav-link"
                 onClick={closeMobileMenu}
               >
-                <FaTicketAlt className="me-1" />
+                
                 My Bookings
               </Link>
             </SignedIn>
@@ -182,9 +182,9 @@ const CustomNavbar = () => {
                 >
                   <UserButton.MenuItems>
                     <UserButton.Link
-                      label="My Bookings"
-                      labelIcon={<FaTicketAlt />}
-                      href="/my-bookings"
+                      label="About"
+                      labelIcon={<FaInfoCircle />}
+                      href="/about"
                     />
                   </UserButton.MenuItems>
                 </UserButton>

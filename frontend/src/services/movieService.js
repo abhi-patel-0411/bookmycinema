@@ -64,9 +64,9 @@ export const filterMoviesByStatus = (movies) => {
   });
   
   return {
-    upcoming: upcoming.length > 0 ? upcoming : movies.slice(0, 3),
-    current: current.length > 0 ? current : movies.slice(0, 5),
-    featured: featured.length > 0 ? featured : movies
+    upcoming: upcoming,
+    current: current,
+    featured: featured
   };
 };
 

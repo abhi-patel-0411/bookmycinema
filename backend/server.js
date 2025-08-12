@@ -146,15 +146,15 @@ mongoose
       console.error('❌ Error updating coming soon movies:', error.message);
     }
     
-    // Schedule daily coming soon updates (every 24 hours)
+    // Schedule frequent coming soon updates (every second)
     setInterval(async () => {
       try {
         await updateComingSoonMovies();
       } catch (error) {
         console.error('❌ Error in scheduled coming soon update:', error.message);
       }
-    }, 24 * 60 * 60 * 1000); // 24 hours
-    console.log('🎬 Coming soon auto-update scheduler started');
+    }, 1000); // 1 second
+    console.log('🎬 Coming soon auto-update scheduler started (runs every second)');
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);

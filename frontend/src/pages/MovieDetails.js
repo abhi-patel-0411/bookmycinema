@@ -290,7 +290,10 @@ const MovieDetails = () => {
       <section
         className="d-none d-md-block"
         style={{
-          backgroundImage: `linear-gradient(90deg, rgb(26, 26, 26) 24.97%, rgb(26, 26, 26) 38.3%, rgba(26, 26, 26, 0.04) 97.47%, rgb(26, 26, 26) 100%), url(${getMoviePosterUrl(movie.poster, movie.title)})`,
+          backgroundImage: `linear-gradient(90deg, rgb(26, 26, 26) 24.97%, rgb(26, 26, 26) 38.3%, rgba(26, 26, 26, 0.04) 97.47%, rgb(26, 26, 26) 100%), url(${getMoviePosterUrl(
+            movie.poster,
+            movie.title
+          )})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -541,35 +544,37 @@ const MovieDetails = () => {
             {/* Trailer and Book Ticket Buttons */}
             <div
               className="position-absolute d-flex gap-2"
-              style={{ bottom: "12px", left: "12px" }}
+              style={{ bottom: "12px", left: "12px", right: "12px" }}
             >
               {(movie.youtubeUrl || movie.trailer) && (
                 <div
-                  className="d-flex align-items-center gap-2 text-white px-3 py-2"
+                  className="d-flex align-items-center gap-1 text-white px-2 py-1"
                   style={{
                     backgroundColor: "rgba(0,0,0,0.8)",
-                    borderRadius: "8px",
-                    fontSize: "13px",
+                    borderRadius: "6px",
+                    fontSize: "11px",
                     cursor: "pointer",
                     backdropFilter: "blur(10px)",
+                    minWidth: "fit-content",
                   }}
                   onClick={() => setShowTrailerModal(true)}
                 >
-                  <FaPlay size={14} />
-                  <span>Watch Trailer</span>
+                  <FaPlay size={10} />
+                  <span>Trailer</span>
                 </div>
               )}
               <button
                 type="button"
-                className="px-5 py-3 fw-semibold btn btn-danger"
+                className="px-3 py-2 fw-semibold btn btn-danger flex-grow-1"
                 style={{
-                  fontSize: "16px",
-                  borderRadius: "8px",
+                  fontSize: "13px",
+                  borderRadius: "6px",
                   fontWeight: "500",
+                  minHeight: "36px",
                 }}
                 onClick={handleBookTickets}
               >
-                Book tickets
+                Book Tickets
               </button>
             </div>
 
@@ -684,35 +689,7 @@ const MovieDetails = () => {
               className="text-light mb-0"
               style={{ fontSize: "14px", lineHeight: "1.6" }}
             >
-              {movie.description ? (
-                movie.description.length > 120 ? (
-                  <>
-                    {movie.description.substring(0, 120)}...
-                    <motion.span
-                      className="text-danger ms-1 fw-semibold"
-                      style={{ cursor: "pointer" }}
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      read more
-                    </motion.span>
-                  </>
-                ) : (
-                  movie.description
-                )
-              ) : (
-                <>
-                  Power. Loyalty. Betrayal. One man's rise to rule it all. A
-                  gripping gangster action thriller that will keep you on the
-                  edge of your seat.
-                  <motion.span
-                    className="text-danger ms-1 fw-semibold"
-                    style={{ cursor: "pointer" }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    read more
-                  </motion.span>
-                </>
-              )}
+              {movie.description || "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
             </p>
           </motion.div>
         </motion.section>
@@ -786,89 +763,14 @@ const MovieDetails = () => {
                 className="text-light"
                 style={{ fontSize: "14px", lineHeight: "1.6" }}
               >
-                {movie.description ? (
-                  movie.description.length > 120 ? (
-                    <>
-                      {movie.description.substring(0, 120)}
-                      <br />
-                      <br />A gripping gangster action thril
-                      <motion.span
-                        className="text-danger ms-1"
-                        style={{ cursor: "pointer", fontWeight: "500" }}
-                        whileHover={{ scale: 1.05 }}
-                      >
-                        ...more
-                      </motion.span>
-                    </>
-                  ) : (
-                    movie.description
-                  )
-                ) : (
-                  <>
-                    Power. Loyalty. Betrayal. One man's rise to rule it all.
-                    <br />
-                    <br />A gripping gangster action thril
-                    <motion.span
-                      className="text-danger ms-1"
-                      style={{ cursor: "pointer", fontWeight: "500" }}
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      ...more
-                    </motion.span>
-                  </>
-                )}
+                {movie.description || "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
               </span>
             </div>
           </motion.div>
         </Container>
       </section>
 
-      {/* Cast Section */}
-      {movie.cast && movie.cast.length > 0 && (
-        <section style={{ backgroundColor: "#1f2025" }} className="py-4">
-          <Container>
-            <div className="mb-3">
-              <h4 className="text-white fw-semibold mb-0">Cast</h4>
-            </div>
-            <div
-              className="d-flex gap-3 overflow-auto pb-3"
-              style={{ scrollbarWidth: "none" }}
-            >
-              {movie.cast.map((actor, index) => (
-                <div
-                  key={index}
-                  className="flex-shrink-0 text-center"
-                  style={{ width: "100px" }}
-                >
-                  <div className="mb-2">
-                    <img
-                      src={getCastImageUrl(actor)}
-                      alt={actor.name || actor}
-                      className="rounded-circle"
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        objectFit: "cover",
-                      }}
-                      onError={(e) => {
-                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          actor.name || actor
-                        )}&background=random&color=fff&size=80`;
-                      }}
-                    />
-                  </div>
-                  <h6 className="text-white mb-0" style={{ fontSize: "12px" }}>
-                    {typeof actor === "string" ? actor : actor.name}
-                  </h6>
-                  <small className="text-light" style={{ fontSize: "10px" }}>
-                    Cast
-                  </small>
-                </div>
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
+
 
       {/* Reviews Section */}
       <Container className="py-3" ref={reviewsRef}>
@@ -1034,32 +936,7 @@ const MovieDetails = () => {
         </Row>
       </Container>
 
-      {/* Mobile Fixed Book Button */}
-      <div
-        className="d-md-none position-fixed w-100"
-        style={{
-          bottom: "80px",
-          left: "0",
-          right: "0",
-          zIndex: 999,
-          padding: "0 16px",
-          backgroundColor: "transparent",
-        }}
-      >
-        <Button
-          variant="danger"
-          className="w-100 py-3 fw-bold shadow-lg"
-          style={{
-            borderRadius: "12px",
-            fontSize: "16px",
-            border: "none",
-            boxShadow: "0 4px 20px rgba(229, 9, 20, 0.4)",
-          }}
-          onClick={handleBookTickets}
-        >
-          Book Tickets
-        </Button>
-      </div>
+      
 
       {/* Trailer Modal */}
       <Modal

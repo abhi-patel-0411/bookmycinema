@@ -54,15 +54,26 @@ export const getMoviePosterUrl = (posterPath, movieTitle = null) => {
 };
 
 export const getCastImageUrl = (castMember) => {
-  if (castMember.image) {
+  // Handle string cast members (legacy format)
+  if (typeof castMember === 'string') {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(castMember)}&background=random&color=fff&size=80`;
+  }
+  
+  // Handle object cast members
+  if (castMember && castMember.image) {
     // If it's a base64 image, return as is
     if (castMember.image.startsWith('data:image/')) {
       return castMember.image;
     }
+    // If it's already a full URL, return as is
+    if (castMember.image.startsWith('http://') || castMember.image.startsWith('https://')) {
+      return castMember.image;
+    }
+    // If it's a relative path, construct the full URL
     return getImageUrl(castMember.image);
   }
   
   // Generate avatar with cast member name
-  const name = castMember.name || 'Actor';
+  const name = (castMember && castMember.name) || castMember || 'Actor';
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=80`;
 };

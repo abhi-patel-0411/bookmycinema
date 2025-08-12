@@ -45,10 +45,23 @@ router.get('/:id/shows', async (req, res) => {
 
 // Add movie (made public for demo)
 router.post('/', (req, res, next) => {
-  upload.single('poster')(req, res, (err) => {
+  upload.any()(req, res, (err) => {
     if (err) {
       console.error('Multer error:', err);
       return res.status(400).json({ message: err.message });
+    }
+    // Organize files by fieldname for easier access
+    if (req.files) {
+      req.files.forEach(file => {
+        if (file.fieldname === 'poster') {
+          req.file = file; // Keep poster as req.file for backward compatibility
+        }
+      });
+      // Create files object for cast images
+      req.files = req.files.reduce((acc, file) => {
+        acc[file.fieldname] = file;
+        return acc;
+      }, {});
     }
     next();
   });
@@ -56,10 +69,23 @@ router.post('/', (req, res, next) => {
 
 // Update movie (made public for demo)
 router.put('/:id', (req, res, next) => {
-  upload.single('poster')(req, res, (err) => {
+  upload.any()(req, res, (err) => {
     if (err) {
       console.error('Multer error:', err);
       return res.status(400).json({ message: err.message });
+    }
+    // Organize files by fieldname for easier access
+    if (req.files) {
+      req.files.forEach(file => {
+        if (file.fieldname === 'poster') {
+          req.file = file; // Keep poster as req.file for backward compatibility
+        }
+      });
+      // Create files object for cast images
+      req.files = req.files.reduce((acc, file) => {
+        acc[file.fieldname] = file;
+        return acc;
+      }, {});
     }
     next();
   });

@@ -61,18 +61,13 @@ const AdminMovies = () => {
     endDate: "",
     isUpcoming: false,
     isActive: true,
-    cast: [],
     price: "199",
     youtubeUrl: "",
     poster: null,
     posterUrl: "",
   });
 
-  const [castMember, setCastMember] = useState({
-    name: "",
-    image: null,
-    imagePreview: "",
-  });
+
 
   const [posterPreview, setPosterPreview] = useState("");
 
@@ -251,8 +246,7 @@ const AdminMovies = () => {
         ) {
           const genres = formData[key].split(",").map((g) => g.trim());
           movieFormData.append("genre", genres);
-        } else if (key === "cast") {
-          movieFormData.append("cast", JSON.stringify(formData.cast));
+
         } else if (key === "startDate" || key === "endDate") {
           // Only add dates if they're provided
           if (formData[key]) {
@@ -343,15 +337,6 @@ const AdminMovies = () => {
       endDate: movie.endDate ? moment(movie.endDate).format("YYYY-MM-DD") : "",
       isUpcoming: movie.isUpcoming === true || movie.isUpcoming === "true",
       isActive: movie.isActive !== false,
-      cast: Array.isArray(movie.cast)
-        ? movie.cast.map((c) => {
-            if (typeof c === "string") {
-              return { name: c, image: null };
-            }
-            return c;
-          })
-        : [],
-
       price: movie.price || "",
       youtubeUrl: movie.youtubeUrl || "",
       poster: null,
@@ -381,8 +366,6 @@ const AdminMovies = () => {
       endDate: "",
       isUpcoming: false,
       isActive: true,
-      cast: [],
-
       price: "199",
       youtubeUrl: "",
       poster: null,
@@ -400,44 +383,7 @@ const AdminMovies = () => {
     }
   };
 
-  const handleCastImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCastMember({
-        ...castMember,
-        image: file,
-        imagePreview: URL.createObjectURL(file),
-      });
-    }
-  };
 
-  const addCastMember = () => {
-    if (!castMember.name) return;
-
-    // Always add the cast member with the name and image preview
-    // This simplifies the process and ensures the image is always visible
-    const newCastMember = {
-      name: castMember.name,
-      image: castMember.imagePreview || null,
-    };
-
-    setFormData({
-      ...formData,
-      cast: [...formData.cast, newCastMember],
-    });
-
-    setCastMember({
-      name: "",
-      image: null,
-      imagePreview: "",
-    });
-  };
-
-  const removeCastMember = (index) => {
-    const updatedCast = [...formData.cast];
-    updatedCast.splice(index, 1);
-    setFormData({ ...formData, cast: updatedCast });
-  };
 
   const filteredMovies = movies.filter((movie) => {
     const matchesSearch =
@@ -1354,151 +1300,7 @@ const AdminMovies = () => {
                 </Col>
               </Row>
 
-              <Form.Group className="mb-4">
-                <Form.Label className="text-white fw-bold mb-3">
-                  Cast Members
-                </Form.Label>
 
-                <div
-                  className="p-3 mb-3"
-                  style={{
-                    backgroundColor: "rgba(0,0,0,0.2)",
-                    borderRadius: "10px",
-                  }}
-                >
-                  <Row className="mb-3">
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label className="text-white">
-                          Actor Name
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={castMember.name}
-                          onChange={(e) =>
-                            setCastMember({
-                              ...castMember,
-                              name: e.target.value,
-                            })
-                          }
-                          placeholder="Enter actor name"
-                          style={{
-                            backgroundColor: "#2a2d35",
-                            borderColor: "#6c757d",
-                            color: "#fff",
-                            borderRadius: "10px",
-                          }}
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label className="text-white">
-                          Actor Image
-                        </Form.Label>
-                        <Form.Control
-                          type="file"
-                          accept="image/*"
-                          onChange={handleCastImageChange}
-                          style={{
-                            backgroundColor: "#2a2d35",
-                            borderColor: "#6c757d",
-                            color: "#fff",
-                            borderRadius: "10px",
-                          }}
-                        />
-                      </Form.Group>
-                    </Col>
-                  </Row>
-
-                  {castMember.imagePreview && (
-                    <div className="mb-3 text-center">
-                      <img
-                        src={castMember.imagePreview}
-                        alt="Cast Preview"
-                        style={{
-                          height: "100px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                        }}
-                        className="border border-secondary"
-                      />
-                    </div>
-                  )}
-
-                  <div className="d-flex justify-content-end">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={addCastMember}
-                      disabled={!castMember.name}
-                      style={{
-                        background: "linear-gradient(135deg, #e63946, #f84565)",
-                        border: "none",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <FaPlus className="me-2" /> Add Cast Member
-                    </Button>
-                  </div>
-                </div>
-
-                {formData.cast.length > 0 && (
-                  <div className="cast-list">
-                    <h6 className="text-white mb-3">Added Cast Members:</h6>
-                    <div className="d-flex flex-wrap gap-3">
-                      {formData.cast.map((cast, index) => (
-                        <div
-                          key={index}
-                          className="text-center position-relative"
-                          style={{ width: "100px" }}
-                        >
-                          <div className="position-relative mb-2">
-                            <img
-                              src={
-                                cast.image ||
-                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                  cast.name
-                                )}&background=random&color=fff&size=96`
-                              }
-                              alt={cast.name}
-                              style={{
-                                width: "80px",
-                                height: "80px",
-                                borderRadius: "50%",
-                                objectFit: "cover",
-                                border: "2px solid #6c757d",
-                              }}
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                  cast.name
-                                )}&background=random&color=fff&size=96`;
-                              }}
-                            />
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              className="position-absolute top-0 end-0 rounded-circle p-0"
-                              style={{
-                                width: "24px",
-                                height: "24px",
-                                fontSize: "10px",
-                              }}
-                              onClick={() => removeCastMember(index)}
-                            >
-                              <FaTimes />
-                            </Button>
-                          </div>
-                          <small className="text-white d-block">
-                            {cast.name}
-                          </small>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </Form.Group>
 
               <Form.Group className="mb-4">
                 <Form.Label className="text-white fw-bold mb-3">

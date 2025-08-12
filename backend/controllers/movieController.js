@@ -152,7 +152,7 @@ const createMovie = async (req, res) => {
       movieData.genre = movieData.genre.split(",").map((g) => g.trim());
     }
 
-    // Handle cast data
+    // Handle cast data with images
     if (movieData.cast) {
       // If cast is a string, try to parse it
       if (typeof movieData.cast === "string") {
@@ -166,11 +166,23 @@ const createMovie = async (req, res) => {
 
       // Handle cast images properly
       if (Array.isArray(movieData.cast)) {
-        movieData.cast = movieData.cast.map((castMember) => ({
-          name: castMember.name,
-          image: castMember.image || null,
-          role: castMember.role || "",
-        }));
+        movieData.cast = movieData.cast.map((castMember, index) => {
+          let imageUrl = castMember.image;
+          
+          // Check if there's an uploaded file for this cast member
+          const castImageFile = req.files && req.files[`castImage_${castMember.imageIndex || index}`];
+          if (castImageFile) {
+            // Convert uploaded cast image to base64
+            imageUrl = `data:${castImageFile.mimetype};base64,${castImageFile.buffer.toString('base64')}`;
+            console.log(`Converted cast image ${index} to base64`);
+          }
+          
+          return {
+            name: castMember.name,
+            image: imageUrl || null,
+            role: castMember.role || "",
+          };
+        });
       }
     }
 
@@ -236,7 +248,7 @@ const updateMovie = async (req, res) => {
       updateData.genre = updateData.genre.split(",").map((g) => g.trim());
     }
 
-    // Handle cast data
+    // Handle cast data with images
     if (updateData.cast) {
       // If cast is a string, try to parse it
       if (typeof updateData.cast === "string") {
@@ -250,11 +262,23 @@ const updateMovie = async (req, res) => {
 
       // Handle cast images properly
       if (Array.isArray(updateData.cast)) {
-        updateData.cast = updateData.cast.map((castMember) => ({
-          name: castMember.name || "",
-          image: castMember.image || null,
-          role: castMember.role || "",
-        }));
+        updateData.cast = updateData.cast.map((castMember, index) => {
+          let imageUrl = castMember.image;
+          
+          // Check if there's an uploaded file for this cast member
+          const castImageFile = req.files && req.files[`castImage_${castMember.imageIndex || index}`];
+          if (castImageFile) {
+            // Convert uploaded cast image to base64
+            imageUrl = `data:${castImageFile.mimetype};base64,${castImageFile.buffer.toString('base64')}`;
+            console.log(`Converted cast image ${index} to base64 for update`);
+          }
+          
+          return {
+            name: castMember.name || "",
+            image: imageUrl || null,
+            role: castMember.role || "",
+          };
+        });
       }
     }
 

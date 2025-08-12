@@ -139,7 +139,7 @@ const Theaters = () => {
   }
 
   return (
-    <div className="min-vh-100" style={{ backgroundColor: '#1f2025', paddingTop: '80px', paddingBottom: '50px' }}>
+    <div className="min-vh-100" style={{ backgroundColor: '#1f2025', paddingTop: '120px', paddingBottom: '50px' }}>
       <Container fluid="xl">
         {/* Hero Section */}
         <motion.div 
@@ -152,9 +152,9 @@ const Theaters = () => {
             <div className="p-3 rounded-circle me-3" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
               <FaBuilding size={32} className="text-white" />
             </div>
-            <h1 className="display-5 fw-bold text-white mb-0">Premium Theaters</h1>
+            <h1 className="fw-bold text-white mb-0" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif', fontSize: '2.2rem', letterSpacing: '-0.01em' }}>Premium Theaters</h1>
           </div>
-          <p className="fs-6 text-light mb-0" style={{ maxWidth: '600px', margin: '0 auto', opacity: 0.8 }}>
+          <p className="text-light mb-0" style={{ maxWidth: '600px', margin: '0 auto', opacity: 0.85, fontFamily: 'Inter, sans-serif', fontSize: '1rem', fontWeight: '400', lineHeight: '1.5' }}>
             Discover world-class cinemas with cutting-edge technology and premium experiences
           </p>
         </motion.div>
@@ -172,8 +172,8 @@ const Theaters = () => {
                 <Row className="g-4">
                   <Col lg={6}>
                     <Form.Group>
-                      <Form.Label className="text-white fw-semibold mb-2 d-flex align-items-center">
-                        <FaSearch className="me-2 text-light" /> Search Theaters
+                      <Form.Label className="text-white fw-semibold mb-2 d-flex align-items-center" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', letterSpacing: '0.01em' }}>
+                        <FaSearch className="me-2 text-light" size={14} /> Search Theaters
                       </Form.Label>
                       <InputGroup size="lg">
                         <InputGroup.Text className="bg-dark text-light border-0">
@@ -185,21 +185,21 @@ const Theaters = () => {
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="text-white border-0"
-                          style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)' }}
+                          style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}
                         />
                       </InputGroup>
                     </Form.Group>
                   </Col>
                   <Col lg={4}>
                     <Form.Group>
-                      <Form.Label className="text-white fw-semibold mb-2 d-flex align-items-center">
-                        <FaMapMarkerAlt className="me-2 text-light" /> Select City
+                      <Form.Label className="text-white fw-semibold mb-2 d-flex align-items-center" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', letterSpacing: '0.01em' }}>
+                        <FaMapMarkerAlt className="me-2 text-light" size={14} /> Select City
                       </Form.Label>
                       <Form.Select
                         value={selectedCity}
                         onChange={(e) => setSelectedCity(e.target.value)}
                         className="text-white border-0"
-                        style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)' }}
+                        style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}
                       >
                         <option value="">All Cities</option>
                         {cities.map(city => (
@@ -212,6 +212,7 @@ const Theaters = () => {
                     <Button
                       variant="outline-light"
                       className="w-100"
+                      style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', fontWeight: '500' }}
                       onClick={() => {
                         setSearchTerm('');
                         setSelectedCity('');
@@ -259,12 +260,12 @@ const Theaters = () => {
                 <FaBuilding className="text-white" size={20} />
               </div>
               <div>
-                <h4 className="text-white mb-1 fw-bold">
+                <h4 className="text-white mb-1 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.25rem', letterSpacing: '-0.01em' }}>
                   {filteredTheaters.length} Theater{filteredTheaters.length !== 1 ? 's' : ''} Found
                 </h4>
                 {selectedCity && (
-                  <p className="text-light mb-0">
-                    <FaMapMarkerAlt className="me-1" /> in {selectedCity}
+                  <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', fontWeight: '500' }}>
+                    <FaMapMarkerAlt className="me-1" size={14} /> in {selectedCity}
                   </p>
                 )}
               </div>
@@ -303,7 +304,7 @@ const Theaters = () => {
                               <div className="me-3 p-2 rounded-circle" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
                                 <FaBuilding className="text-white" size={16} />
                               </div>
-                              <h5 className="text-white mb-0 fw-bold">{theater.name}</h5>
+                              <h5 className="text-white mb-0 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.1rem', letterSpacing: '-0.01em' }}>{theater.name}</h5>
                             </div>
                             <Badge style={{ background: 'linear-gradient(135deg, #28a745, #20c997)' }} className="px-3 py-2">
                               <FaUsers className="me-1" size={12} />
@@ -313,15 +314,15 @@ const Theaters = () => {
                           
                           <div className="d-flex align-items-center mb-2">
                             <FaMapMarkerAlt className="text-white me-2" size={12} />
-                            <span className="text-white fw-medium" style={{ fontSize: '0.85rem' }}>
+                            <span className="text-white fw-medium" style={{ fontSize: '0.9rem', fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em' }}>
                               {theater.address?.city || theater.city}
                             </span>
                           </div>
                           
                           <div className="d-flex align-items-center mb-3">
                             <FaStar className="text-warning me-1" size={12} />
-                            <span className="text-white fw-medium" style={{ fontSize: '0.8rem' }}>4.5</span>
-                            <span className="text-white-50 ms-1" style={{ fontSize: '0.75rem' }}>(250+)</span>
+                            <span className="text-white fw-medium" style={{ fontSize: '0.85rem', fontFamily: 'Inter, sans-serif' }}>4.5</span>
+                            <span className="text-white-50 ms-1" style={{ fontSize: '0.8rem', fontFamily: 'Inter, sans-serif' }}>(250+)</span>
                           </div>
 
                           {theater.amenities && theater.amenities.length > 0 && (
@@ -330,14 +331,14 @@ const Theaters = () => {
                                 {theater.amenities.slice(0, 2).map((amenity, i) => (
                                   <Badge 
                                     key={i}
-                                    style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontSize: '0.7rem' }}
+                                    style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}
                                     className="px-2 py-1 text-white"
                                   >
                                     {amenity}
                                   </Badge>
                                 ))}
                                 {theater.amenities.length > 2 && (
-                                  <Badge style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontSize: '0.7rem' }} className="px-2 py-1 text-white">
+                                  <Badge style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }} className="px-2 py-1 text-white">
                                     +{theater.amenities.length - 2}
                                   </Badge>
                                 )}
@@ -352,12 +353,15 @@ const Theaters = () => {
                               border: 'none',
                               borderRadius: '12px',
                               padding: '0.75rem',
-                              fontSize: '0.9rem',
+                              fontSize: '0.95rem',
+                              fontFamily: 'Inter, sans-serif',
+                              fontWeight: '600',
+                              letterSpacing: '0.01em',
                               transition: 'all 0.3s ease'
                             }}
                           >
                             View Movies & Shows
-                            <FaChevronRight className="ms-2" size={12} />
+                            <FaChevronRight className="ms-2" size={14} />
                           </Button>
                         </Card.Body>
                       </Card>
@@ -378,8 +382,8 @@ const Theaters = () => {
                         <div className="mb-4 mx-auto p-4 rounded-circle" style={{ backgroundColor: '#343a40', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <FaBuilding size={32} className="text-white" />
                         </div>
-                        <h4 className="text-white mb-3 fw-bold">No Theaters Found</h4>
-                        <p className="text-light mb-4">
+                        <h4 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.4rem', letterSpacing: '-0.01em' }}>No Theaters Found</h4>
+                        <p className="text-light mb-4" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', lineHeight: '1.6', fontWeight: '400' }}>
                           We couldn't find any theaters matching your search criteria. Try adjusting your filters.
                         </p>
                         <Button
@@ -413,10 +417,10 @@ const Theaters = () => {
                 <Row className="align-items-center">
                   <Col md={8}>
                     <div className="mb-3">
-                      <h3 className="text-white mb-2 fw-bold">{selectedTheater.name}</h3>
+                      <h3 className="text-white mb-2 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.75rem', letterSpacing: '-0.02em' }}>{selectedTheater.name}</h3>
                       <div className="d-flex align-items-center text-light">
                         <FaMapMarkerAlt className="text-light me-2" />
-                        <span>
+                        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', fontWeight: '500' }}>
                           {selectedTheater.location || selectedTheater.address?.street}, {selectedTheater.address?.city || selectedTheater.city}
                         </span>
                       </div>
@@ -430,8 +434,8 @@ const Theaters = () => {
                       </Badge>
                       <div className="d-flex align-items-center justify-content-md-end">
                         <FaStar className="text-warning me-1" />
-                        <span className="text-light fw-semibold">4.5 Rating</span>
-                        <span className="text-muted ms-2">(250+ reviews)</span>
+                        <span className="text-light fw-semibold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.95rem' }}>4.5 Rating</span>
+                        <span className="text-muted ms-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem' }}>(250+ reviews)</span>
                       </div>
                     </div>
                   </Col>
@@ -440,7 +444,7 @@ const Theaters = () => {
                 {/* Amenities */}
                 {selectedTheater.amenities && selectedTheater.amenities.length > 0 && (
                   <div className="mt-4">
-                    <h6 className="text-white mb-3 fw-semibold">Premium Amenities</h6>
+                    <h6 className="text-white mb-3 fw-semibold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.05rem', letterSpacing: '0.01em' }}>Premium Amenities</h6>
                     <div className="d-flex flex-wrap gap-2">
                       {selectedTheater.amenities.map((amenity, i) => (
                         <Badge 
@@ -459,7 +463,7 @@ const Theaters = () => {
 
             {/* Screens Section */}
             <div className="mb-4">
-              <h5 className="text-white mb-3 fw-bold">Available Screens</h5>
+              <h5 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.3rem', letterSpacing: '-0.01em' }}>Available Screens</h5>
               
               <Row className="g-2">
                 {selectedTheater.screens && selectedTheater.screens.map((screen, index) => (
@@ -478,10 +482,10 @@ const Theaters = () => {
                     >
                       <Card.Body className="p-3">
                         <div className="d-flex align-items-center justify-content-between mb-2">
-                          <h6 className="text-white mb-0 fw-bold" style={{ fontSize: '0.9rem' }}>
+                          <h6 className="text-white mb-0 fw-bold" style={{ fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em' }}>
                             Screen {screen.screenNumber || index + 1}
                           </h6>
-                          <Badge style={{ backgroundColor: 'rgba(255,255,255,0.2)', fontSize: '0.7rem' }} className="px-2 py-1 text-white">
+                          <Badge style={{ backgroundColor: 'rgba(255,255,255,0.2)', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }} className="px-2 py-1 text-white">
                             {screen.screenType || '2D'}
                           </Badge>
                         </div>
@@ -489,15 +493,9 @@ const Theaters = () => {
                         <div className="d-flex align-items-center justify-content-between">
                           <div className="d-flex align-items-center">
                             <FaUsers className="text-white me-1" size={12} />
-                            <span className="text-white fw-medium" style={{ fontSize: '0.8rem' }}>{screen.capacity}</span>
+                            <span className="text-white fw-medium" style={{ fontSize: '0.85rem', fontFamily: 'Inter, sans-serif' }}>{screen.capacity}</span>
                           </div>
-                          <Button 
-                            variant="outline-light"
-                            size="sm"
-                            style={{ fontSize: '0.7rem', padding: '0.25rem 0.5rem', borderColor: 'rgba(255,255,255,0.3)' }}
-                          >
-                            View
-                          </Button>
+                          
                         </div>
                       </Card.Body>
                     </Card>
@@ -508,12 +506,12 @@ const Theaters = () => {
 
             {/* Movies Section */}
             <div>
-              <h5 className="text-white mb-3 fw-bold">Now Showing</h5>
+              <h5 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.3rem', letterSpacing: '-0.01em' }}>Now Showing</h5>
               
               {loadingMovies ? (
                 <div className="text-center py-4">
                   <Spinner animation="border" variant="light" size="sm" />
-                  <p className="text-white mt-2" style={{ fontSize: '0.9rem' }}>Loading movies...</p>
+                  <p className="text-white mt-2" style={{ fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>Loading movies...</p>
                 </div>
               ) : theaterMovies.length > 0 ? (
                 <Row className="g-3">
@@ -548,12 +546,12 @@ const Theaters = () => {
                           
                           <div className="card-body p-2 d-flex flex-column">
                             <h6 className="card-title text-white mb-1" 
-                                style={{ fontSize: '0.85rem', lineHeight: '1.2', height: '2.4rem', overflow: 'hidden' }}>
+                                style={{ fontSize: '0.9rem', lineHeight: '1.3', height: '2.6rem', overflow: 'hidden', fontFamily: 'Inter, sans-serif', fontWeight: '600', letterSpacing: '0.01em' }}>
                               {movie.title}
                             </h6>
                             
                             <div className="d-flex gap-1 mb-2">
-                              <Badge bg="secondary" style={{ fontSize: '0.6rem' }}>
+                              <Badge bg="secondary" style={{ fontSize: '0.65rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>
                                 {Array.isArray(movie.genre) ? movie.genre[0] : (movie.genre || 'Action')}
                               </Badge>
                             </div>
@@ -567,11 +565,13 @@ const Theaters = () => {
                                 navigate(`/movie/${movie._id}/showtimes?city=${encodeURIComponent(selectedTheater.address?.city || selectedTheater.city || '')}&theaterId=${selectedTheater._id}`);
                               }}
                               style={{ 
-                                fontSize: '0.7rem', 
+                                fontSize: '0.75rem', 
                                 padding: '6px 8px',
                                 minHeight: '28px',
                                 fontWeight: '600',
-                                whiteSpace: 'nowrap'
+                                whiteSpace: 'nowrap',
+                                fontFamily: 'Inter, sans-serif',
+                                letterSpacing: '0.01em'
                               }}
                             >
                               Book Now
@@ -591,8 +591,8 @@ const Theaters = () => {
                     <div className="mb-3 mx-auto p-3 rounded-circle" style={{ backgroundColor: 'rgba(255,255,255,0.1)', width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FaFilm size={24} className="text-white" />
                     </div>
-                    <h6 className="text-white mb-2 fw-bold">No Movies Currently Showing</h6>
-                    <p className="text-white" style={{ fontSize: '0.85rem' }}>
+                    <h6 className="text-white mb-2 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.1rem', letterSpacing: '-0.01em' }}>No Movies Currently Showing</h6>
+                    <p className="text-white" style={{ fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', fontWeight: '400' }}>
                       There are no movies currently scheduled at {selectedTheater.name}. Check back soon for updates!
                     </p>
                   </Card.Body>
