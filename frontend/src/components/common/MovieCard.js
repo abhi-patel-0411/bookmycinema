@@ -50,6 +50,9 @@ const MovieCard = ({ movie, index = 0 }) => {
       whileHover={{ y: -8, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}
       className="movie-card-container"
       style={{ borderRadius: '12px', overflow: 'hidden' }}
+      data-aos="zoom-in"
+      data-aos-delay={index * 100}
+      data-aos-duration="600"
     >
       <Card 
         className="movie-card h-100 border-0 shadow-sm"

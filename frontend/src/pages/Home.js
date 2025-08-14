@@ -364,39 +364,43 @@ const Home = () => {
         <Container fluid className="px-md-4 px-3">
           {/* Now Showing Movies */}
           {currentMovies.length > 0 && (
-            <div className="mb-5">
-              <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="mb-5" data-aos="fade-up" data-aos-duration="800">
+              <div className="d-flex justify-content-between align-items-center mb-4" data-aos="zoom-in" data-aos-delay="200">
                 <h2 className="h3 text-white mb-0">
                   <FaFilm className="me-2 text-danger" />
                   Now Showing
                 </h2>
               </div>
 
-              <TrendingCarousel
-                movies={currentMovies.map((movie) =>
-                  formatMovieForCarousel(movie, "Now Showing", "success")
-                )}
-                title=""
-              />
+              <div data-aos="slide-up" data-aos-delay="400">
+                <TrendingCarousel
+                  movies={currentMovies.map((movie) =>
+                    formatMovieForCarousel(movie, "Now Showing", "success")
+                  )}
+                  title=""
+                />
+              </div>
             </div>
           )}
 
           {/* Upcoming Movies */}
           {upcomingMovies.length > 0 && (
-            <div className="mb-5">
-              <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="mb-5" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">
+              <div className="d-flex justify-content-between align-items-center mb-4" data-aos="zoom-in" data-aos-delay="500">
                 <h2 className="h3 text-white mb-0">
                   <FaCalendarAlt className="me-2 text-warning" />
                   Coming Soon
                 </h2>
               </div>
 
-              <TrendingCarousel
-                movies={upcomingMovies.map((movie) =>
-                  formatMovieForCarousel(movie, "Coming Soon", "warning")
-                )}
-                title=""
-              />
+              <div data-aos="slide-up" data-aos-delay="700">
+                <TrendingCarousel
+                  movies={upcomingMovies.map((movie) =>
+                    formatMovieForCarousel(movie, "Coming Soon", "warning")
+                  )}
+                  title=""
+                />
+              </div>
             </div>
           )}
         </Container>

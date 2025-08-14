@@ -144,10 +144,10 @@ const MyBookings = () => {
       </style>
       
       <Container>
-        <div className="text-center mb-5">
-          <FaTicketAlt size={48} className="text-danger mb-3" />
-          <h2 className="text-white fw-bold mb-2">My Bookings</h2>
-          <p className="text-light">Manage your movie tickets</p>
+        <div className="text-center mb-5" data-aos="fade-down" data-aos-duration="800">
+          <FaTicketAlt size={48} className="text-danger mb-3" data-aos="bounce" data-aos-delay="200" />
+          <h2 className="text-white fw-bold mb-2" data-aos="zoom-in" data-aos-delay="400">My Bookings</h2>
+          <p className="text-light" data-aos="fade-up" data-aos-delay="600">Manage your movie tickets</p>
         </div>
 
         <AnimatePresence>
@@ -163,6 +163,9 @@ const MyBookings = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className="h-100"
+                    data-aos="flip-left"
+                    data-aos-delay={index * 100}
+                    data-aos-duration="600"
                   >
                     <Card className="booking-card bg-secondary border-0 text-white h-100">
                       <Card.Body className="p-3 d-flex flex-column">
@@ -354,11 +357,11 @@ const MyBookings = () => {
               )}
             </>
           ) : (
-            <div className="text-center py-5">
-              <FaTicketAlt size={80} className="text-muted mb-4" />
-              <h3 className="text-white mb-3">No Bookings Found</h3>
-              <p className="text-light mb-4 lead">Start booking your favorite movies!</p>
-              <Button variant="danger" size="lg" href="/movies" className="px-5 py-3">
+            <div className="text-center py-5" data-aos="fade-up" data-aos-duration="800">
+              <FaTicketAlt size={80} className="text-muted mb-4" data-aos="bounce" data-aos-delay="200" />
+              <h3 className="text-white mb-3" data-aos="zoom-in" data-aos-delay="400">No Bookings Found</h3>
+              <p className="text-light mb-4 lead" data-aos="fade-up" data-aos-delay="600">Start booking your favorite movies!</p>
+              <Button variant="danger" size="lg" href="/movies" className="px-5 py-3" data-aos="slide-up" data-aos-delay="800">
                 <FaFilm className="me-2" />
                 Browse Movies
               </Button>

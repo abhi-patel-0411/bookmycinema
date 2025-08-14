@@ -275,9 +275,13 @@ const Movies = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-5"
+          data-aos="fade-down"
+          data-aos-duration="1000"
         >
-          <h1 className="display-4 fw-bold text-white mb-3">All Movies</h1>
-          <p className="lead text-light">
+          <h1 className="display-4 fw-bold text-white mb-3" data-aos="zoom-in" data-aos-delay="200">
+            All Movies
+          </h1>
+          <p className="lead text-light" data-aos="fade-up" data-aos-delay="400">
             Discover and book tickets for the latest blockbuster movies
           </p>
         </motion.div>
@@ -287,9 +291,12 @@ const Movies = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-4"
+          data-aos="slide-up"
+          data-aos-duration="800"
+          data-aos-delay="600"
         >
           <Row className="align-items-center mb-3">
-            <Col lg={6} md={8} className="mb-3 mb-md-0">
+            <Col lg={6} md={8} className="mb-3 mb-md-0" data-aos="slide-right" data-aos-delay="800">
               <div
                 className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden"
                 style={{ height: "46px" }}
@@ -320,7 +327,7 @@ const Movies = () => {
               </div>
             </Col>
 
-            <Col lg={3} md={4} className="mb-3 mb-md-0">
+            <Col lg={3} md={4} className="mb-3 mb-md-0" data-aos="slide-left" data-aos-delay="1000">
               <Button
                 variant="outline-primary"
                 className="w-100 d-flex align-items-center justify-content-center"
@@ -850,6 +857,9 @@ const Movies = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.02, duration: 0.3 }}
+                        data-aos="flip-up"
+                        data-aos-delay={index * 50}
+                        data-aos-duration="600"
                       >
                         <div
                           className="movie-card-simple"

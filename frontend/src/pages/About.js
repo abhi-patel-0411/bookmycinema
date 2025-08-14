@@ -106,14 +106,16 @@ const About = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 className="hero-content"
+                data-aos="fade-up"
+                data-aos-duration="1000"
               >
-                <div className="d-flex justify-content-center align-items-center mb-4">
+                <div className="d-flex justify-content-center align-items-center mb-4" data-aos="zoom-in" data-aos-delay="200">
                   <BrandLogo />
                 </div>
-                <p className="text-light mb-4" style={{ fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)', fontFamily: 'Inter, sans-serif', fontWeight: '400', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                <p className="text-light mb-4" style={{ fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)', fontFamily: 'Inter, sans-serif', fontWeight: '400', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto 2rem' }} data-aos="fade-up" data-aos-delay="400">
                   Your premier destination for seamless movie booking experiences with cutting-edge technology
                 </p>
-                <div className="d-flex align-items-center justify-content-center gap-3 mb-4">
+                <div className="d-flex align-items-center justify-content-center gap-3 mb-4" data-aos="slide-up" data-aos-delay="600">
                   <div style={{ width: '60px', height: '2px', background: 'linear-gradient(135deg, transparent, #e50914, transparent)' }}></div>
                   <FaPlay className="text-danger" size={20} />
                   <div style={{ width: '60px', height: '2px', background: 'linear-gradient(135deg, transparent, #e50914, transparent)' }}></div>
@@ -123,6 +125,8 @@ const About = () => {
                   size="lg" 
                   className="px-5 py-3 fw-semibold"
                   style={{ fontFamily: 'Inter, sans-serif', borderRadius: '50px', fontSize: '1.1rem', letterSpacing: '0.5px' }}
+                  data-aos="bounce"
+                  data-aos-delay="800"
                 >
                   Explore Movies
                 </Button>
@@ -142,6 +146,9 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 viewport={{ once: true }}
+                data-aos="flip-up"
+                data-aos-delay="100"
+                data-aos-duration="800"
               >
                 <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                   <Card.Body className="text-center p-4">
@@ -162,6 +169,9 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
+                data-aos="flip-up"
+                data-aos-delay="300"
+                data-aos-duration="800"
               >
                 <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                   <Card.Body className="text-center p-4">
@@ -182,6 +192,9 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
+                data-aos="flip-up"
+                data-aos-delay="500"
+                data-aos-duration="800"
               >
                 <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                   <Card.Body className="text-center p-4">
@@ -210,9 +223,11 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 viewport={{ once: true }}
+                data-aos="fade-down"
+                data-aos-duration="800"
               >
-                <h2 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(2rem, 4vw, 2.8rem)', letterSpacing: '-0.01em' }}>Why Choose Book My Cinema?</h2>
-                <p className="text-light" style={{ fontSize: '1.2rem', fontFamily: 'Inter, sans-serif', fontWeight: '400', lineHeight: '1.6' }}>
+                <h2 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(2rem, 4vw, 2.8rem)', letterSpacing: '-0.01em' }} data-aos="zoom-in" data-aos-delay="200">Why Choose Book My Cinema?</h2>
+                <p className="text-light" style={{ fontSize: '1.2rem', fontFamily: 'Inter, sans-serif', fontWeight: '400', lineHeight: '1.6' }} data-aos="fade-up" data-aos-delay="400">
                   Experience the future of movie booking with our cutting-edge platform
                 </p>
               </motion.div>
@@ -227,6 +242,9 @@ const About = () => {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -10 }}
+                  data-aos="zoom-in"
+                  data-aos-delay={index * 150}
+                  data-aos-duration="600"
                 >
                   <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)', transition: 'all 0.3s ease' }}>
                     <Card.Body className="text-center p-4">
@@ -254,8 +272,10 @@ const About = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
+                data-aos="slide-right"
+                data-aos-duration="1000"
               >
-                <h2 className="fw-bold text-white mb-4" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(2rem, 4vw, 2.5rem)', letterSpacing: '-0.01em' }}>Our Mission</h2>
+                <h2 className="fw-bold text-white mb-4" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(2rem, 4vw, 2.5rem)', letterSpacing: '-0.01em' }} data-aos="fade-up" data-aos-delay="200">Our Mission</h2>
                 <p className="text-light mb-4" style={{ fontSize: '1.1rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.8', fontWeight: '400' }}>
                   At Book My Cinema, we believe that going to the movies should be effortless and enjoyable. Our mission is to revolutionize the way people discover, book, and experience cinema by providing a seamless, user-friendly platform that connects movie lovers with their favorite films.
                 </p>
@@ -288,6 +308,9 @@ const About = () => {
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
                 className="d-flex justify-content-center"
+                data-aos="slide-left"
+                data-aos-duration="1000"
+                data-aos-delay="300"
               >
                 <Card className="border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '25px', maxWidth: '400px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                   <Card.Body className="text-center p-5">
@@ -314,8 +337,10 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 viewport={{ once: true }}
+                data-aos="fade-up"
+                data-aos-duration="800"
               >
-                <h3 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: '2rem', letterSpacing: '-0.01em' }}>Ready to Start Your Journey?</h3>
+                <h3 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: '2rem', letterSpacing: '-0.01em' }} data-aos="zoom-in" data-aos-delay="200">Ready to Start Your Journey?</h3>
                 <p className="text-light mb-4" style={{ fontSize: '1.1rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.6', fontWeight: '400' }}>
                   Join thousands of movie enthusiasts who trust Book My Cinema for their entertainment needs.
                 </p>

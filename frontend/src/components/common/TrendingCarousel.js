@@ -87,6 +87,9 @@ const TrendingCarousel = ({ movies = [], title = "Recommended Movies" }) => {
                 className="movie-card-carousel"
                 onClick={() => navigate(`/movie/${movieId}`)}
                 style={{ cursor: 'pointer' }}
+                data-aos="zoom-in"
+                data-aos-delay={index * 100}
+                data-aos-duration="500"
               >
                 <div className="card-inner">
                   <div className="position-relative">

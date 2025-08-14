@@ -676,6 +676,8 @@ const MovieDetails = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
+          data-aos="fade-up"
+          data-aos-duration="800"
         >
           <motion.div
             className="p-3 rounded"
@@ -683,11 +685,17 @@ const MovieDetails = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            data-aos="zoom-in"
+            data-aos-delay="200"
           >
-            <h6 className="text-white mb-2 fw-semibold">About the Movie</h6>
+            <h6 className="text-white mb-2 fw-semibold" data-aos="slide-right" data-aos-delay="400">
+              About the Movie
+            </h6>
             <p
               className="text-light mb-0"
               style={{ fontSize: "14px", lineHeight: "1.6" }}
+              data-aos="fade-up"
+              data-aos-delay="600"
             >
               {movie.description || "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
             </p>
@@ -774,10 +782,12 @@ const MovieDetails = () => {
 
       {/* Reviews Section */}
       <Container className="py-3" ref={reviewsRef}>
-        <div className="text-center mb-3">
-          <FaComment className="text-danger mb-2" size={24} />
-          <h4 className="text-white fw-bold mb-1">User Reviews</h4>
-          <p className="text-light mb-0" style={{ fontSize: "14px" }}>
+        <div className="text-center mb-3" data-aos="fade-down" data-aos-duration="800">
+          <FaComment className="text-danger mb-2" size={24} data-aos="bounce" data-aos-delay="200" />
+          <h4 className="text-white fw-bold mb-1" data-aos="zoom-in" data-aos-delay="400">
+            User Reviews
+          </h4>
+          <p className="text-light mb-0" style={{ fontSize: "14px" }} data-aos="fade-up" data-aos-delay="600">
             What our audience thinks about this movie
           </p>
         </div>
@@ -789,6 +799,8 @@ const MovieDetails = () => {
               <Card
                 className="border-0 text-white shadow mb-3"
                 style={{ backgroundColor: "#1f2025" }}
+                data-aos="slide-up"
+                data-aos-duration="600"
               >
                 <Card.Body className="p-3">
                   <h6 className="text-white mb-2">Write a Review</h6>
@@ -847,6 +859,9 @@ const MovieDetails = () => {
               <div
                 key={review._id || index}
                 className="border-bottom border-secondary pb-2 mb-3"
+                data-aos="fade-up"
+                data-aos-delay={index * 100}
+                data-aos-duration="500"
               >
                 <div className="d-flex align-items-center mb-2">
                   <img
@@ -898,6 +913,9 @@ const MovieDetails = () => {
             <Card
               className="border-0 text-white shadow"
               style={{ backgroundColor: "#1f2025" }}
+              data-aos="slide-left"
+              data-aos-duration="800"
+              data-aos-delay="300"
             >
               <Card.Body className="p-3">
                 <h6 className="text-white mb-3">Rating Breakdown</h6>

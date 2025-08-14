@@ -82,23 +82,23 @@ const AppContentWrapper = () => {
   }
 
   return (
-    <ReactLenis
-      root
-      options={{
-        duration: 1.0,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smooth: true,
-        mouseMultiplier: 0.8,
-        smoothTouch: false,
-        touchMultiplier: 1.5,
-        lerp: 0.12,
-        normalizeWheel: true,
-      }}
-    >
+    // <ReactLenis
+    //   root
+    //   options={{
+    //     duration: 1.0,
+    //     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    //     smooth: true,
+    //     mouseMultiplier: 0.8,
+    //     smoothTouch: false,
+    //     touchMultiplier: 1.5,
+    //     lerp: 0.12,
+    //     normalizeWheel: true,
+    //   }}
+    // >
       <div className="App">
         <AppContent />
       </div>
-    </ReactLenis>
+    // </ReactLenis>
   );
 };
 
