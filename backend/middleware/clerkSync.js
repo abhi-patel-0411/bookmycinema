@@ -1,4 +1,4 @@
-const { clerkClient } = require('@clerk/clerk-sdk-node');
+const { clerkClient } = require('@clerk/express');
 const User = require('../models/User');
 
 // Middleware to sync Clerk user to database

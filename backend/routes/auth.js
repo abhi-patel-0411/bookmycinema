@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { clerkClient } = require('@clerk/clerk-sdk-node');
+const { clerkClient } = require('@clerk/express');
 const User = require('../models/User');
 const { auth, optionalAuth } = require('../middleware/auth');
 
@@ -172,6 +172,27 @@ router.post('/sync-clerk-user', optionalAuth, async (req, res) => {
   }
 });
 
+// Sync all users from Clerk
+router.post('/sync-users', auth, async (req, res) => {
+  try {
+    // Only admins can sync users
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const UserSyncService = require('../services/userSyncService');
+    const result = await UserSyncService.syncAllUsers();
+    
+    res.json({ 
+      message: 'Users synced successfully', 
+      result 
+    });
+  } catch (error) {
+    console.error('Sync users error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Update user role
 router.post('/update-role', auth, async (req, res) => {
   try {
@@ -183,7 +204,7 @@ router.post('/update-role', auth, async (req, res) => {
     }
     
     // Validate role
-    const validRoles = ['user', 'clerk', 'admin'];
+    const validRoles = ['user', 'admin'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }

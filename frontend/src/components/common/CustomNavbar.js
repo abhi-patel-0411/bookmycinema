@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSearch, FaTimes, FaBars, FaTicketAlt, FaUser, FaHome, FaFilm, FaBuilding, FaEllipsisH, FaTachometerAlt, FaInfoCircle } from "react-icons/fa";
+import {
+  FaSearch,
+  FaTimes,
+  FaBars,
+  FaTicketAlt,
+  FaUser,
+  FaHome,
+  FaFilm,
+  FaBuilding,
+  FaEllipsisH,
+  FaTachometerAlt,
+  FaInfoCircle,
+} from "react-icons/fa";
 import { UserButton, SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import BrandLogo from "./BrandLogo";
@@ -44,7 +56,7 @@ const CustomNavbar = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    
+
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -69,19 +81,19 @@ const CustomNavbar = () => {
       document.body.classList.remove("mobile-menu-open");
     };
   }, [mobileMenuOpen]);
-  
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
       setShowMobileDropdown(false);
     };
-    
+
     if (showMobileDropdown) {
-      document.addEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
     }
-    
+
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [showMobileDropdown]);
 
@@ -94,7 +106,12 @@ const CustomNavbar = () => {
     { name: "Home", path: "/", icon: <FaHome size={20} /> },
     { name: "Movies", path: "/movies", icon: <FaFilm size={20} /> },
     { name: "Theaters", path: "/theaters", icon: <FaBuilding size={20} /> },
-    { name: "Bookings", path: "/my-bookings", icon: <FaTicketAlt size={20} />, requireAuth: true },
+    {
+      name: "Bookings",
+      path: "/my-bookings",
+      icon: <FaTicketAlt size={20} />,
+      requireAuth: true,
+    },
   ];
 
   return (
@@ -112,10 +129,16 @@ const CustomNavbar = () => {
       <div className={`custom-navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="navbar-container">
           <Link to="/" className="navbar-logo">
-            <BrandLogo style={{ transform: isMobile ? "scale(0.85)" : "none" }} />
+            <BrandLogo
+              style={{ transform: isMobile ? "scale(0.85)" : "none" }}
+            />
           </Link>
 
-          <div className={`navbar-menu d-none d-md-flex ${mobileMenuOpen ? "mobile-open" : ""}`}>
+          <div
+            className={`navbar-menu d-none d-md-flex ${
+              mobileMenuOpen ? "mobile-open" : ""
+            }`}
+          >
             <Link to="/" className="nav-link" onClick={closeMobileMenu}>
               Home
             </Link>
@@ -131,7 +154,6 @@ const CustomNavbar = () => {
                 className="nav-link"
                 onClick={closeMobileMenu}
               >
-                
                 My Bookings
               </Link>
             </SignedIn>
@@ -157,6 +179,16 @@ const CustomNavbar = () => {
                 backgroundColor: "rgba(0, 0, 0, 0.7)",
                 border: "none",
                 fontSize: "1.2rem",
+                // cursor: "pointer",
+                // color: isAudioPlaying ? "#e63946" : "#9ca3af",
+                // transition: "color 0.3s ease",
+                // boxShadow: "0 2px 4px rgba(0,0,0, 0.2)",
+                // backdropFilter: "blur(10px)",
+                // borderRadius: "50%",
+
+                // display: "flex",
+                // alignItems: "center",
+                // justifyContent: "center",
               }}
               onClick={toggleAudio}
               aria-label="Toggle background audio"
@@ -202,12 +234,10 @@ const CustomNavbar = () => {
                 </Link>
               </div>
             </SignedOut>
-
-
           </div>
         </div>
       </div>
-      
+
       {/* Mobile Bottom Navigation */}
       {isMobile && (
         <>
@@ -224,11 +254,13 @@ const CustomNavbar = () => {
               {navLinks.map((item, index) => {
                 // Skip items that require auth if user is not signed in
                 if (item.requireAuth && !user) return null;
-                
+
                 // Check if current path matches this nav item
-                const isActive = window.location.pathname === item.path || 
-                  (item.path !== "/" && window.location.pathname.startsWith(item.path));
-                  
+                const isActive =
+                  window.location.pathname === item.path ||
+                  (item.path !== "/" &&
+                    window.location.pathname.startsWith(item.path));
+
                 return (
                   <Link
                     to={item.path}
@@ -240,18 +272,17 @@ const CustomNavbar = () => {
                       minWidth: "60px",
                     }}
                   >
-                    <div className="mb-1" style={{ color: isActive ? "#e63946" : "#9ca3af" }}>
+                    <div
+                      className="mb-1"
+                      style={{ color: isActive ? "#e63946" : "#9ca3af" }}
+                    >
                       {item.icon}
                     </div>
                     <span style={{ fontSize: "0.7rem" }}>{item.name}</span>
                   </Link>
                 );
               })}
-              
 
-              
-
-              
               {/* More Options Dropdown */}
               <div className="position-relative">
                 <button
@@ -271,7 +302,7 @@ const CustomNavbar = () => {
                   </div>
                   <span style={{ fontSize: "0.7rem" }}>More</span>
                 </button>
-                
+
                 {/* Dropdown Menu */}
                 {showMobileDropdown && (
                   <div
@@ -289,28 +320,25 @@ const CustomNavbar = () => {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    
-                     
-                    
                     {/* Login option removed from mobile dropdown */}
-                    
+
                     {user?.publicMetadata?.role === "admin" && (
                       <button
                         className="d-flex align-items-center px-3 py-2 text-decoration-none border-bottom w-100 bg-transparent border-0 text-start"
-                        style={{ 
+                        style={{
                           color: "#9ca3af",
-                          borderColor: "rgba(255,255,255,0.1) !important"
+                          borderColor: "rgba(255,255,255,0.1) !important",
                         }}
                         onClick={() => {
                           setShowMobileDropdown(false);
-                          window.location.href = '/admin';
+                          window.location.href = "/admin";
                         }}
                       >
                         <FaTachometerAlt className="me-2" size={16} />
                         <span>Admin Panel</span>
                       </button>
                     )}
-                    
+
                     <Link
                       to="/about"
                       className="d-flex align-items-center px-3 py-2 text-decoration-none"
@@ -325,7 +353,7 @@ const CustomNavbar = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Backdrop to close dropdown */}
           {showMobileDropdown && (
             <div

@@ -172,8 +172,8 @@ const MyBookings = () => {
                             <FaFilm className="text-danger me-2" size={18} />
                             <div className="flex-grow-1">
                               <h6 className="text-white mb-1 fw-bold" style={{ fontSize: '0.9rem' }}>
-                                {booking.show?.movie?.title || 'Movie Title'}
-                                {booking.show?.movie && !booking.show.movie.isActive && (
+                                {booking.show?.movie?.title || booking.movieTitle || 'Movie Title'}
+                                {((booking.show?.movie && !booking.show.movie.isActive) || (booking.movieIsActive === false)) && (
                                   <Badge bg="secondary" className="ms-2" style={{ fontSize: '0.65rem' }}>No Longer Available</Badge>
                                 )}
                               </h6>
@@ -195,10 +195,10 @@ const MyBookings = () => {
                             <FaMapMarkerAlt className="text-danger me-2" size={14} />
                             <div>
                               <div className="text-white fw-semibold" style={{ fontSize: '0.8rem' }}>
-                                {booking.show?.theater?.name || 'Theater'}
+                                {booking.show?.theater?.name || booking.theaterName || 'Theater'}
                               </div>
                               <small className="text-light" style={{ fontSize: '0.7rem' }}>
-                                {booking.show?.theater?.city || 'City'}
+                                {booking.show?.theater?.city || booking.show?.theater?.location || 'City'}
                               </small>
                             </div>
                           </div>
@@ -207,10 +207,10 @@ const MyBookings = () => {
                             <FaCalendarAlt className="text-danger me-2" size={14} />
                             <div>
                               <div className="text-white fw-semibold" style={{ fontSize: '0.8rem' }}>
-                                {moment(booking.show?.showDate).format('MMM DD, YYYY')}
+                                {moment(booking.show?.showDate || booking.showDate).format('MMM DD, YYYY')}
                               </div>
                               <small className="text-light" style={{ fontSize: '0.7rem' }}>
-                                {booking.show?.showTime || 'Time TBD'}
+                                {booking.show?.showTime || booking.showTime || 'Time TBD'}
                               </small>
                             </div>
                           </div>
@@ -252,7 +252,7 @@ const MyBookings = () => {
                                 className="px-2 py-1"
                                 style={{ fontSize: '0.7rem' }}
                                 onClick={() => setTicketModal({ show: true, booking })}
-                                disabled={booking.show?.movie && !booking.show.movie.isActive}
+                                disabled={(booking.show?.movie && !booking.show.movie.isActive) || (booking.movieIsActive === false)}
                               >
                                 <FaEye size={10} className="me-1" />
                                 View
@@ -387,7 +387,7 @@ const MyBookings = () => {
               {cancelModal.booking && (
                 <>
                   <div className="mb-4">
-                    <h6 className="text-white">{cancelModal.booking.show?.movie?.title}</h6>
+                    <h6 className="text-white">{cancelModal.booking.show?.movie?.title || cancelModal.booking.movieTitle}</h6>
                     <small className="text-light">Booking ID: #{cancelModal.booking.bookingId}</small>
                   </div>
                   

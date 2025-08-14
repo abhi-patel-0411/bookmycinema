@@ -63,3 +63,6 @@ Home page positioning
     padding-right: 5px;
   }
 }
+.spline-watermark {
+  display: none !important;
+}

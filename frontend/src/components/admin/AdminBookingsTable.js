@@ -86,17 +86,14 @@ const AdminBookingsTable = ({ bookings, onEdit, onDelete, onStatusUpdate }) => {
                   <div>
                     <div className="fw-bold text-white" style={{ fontSize: isMobile ? '0.75rem' : '0.875rem' }}>
                       {isMobile ? 
-                        (booking.movieTitle || booking.show?.movie?.title || 'N/A').substring(0, 15) + '...' :
-                        (booking.movieTitle || booking.show?.movie?.title || 'N/A')
+                        (booking.show?.movie?.title || booking.movieTitle || 'N/A').substring(0, 15) + '...' :
+                        (booking.show?.movie?.title || booking.movieTitle || 'N/A')
                       }
-                      {(booking.show?.movie?.isActive === false || !booking.show?.movie) && (
-                        <span className="badge bg-secondary ms-1" style={{ fontSize: '0.6rem', verticalAlign: 'middle' }}>Inactive</span>
-                      )}
                     </div>
                     <div className="small text-secondary" style={{ fontSize: isMobile ? '0.65rem' : '0.75rem' }}>
                       {isMobile ? 
-                        (booking.theaterName || booking.show?.theater?.name || 'N/A').substring(0, 12) + '...' :
-                        (booking.theaterName || booking.show?.theater?.name || 'N/A')
+                        (booking.show?.theater?.name || booking.theaterName || 'N/A').substring(0, 12) + '...' :
+                        (booking.show?.theater?.name || booking.theaterName || 'N/A')
                       }
                     </div>
                     {isMobile && (

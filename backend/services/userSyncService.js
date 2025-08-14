@@ -1,4 +1,4 @@
-const { createClerkClient } = require('@clerk/clerk-sdk-node');
+const { createClerkClient } = require('@clerk/express');
 
 // Initialize Clerk client
 const clerkClient = createClerkClient({
@@ -11,109 +11,87 @@ const User = require('../models/User');
  */
 class UserSyncService {
   /**
-   * Sync all users from Clerk to the database
+   * Sync all users from Clerk to the database with cleanup
    * @returns {Promise<Object>} Results of the sync operation
    */
   static async syncAllUsers() {
     try {
-      console.log('Starting sync of all users from Clerk...');
+      console.log('🔄 Starting dynamic user sync from Clerk...');
       
       // Get all users from Clerk
-      console.log('Fetching users from Clerk...');
-      const clerkResponse = await clerkClient.users.getUserList({
-        limit: 100,
-      });
-      
-      console.log('Clerk response type:', typeof clerkResponse);
-      console.log('Clerk response keys:', Object.keys(clerkResponse || {}));
-      
-      // Handle different response structures between SDK versions
+      const clerkResponse = await clerkClient.users.getUserList({ limit: 100 });
       const clerkUsers = clerkResponse.data || clerkResponse || [];
-      
-      console.log(`Found ${clerkUsers?.length || 'undefined'} users in Clerk`);
       
       // Get all users from database
       const dbUsers = await User.find();
-      console.log(`Found ${dbUsers.length} users in database`);
       
-      // Create a map of database users by email and clerkId for quick lookup
-      const dbUsersByEmail = {};
+      console.log(`👥 Clerk users: ${clerkUsers.length}, 💾 Database users: ${dbUsers.length}`);
+      
+      // Create maps for quick lookup
+      const clerkUserIds = clerkUsers.map(u => u.id);
       const dbUsersByClerkId = {};
       
       dbUsers.forEach(user => {
-        if (user.email) dbUsersByEmail[user.email.toLowerCase()] = user;
         if (user.clerkId) dbUsersByClerkId[user.clerkId] = user;
       });
       
-      // Find users in Clerk that are not in the database
       let newUsers = 0;
       let updatedUsers = 0;
+      let deletedUsers = 0;
       
-      // Ensure clerkUsers is iterable
-      if (!Array.isArray(clerkUsers)) {
-        console.error('clerkUsers is not an array:', typeof clerkUsers, clerkUsers);
-        throw new Error('Failed to get users from Clerk - invalid response format');
-      }
-      
+      // Sync users from Clerk to database
       for (const clerkUser of clerkUsers) {
-        // Get primary email
-        const emailObject = clerkUser.emailAddresses.find(
-          email => email.id === clerkUser.primaryEmailAddressId
-        ) || clerkUser.emailAddresses[0];
+        const email = clerkUser.emailAddresses?.[0]?.emailAddress;
+        if (!email) continue;
         
-        const email = emailObject ? emailObject.emailAddress : null;
+        const existingUser = dbUsersByClerkId[clerkUser.id];
         
-        if (!email) {
-          console.log(`Skipping user ${clerkUser.id} - no email found`);
-          continue;
-        }
-        
-        // Check if user exists in database by clerkId or email
-        const existingUserByClerkId = dbUsersByClerkId[clerkUser.id];
-        const existingUserByEmail = dbUsersByEmail[email.toLowerCase()];
-        
-        if (existingUserByClerkId || existingUserByEmail) {
-          // User exists, update if needed
-          const existingUser = existingUserByClerkId || existingUserByEmail;
-          
-          // Update clerkId if missing
-          if (!existingUser.clerkId) {
-            existingUser.clerkId = clerkUser.id;
+        if (existingUser) {
+          // Update existing user
+          const role = clerkUser.publicMetadata?.role || existingUser.role || 'user';
+          if (existingUser.role !== role) {
+            existingUser.role = role;
             await existingUser.save();
-            console.log(`Updated clerkId for user: ${email}`);
             updatedUsers++;
+            console.log(`✅ Updated user role: ${email} → ${role}`);
           }
         } else {
-          // Create new user in database
-          console.log(`Creating new user: ${email}`);
-          
-          // Get role from Clerk metadata or default to 'user'
+          // Create new user
           const role = clerkUser.publicMetadata?.role || 'user';
-          
           const newUser = new User({
             name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || email.split('@')[0],
             email: email,
             password: 'clerk_managed_' + Math.random().toString(36).substring(2, 15),
             role: role,
             clerkId: clerkUser.id,
-            isActive: !clerkUser.banned,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            isActive: !clerkUser.banned
           });
           
           await newUser.save();
-          console.log(`Created new user in database: ${email}`);
           newUsers++;
+          console.log(`✅ Created new user: ${email} (${role})`);
         }
       }
+      
+      // Clean up orphaned users (exist in database but not in Clerk)
+      const orphanUsers = dbUsers.filter(u => u.clerkId && !clerkUserIds.includes(u.clerkId));
+      
+      for (const orphanUser of orphanUsers) {
+        await User.findByIdAndDelete(orphanUser._id);
+        deletedUsers++;
+        console.log(`🗑️ Removed orphaned user: ${orphanUser.email}`);
+      }
+      
+      console.log(`🎯 Sync complete: +${newUsers} new, ~${updatedUsers} updated, -${deletedUsers} deleted`);
       
       return {
         newUsers,
         updatedUsers,
+        deletedUsers,
         total: clerkUsers.length
       };
     } catch (error) {
-      console.error('Error syncing users:', error);
+      console.error('❌ Error syncing users:', error);
       throw error;
     }
   }

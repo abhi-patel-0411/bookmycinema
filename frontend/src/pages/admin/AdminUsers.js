@@ -28,15 +28,13 @@ const AdminUsers = () => {
   const { client } = useClerk();
   const { fetchClerkUsers } = useClerkUsers();
   const [users, setUsers] = useState([]);
-  const [clerkUsers, setClerkUsers] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [clerkLoading, setClerkLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchDatabaseUsers = async () => {
+  const fetchUsers = async () => {
     try {
+      setLoading(true);
       const dbResponse = await api.get("/users", {
         params: {
           page: currentPage,
@@ -49,10 +47,9 @@ const AdminUsers = () => {
         dbUsers.map((user) => ({
           ...user,
           id: user._id,
-          type: "database",
-          displayName: user.name,
+          displayName: user.name || user.email?.split('@')[0] || 'Unknown',
           email: user.email,
-          role: user.role,
+          role: user.role || 'user',
           isActive: user.isActive,
           createdAt: user.createdAt,
           avatar: null,
@@ -60,57 +57,28 @@ const AdminUsers = () => {
       );
       setTotalPages(dbResponse.data.pagination?.pages || 1);
     } catch (error) {
-      console.error("Fetch database users error:", error);
-      toast.error("Failed to fetch database users");
-      setUsers([]);
-    }
-  };
-
-  const fetchClerkUsersList = async () => {
-    try {
-      setClerkLoading(true);
-      const clerkUsersList = await fetchClerkUsers();
-      setClerkUsers(clerkUsersList);
-    } catch (error) {
-      console.error("Fetch Clerk users error:", error);
-      toast.error("Failed to fetch Clerk users");
-      setClerkUsers([]);
-    } finally {
-      setClerkLoading(false);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      await Promise.all([fetchDatabaseUsers(), fetchClerkUsersList()]);
-    } catch (error) {
       console.error("Fetch users error:", error);
+      toast.error("Failed to fetch users");
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Combine users when either list changes
-  useEffect(() => {
-    const combinedUsers = [...users, ...clerkUsers];
-    setAllUsers(combinedUsers);
-  }, [users, clerkUsers]);
+  const syncUsers = async () => {
+    try {
+      await api.post('/auth/sync-users');
+      toast.success('Users synced successfully');
+      await fetchUsers();
+    } catch (error) {
+      console.error('Sync users error:', error);
+      toast.error('Failed to sync users');
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
   }, [currentPage]);
-
-  // Refresh Clerk users periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (client) {
-        fetchClerkUsersList();
-      }
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [client]);
 
   if (loading && users.length === 0) return <ModernLoader text="Loading Users" />;
 
@@ -130,12 +98,12 @@ const AdminUsers = () => {
             <div className="d-flex gap-2">
               <Button
                 variant="outline-info"
-                onClick={fetchClerkUsersList}
-                disabled={clerkLoading}
+                onClick={syncUsers}
+                disabled={loading}
                 style={{ borderRadius: "10px" }}
               >
-                <FaSync className={`me-2 ${clerkLoading ? "fa-spin" : ""}`} />
-                Refresh Users
+                <FaSync className={`me-2 ${loading ? "fa-spin" : ""}`} />
+                Sync Users
               </Button>
             </div>
           </div>
@@ -158,7 +126,7 @@ const AdminUsers = () => {
                   >
                     <FaUsers size={24} className="text-white" />
                   </div>
-                  <h3 className="text-white mb-1">{allUsers.length}</h3>
+                  <h3 className="text-white mb-1">{users.length}</h3>
                   <p className="text-white mb-0 opacity-75">Total Users</p>
                 </Card.Body>
               </Card>
@@ -181,7 +149,7 @@ const AdminUsers = () => {
                     <FaUserShield size={24} className="text-white" />
                   </div>
                   <h3 className="text-white mb-1">
-                    {allUsers.filter((u) => u.role === "admin").length}
+                    {users.filter((u) => u.role === "admin").length}
                   </h3>
                   <p className="text-white mb-0 opacity-75">Admin Users</p>
                 </Card.Body>
@@ -221,8 +189,8 @@ const AdminUsers = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {allUsers.length > 0 ? (
-                    allUsers.map((user) => (
+                  {users.length > 0 ? (
+                    users.map((user) => (
                       <tr
                         key={user.id}
                         style={{
@@ -239,8 +207,6 @@ const AdminUsers = () => {
                                 background:
                                   user.role === "admin"
                                     ? "linear-gradient(135deg, #e63946, #f84565)"
-                                    : user.role === "clerk"
-                                    ? "linear-gradient(135deg, #f953c6, #b91d73)"
                                     : "linear-gradient(135deg, #3a7bd5, #00d2ff)",
                                 color: "white",
                                 fontWeight: "bold",
@@ -282,8 +248,6 @@ const AdminUsers = () => {
                             bg={
                               user.role === "admin"
                                 ? "danger"
-                                : user.role === "clerk"
-                                ? "warning"
                                 : "primary"
                             }
                             style={{

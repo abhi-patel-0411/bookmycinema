@@ -78,3 +78,6 @@
     font-size: 1.4rem;
   }
 }
+.spline-watermark{
+  display: none !important;
+}

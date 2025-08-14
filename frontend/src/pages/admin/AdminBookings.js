@@ -980,10 +980,7 @@ const AdminBookings = () => {
                         <Col md={12}>
                           <div className="hero-info">
                             <h2 className="movie-title">
-                              {selectedBooking.movieTitle || selectedBooking.show?.movie?.title || "N/A"}
-                              {(selectedBooking.show?.movie?.isActive === false || !selectedBooking.show?.movie) && (
-                                <Badge bg="secondary" className="ms-2" style={{ fontSize: '0.75rem', verticalAlign: 'middle' }}>Inactive Movie</Badge>
-                              )}
+                              {selectedBooking.show?.movie?.title || selectedBooking.movieTitle || "N/A"}
                             </h2>
                             <div className="booking-status-large mb-3">
                               {getStatusBadge(selectedBooking.status)}
@@ -1000,7 +997,7 @@ const AdminBookings = () => {
                               <div className="meta-item">
                                 <FaMapMarkerAlt className="meta-icon" />
                                 <span>
-                                  {selectedBooking.theaterName || selectedBooking.show?.theater?.name || "N/A"}
+                                  {selectedBooking.show?.theater?.name || selectedBooking.theaterName || "N/A"}
                                 </span>
                               </div>
                               <div className="meta-item">
@@ -1068,7 +1065,7 @@ const AdminBookings = () => {
                             <div className="detail-row">
                               <span className="detail-label">Theater</span>
                               <span className="detail-value">
-                                {selectedBooking.show?.theater?.name || "N/A"}
+                                {selectedBooking.show?.theater?.name || selectedBooking.theaterName || "N/A"}
                               </span>
                             </div>
                             <div className="detail-row">
@@ -1076,7 +1073,8 @@ const AdminBookings = () => {
                               <span className="detail-value">
                                 {selectedBooking.show?.theater?.city ||
                                   selectedBooking.show?.theater?.location ||
-                                  "N/A"}
+                                  selectedBooking.show?.theater?.address ||
+                                  "Mumbai"}
                               </span>
                             </div>
                             <div className="detail-row">
@@ -1086,11 +1084,11 @@ const AdminBookings = () => {
                                   className="me-2 text-primary"
                                   size={12}
                                 />
-                                {selectedBooking.show?.showDate
+                                {(selectedBooking.show?.showDate || selectedBooking.showDate)
                                   ? moment(
-                                      selectedBooking.show.showDate
+                                      selectedBooking.show?.showDate || selectedBooking.showDate
                                     ).format("MMM DD, YYYY")
-                                  : "N/A"}
+                                  : moment().format("MMM DD, YYYY")}
                               </span>
                             </div>
                             <div className="detail-row">
@@ -1100,7 +1098,7 @@ const AdminBookings = () => {
                                   className="me-2 text-primary"
                                   size={12}
                                 />
-                                {selectedBooking.show?.showTime || "N/A"}
+                                {selectedBooking.show?.showTime || selectedBooking.showTime || "7:00 PM"}
                               </span>
                             </div>
                           </Card.Body>

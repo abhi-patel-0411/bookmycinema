@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { clerkClient } = require('@clerk/clerk-sdk-node');
+const { verifyToken, clerkClient } = require('@clerk/express');
 const User = require('../models/User');
 
 const auth = async (req, res, next) => {
@@ -13,7 +13,9 @@ const auth = async (req, res, next) => {
     
     // Try Clerk token first
     try {
-      const payload = await clerkClient.verifyToken(token);
+      const payload = await verifyToken(token, {
+        secretKey: process.env.CLERK_SECRET_KEY
+      });
       const clerkUser = await clerkClient.users.getUser(payload.sub);
       
       // Get primary email
@@ -98,7 +100,9 @@ const optionalAuth = async (req, res, next) => {
       
       // Try Clerk token first
       try {
-        const payload = await clerkClient.verifyToken(token);
+        const payload = await verifyToken(token, {
+          secretKey: process.env.CLERK_SECRET_KEY
+        });
         const clerkUser = await clerkClient.users.getUser(payload.sub);
         
         // Get primary email

@@ -28,7 +28,11 @@ const getAllBookings = async (req, res) => {
       .populate({
         path: "show",
         populate: [
-          { path: "movie", select: "title poster isActive" },
+          { 
+            path: "movie", 
+            select: "title poster isActive duration genre rating",
+            match: null // Don't filter out any movies
+          },
           { path: "theater", select: "name location city" },
         ],
       })
@@ -502,9 +506,8 @@ const getUserBookings = async (req, res) => {
         populate: [
           { 
             path: "movie", 
-            select: "title poster duration isActive",
-            // Don't filter out inactive movies
-            match: {}
+            select: "title poster duration isActive genre rating",
+            match: null // Show all movies regardless of active status
           },
           { path: "theater", select: "name location city" },
         ],

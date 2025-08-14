@@ -135,8 +135,17 @@ mongoose
     startAutoCleanup();
     console.log("🧹 Auto cleanup scheduler started");
 
-    // Start user sync scheduler (sync every 30 minutes)
-    scheduleUserSync(1);
+    // Start user sync scheduler (sync every 5 minutes for dynamic cleanup)
+    scheduleUserSync(5);
+    
+    // Run immediate cleanup on startup
+    console.log('🧹 Running initial user cleanup...');
+    try {
+      const cleanupResult = await UserSyncService.syncAllUsers();
+      console.log(`🧹 Initial cleanup: +${cleanupResult.newUsers} new, ~${cleanupResult.updatedUsers} updated, -${cleanupResult.deletedUsers} deleted`);
+    } catch (error) {
+      console.error('❌ Error in initial user cleanup:', error.message);
+    }
     
     // Update coming soon movies on startup
     try {
@@ -146,15 +155,15 @@ mongoose
       console.error('❌ Error updating coming soon movies:', error.message);
     }
     
-    // Schedule frequent coming soon updates (every second)
+    // Schedule frequent coming soon updates (every minute)
     setInterval(async () => {
       try {
         await updateComingSoonMovies();
       } catch (error) {
         console.error('❌ Error in scheduled coming soon update:', error.message);
       }
-    }, 1000); // 1 second
-    console.log('🎬 Coming soon auto-update scheduler started (runs every second)');
+    }, 60000); // 1 minute
+    console.log('🎬 Coming soon auto-update scheduler started (runs every minute)');
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);

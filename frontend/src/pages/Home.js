@@ -38,6 +38,109 @@ import TrendingCarousel from "../components/common/TrendingCarousel";
 import { useAuth } from "../contexts/AuthContext";
 
 import "../styles/home-page.css";
+
+// Hide Spline watermark and add custom button styles
+const splineStyles = `
+  .spline-watermark {
+    display: none !important;
+  }
+  iframe .spline-watermark {
+    display: none !important;
+  }
+  
+  /* Explore Movies Button Styles - Spline Watermark Position */
+  .explore-movies-btn {
+    bottom: 20px;
+    right: 16px;
+    z-index: 1000;
+    background-color: rgba(220, 53, 69, 0.9) !important;
+    border: none !important;
+    border-radius: 20px !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    position: relative;
+
+    height: 36px;
+    min-width: 120px;
+    max-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+
+  
+  .explore-movies-btn:hover {
+    background-color: rgba(220, 53, 69, 1) !important;
+    
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+  }
+  
+  /* Animated Arrow */
+  .arrow-animate {
+    transition: transform 0.3s ease;
+  }
+  
+  .explore-movies-btn:hover .arrow-animate {
+    transform: translateX(5px);
+    animation: arrowBounce 1s infinite;
+  }
+  
+  @keyframes arrowBounce {
+    0%, 100% { transform: translateX(5px); }
+    50% { transform: translateX(8px); }
+  }
+  
+  /* Consistent Spline Watermark Position - All Devices */
+  @media (max-width: 768px) {
+    .explore-movies-btn {
+      bottom: 16px;
+      right: 16px;
+      padding: 8px 16px;
+      font-size: 12px;
+      height: 36px;
+      min-width: 120px;
+      max-width: 140px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .explore-movies-btn {
+      bottom: 3px;
+      right: 16px;
+      padding: 8px 16px;
+      font-size: 12px;
+      height: 36px;
+      min-width: 120px;
+      max-width: 140px;
+    }
+  }
+  
+  @media (max-width: 360px) {
+    .explore-movies-btn {
+      bottom: 16px;
+      right: 16px;
+      padding: 8px 16px;
+      font-size: 12px;
+      height: 36px;
+      min-width: 120px;
+      max-width: 140px;
+    }
+  }
+`;
+
+// Inject styles
+if (typeof document !== "undefined") {
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = splineStyles;
+  document.head.appendChild(styleSheet);
+}
 const Home = () => {
   const [featuredMovies, setFeaturedMovies] = useState([]);
   const [upcomingMovies, setUpcomingMovies] = useState([]);
@@ -103,16 +206,19 @@ const Home = () => {
         // Handle different API response formats
         if (Array.isArray(moviesRes.data)) {
           moviesData = moviesRes.data;
-        } else if (moviesRes.data.movies && Array.isArray(moviesRes.data.movies)) {
+        } else if (
+          moviesRes.data.movies &&
+          Array.isArray(moviesRes.data.movies)
+        ) {
           moviesData = moviesRes.data.movies;
-        } else if (typeof moviesRes.data === 'object') {
+        } else if (typeof moviesRes.data === "object") {
           // If it's an object but not an array, try to extract movies
-          moviesData = Object.values(moviesRes.data).filter(item => 
-            item && typeof item === 'object' && item.title
+          moviesData = Object.values(moviesRes.data).filter(
+            (item) => item && typeof item === "object" && item.title
           );
         }
       }
-      
+
       const theatersData = theatersRes.data.theaters || theatersRes.data || [];
 
       console.log("Raw movies data:", moviesData);
@@ -240,6 +346,17 @@ const Home = () => {
             title="3D Background"
           ></iframe>
         </div>
+
+        {/* Explore Movies Button - Positioned like Spline watermark */}
+        <Button
+          variant="primary"
+          className="position-absolute d-flex align-items-center explore-movies-btn"
+          onClick={() => navigate("/movies")}
+        >
+          <FaFilm className="me-2" />
+          <span>Explore Movies</span>
+          <FaArrowRight className="ms-2 arrow-animate" />
+        </Button>
       </section>
 
       {/* Movie Categories */}
@@ -253,7 +370,6 @@ const Home = () => {
                   <FaFilm className="me-2 text-danger" />
                   Now Showing
                 </h2>
-
               </div>
 
               <TrendingCarousel
@@ -273,7 +389,6 @@ const Home = () => {
                   <FaCalendarAlt className="me-2 text-warning" />
                   Coming Soon
                 </h2>
-
               </div>
 
               <TrendingCarousel
@@ -284,10 +399,6 @@ const Home = () => {
               />
             </div>
           )}
-
-
-
-
         </Container>
       </section>
     </div>
