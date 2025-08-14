@@ -327,7 +327,7 @@ const ShowTimes = () => {
                     <div className="d-flex align-items-center gap-3 mb-3">
                       <div className="d-flex align-items-center">
                         <FaStar className="text-warning me-1" size={16} />
-                        <span className="text-white fw-semibold">{movie.averageRating > 0 ? movie.averageRating.toFixed(1) : 'N/A'}/5</span>
+                        <span className="text-white fw-semibold">{movie.averageRating > 0 ? movie.averageRating.toFixed(1) : (movie.rating || 'N/A')}/5</span>
                       </div>
                       <div className="d-flex align-items-center text-light">
                         <FaClock className="me-1" size={14} />

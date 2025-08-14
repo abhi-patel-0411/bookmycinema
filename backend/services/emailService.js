@@ -50,7 +50,7 @@ const sendBookingConfirmation = async (booking) => {
                           </div>
                           <div>
                             <span style="background: #ffc107; color: #000; padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; margin-right: 10px;">Movie</span>
-                            <span style="color: #ffc107; font-size: 14px;">⭐ 8.5</span>
+                            <span style="color: #ffc107; font-size: 14px;">⭐ ${booking.show?.movie?.rating || '8.5'}</span>
                           </div>
                         </div>
                         
@@ -63,7 +63,7 @@ const sendBookingConfirmation = async (booking) => {
                                   <span style="color: #ccc; font-size: 14px; font-weight: bold;">Theater</span>
                                 </div>
                                 <p style="color: white; margin: 0; font-size: 18px; font-weight: bold;">${booking.show.theater.name}</p>
-                                <small style="color: rgba(255,255,255,0.7); font-size: 12px;">Screen 1</small>
+                                <small style="color: rgba(255,255,255,0.7); font-size: 12px;">Screen ${booking.show?.screenNumber || booking.show?.theater?.screen || '1'}</small>
                               </div>
                               
                               <div>
