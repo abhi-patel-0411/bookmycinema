@@ -114,8 +114,9 @@ const Movies = () => {
       // Fetch ratings for each movie
       const ratingsPromises = response.data.map(async (movie) => {
         try {
+          const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
           const ratingResponse = await fetch(
-            `http://localhost:5000/api/ratings/movie/${movie._id}`
+            `${apiUrl}/ratings/movie/${movie._id}`
           );
           if (ratingResponse.ok) {
             const ratingData = await ratingResponse.json();
