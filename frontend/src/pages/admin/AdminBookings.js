@@ -436,6 +436,35 @@ const AdminBookings = () => {
     setSortOrder("desc");
   };
 
+  // Handle cleanup of past show bookings
+  const handleCleanupPastShows = async () => {
+    if (window.confirm("Are you sure you want to delete all past show bookings? This action cannot be undone.")) {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(
+          `${apiUrl}/bookings/cleanup/past-shows?days=30`,
+          {
+            method: "DELETE",
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+            }
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          toast.success(`${result.deletedCount} past show bookings deleted successfully!`);
+          fetchBookings(pagination.currentPage);
+        } else {
+          throw new Error("Failed to cleanup past show bookings");
+        }
+      } catch (error) {
+        console.error("Cleanup error:", error);
+        toast.error("Failed to cleanup past show bookings");
+      }
+    }
+  };
+
   if (loading) return <ModernLoader text="Loading Bookings" />;
 
   return (
@@ -479,6 +508,15 @@ const AdminBookings = () => {
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
+              <Button
+                variant="outline-warning"
+                size="sm"
+                onClick={handleCleanupPastShows}
+                title="Delete Past Show Bookings"
+              >
+                <FaTrash />
+                <span className="d-none d-sm-inline ms-1">Cleanup</span>
+              </Button>
             </div>
           </div>
 
@@ -877,6 +915,7 @@ const AdminBookings = () => {
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onStatusUpdate={handleStatusUpdate}
+                  onView={handleEdit}
                 />
               </div>
 

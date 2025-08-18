@@ -8,6 +8,7 @@ const {
   updateBookingStatus,
   cancelBooking,
   deleteBooking,
+  deletePastShowBookings,
   selectSeats,
   releaseSeats
 } = require('../controllers/bookingController');
@@ -46,5 +47,6 @@ router.put('/:id/cancel', optionalAuth, cancelBooking);
 router.get('/', getAllBookings);
 router.put('/:id/status', updateBookingStatus);
 router.delete('/:id', deleteBooking);
+router.delete('/cleanup/past-shows', deletePastShowBookings);
 
 module.exports = router;

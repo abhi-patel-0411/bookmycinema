@@ -1,10 +1,10 @@
 import React from 'react';
 import { Table, Badge, Button } from 'react-bootstrap';
 import { motion } from 'framer-motion';
-import { FaEdit, FaTrash, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheck, FaTimes, FaClock, FaEye } from 'react-icons/fa';
 import moment from 'moment';
 
-const AdminBookingsTable = ({ bookings, onEdit, onDelete, onStatusUpdate }) => {
+const AdminBookingsTable = ({ bookings, onEdit, onDelete, onStatusUpdate, onView }) => {
   const getStatusBadge = (status) => {
     const statusConfig = {
       confirmed: { bg: 'success', text: 'Confirmed', icon: <FaCheck className="me-1" /> },
@@ -140,28 +140,66 @@ const AdminBookingsTable = ({ bookings, onEdit, onDelete, onStatusUpdate }) => {
               <td className="align-middle">
                 <div style={{ fontSize: isMobile ? '0.7rem' : '0.875rem' }}>
                   {getStatusBadge(booking.status)}
+                  {booking.isPastShow && (
+                    <div className="mt-1">
+                      <Badge bg="secondary" className="status-badge" style={{ fontSize: '0.65rem' }}>
+                        Past Show
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               </td>
               <td className="align-middle text-center">
                 <div className="d-flex justify-content-center gap-1">
-                  <motion.button
-                    className="btn btn-sm btn-outline-primary action-button"
-                    style={{ padding: isMobile ? '0.2rem 0.4rem' : '0.375rem 0.75rem', fontSize: isMobile ? '0.7rem' : '0.875rem' }}
-                    onClick={() => onEdit(booking)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <FaEdit size={isMobile ? 10 : 12} />
-                  </motion.button>
-                  <motion.button
-                    className="btn btn-sm btn-outline-danger action-button"
-                    style={{ padding: isMobile ? '0.2rem 0.4rem' : '0.375rem 0.75rem', fontSize: isMobile ? '0.7rem' : '0.875rem' }}
-                    onClick={() => onDelete(booking._id)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <FaTrash size={isMobile ? 10 : 12} />
-                  </motion.button>
+                  {booking.isPastShow ? (
+                    // Past show - only view and delete actions
+                    <>
+                      <motion.button
+                        className="btn btn-sm btn-outline-info action-button"
+                        style={{ padding: isMobile ? '0.2rem 0.4rem' : '0.375rem 0.75rem', fontSize: isMobile ? '0.7rem' : '0.875rem' }}
+                        onClick={() => onView ? onView(booking) : onEdit(booking)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        title="View Details Only"
+                      >
+                        <FaEye size={isMobile ? 10 : 12} />
+                      </motion.button>
+                      <motion.button
+                        className="btn btn-sm btn-outline-danger action-button"
+                        style={{ padding: isMobile ? '0.2rem 0.4rem' : '0.375rem 0.75rem', fontSize: isMobile ? '0.7rem' : '0.875rem' }}
+                        onClick={() => onDelete(booking._id)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        title="Delete Past Show Booking"
+                      >
+                        <FaTrash size={isMobile ? 10 : 12} />
+                      </motion.button>
+                    </>
+                  ) : (
+                    // Future show - normal edit and delete actions
+                    <>
+                      <motion.button
+                        className="btn btn-sm btn-outline-primary action-button"
+                        style={{ padding: isMobile ? '0.2rem 0.4rem' : '0.375rem 0.75rem', fontSize: isMobile ? '0.7rem' : '0.875rem' }}
+                        onClick={() => onEdit(booking)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        title="Edit Booking"
+                      >
+                        <FaEdit size={isMobile ? 10 : 12} />
+                      </motion.button>
+                      <motion.button
+                        className="btn btn-sm btn-outline-danger action-button"
+                        style={{ padding: isMobile ? '0.2rem 0.4rem' : '0.375rem 0.75rem', fontSize: isMobile ? '0.7rem' : '0.875rem' }}
+                        onClick={() => onDelete(booking._id)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        title="Cancel/Delete Booking"
+                      >
+                        <FaTrash size={isMobile ? 10 : 12} />
+                      </motion.button>
+                    </>
+                  )}
                 </div>
               </td>
             </motion.tr>

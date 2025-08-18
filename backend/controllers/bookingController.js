@@ -570,12 +570,24 @@ const cancelBooking = async (req, res) => {
         .json({ message: "Not authorized to cancel this booking" });
     }
 
-    // Check if booking can be cancelled (e.g., not too close to show time)
-    const showDateTime = new Date(booking.show.showDate);
-    const [hours, minutes] = booking.show.showTime.split(":");
-    showDateTime.setHours(parseInt(hours), parseInt(minutes));
+    // Check if show is in the past
+    const showDateTime = new Date(booking.show?.showDate || booking.showDate);
+    const showTime = booking.show?.showTime || booking.showTime;
+    if (showTime) {
+      const [hours, minutes] = showTime.split(":");
+      showDateTime.setHours(parseInt(hours), parseInt(minutes));
+    }
 
     const now = new Date();
+    const isPastShow = showDateTime.getTime() < now.getTime();
+
+    if (isPastShow) {
+      return res.status(400).json({
+        message: "Cannot cancel booking for past shows. You can only view details.",
+        isPastShow: true
+      });
+    }
+
     const timeDiff = showDateTime.getTime() - now.getTime();
     const hoursDiff = timeDiff / (1000 * 3600);
 
@@ -585,13 +597,17 @@ const cancelBooking = async (req, res) => {
       });
     }
 
-    // Free up the seats
-    const show = await Show.findById(booking.show._id);
-    show.bookedSeats = show.bookedSeats.filter(
-      (seat) => !booking.seats.includes(seat)
-    );
-    show.availableSeats += booking.seats.length;
-    await show.save();
+    // Free up the seats only if show exists and is not past
+    if (booking.show) {
+      const show = await Show.findById(booking.show._id);
+      if (show) {
+        show.bookedSeats = show.bookedSeats.filter(
+          (seat) => !booking.seats.includes(seat)
+        );
+        show.availableSeats += booking.seats.length;
+        await show.save();
+      }
+    }
 
     // Update booking status instead of deleting
     booking.status = "cancelled";
@@ -630,6 +646,49 @@ const deleteBooking = async (req, res) => {
   }
 };
 
+// Helper function to check if a show is in the past
+const isPastShow = (showDate, showTime) => {
+  const showDateTime = new Date(showDate);
+  if (showTime) {
+    const [hours, minutes] = showTime.split(":");
+    showDateTime.setHours(parseInt(hours), parseInt(minutes));
+  }
+  return showDateTime.getTime() < new Date().getTime();
+};
+
+// New endpoint to delete past show bookings in bulk
+const deletePastShowBookings = async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
+
+    const pastBookings = await Booking.find({
+      $or: [
+        { showDate: { $lt: cutoffDate } },
+        { show: { $exists: true } }
+      ]
+    }).populate('show');
+
+    const bookingsToDelete = pastBookings.filter(booking => {
+      const showDate = booking.show?.showDate || booking.showDate;
+      const showTime = booking.show?.showTime || booking.showTime;
+      return isPastShow(showDate, showTime);
+    });
+
+    const deletedIds = bookingsToDelete.map(b => b._id);
+    await Booking.deleteMany({ _id: { $in: deletedIds } });
+
+    res.json({ 
+      message: `Deleted ${deletedIds.length} past show bookings`,
+      deletedCount: deletedIds.length,
+      cutoffDate
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllBookings,
   getBookingById,
@@ -638,6 +697,8 @@ module.exports = {
   updateBookingStatus,
   cancelBooking,
   deleteBooking,
+  deletePastShowBookings,
   selectSeats,
-  releaseSeats
+  releaseSeats,
+  isPastShow
 };

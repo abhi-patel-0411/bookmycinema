@@ -11,11 +11,16 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
-
+//This pre-save hook ensures that whenever a user is created or their password is updated, the password is automatically hashed before saving to MongoDB (unless it’s a Clerk-managed user).
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password') || !this.password || this.password.startsWith('clerk_managed_')) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  if (
+    !this.isModified("password") ||
+    !this.password ||
+    this.password.startsWith("clerk_managed_")
+  )
+    return next();
+  const salt = await bcrypt.genSalt(10); //generates a random salt (10 rounds).
+  this.password = await bcrypt.hash(this.password, salt); //hashes the plain password.
   next();
 });
 
