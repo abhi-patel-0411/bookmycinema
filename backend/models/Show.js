@@ -76,6 +76,9 @@ showSchema.virtual('isPast').get(function() {
   showDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10));
   return now > showDateTime;
 });
+// parseInt(string, radix) → converts a string to an integer using the given base.
+
+// 10 means decimal system (normal numbers we use every day).
 
 // Pre-save middleware to sync base price with silver price
 showSchema.pre('save', function(next) {

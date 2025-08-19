@@ -14,6 +14,7 @@ const initializeSocket = (server) => {
     /\.vercel\.app$/,
   ].filter(Boolean);
 
+  // new instent 
   io = socketIO(server, {
     cors: {
       origin: allowedOrigins,
@@ -51,6 +52,8 @@ const initializeSocket = (server) => {
 
 const emitToUsers = (event, data) => {
   try {
+    // io.emit(event, data) sends a message (event) to all connected clients.
+    // io is main socket manager 
     if (io && io.emit) {
       io.emit(event, data);
       console.log(`Real-time event emitted to all users: ${event}`);
@@ -67,7 +70,7 @@ const emitToUser = (userId, event, data) => {
     if (io && io.to && userId) {
       const socketId = userSocketMap.get(userId);
       if (socketId) {
-        io.to(socketId).emit(event, data);
+        io.to(socketId).emit(event, data);//for 1 user specific
         console.log(`Real-time event emitted to user ${userId}: ${event}`);
         return true;
       } else {

@@ -18,40 +18,19 @@ const movieSchema = new mongoose.Schema({
   releaseDate: { type: Date, required: false },
   rating: { type: Number, min: 0, max: 5, default: 0 },
   poster: { type: String, required: false },
-  trailer: { type: String },
   youtubeUrl: { type: String },
-  cast: [
-    {
-      name: { type: String, required: true },
-      image: { type: String },
-      role: { type: String },
-    },
-  ],
   director: { type: String },
   price: { type: Number, default: 199 },
-  youtubeTrailer: { type: String },
+
   isActive: { type: Boolean, default: true },
 
-  // TMDB Integration
-  tmdbId: { type: Number, unique: true, sparse: true },
-  backdrop: { type: String },
-  voteAverage: { type: Number, default: 0 },
-  voteCount: { type: Number, default: 0 },
-  popularity: { type: Number, default: 0 },
 
-  // Enhanced fields
+
   reviews: [reviewSchema],
   totalRatings: { type: Number, default: 0 },
   averageRating: { type: Number, default: 0 },
-  viewCount: { type: Number, default: 0 },
-  country: { type: String, default: "India" },
-  budget: { type: String },
-  boxOffice: { type: String },
 
-  // Showing period fields
-  startDate: { type: Date },
-  endDate: { type: Date },
-  isUpcoming: { type: Boolean, default: false },
+
 
   createdAt: { type: Date, default: Date.now },
 });

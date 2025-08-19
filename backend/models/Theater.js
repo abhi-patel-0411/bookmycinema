@@ -84,5 +84,11 @@ theaterSchema.virtual("city").get(function () {
 
 theaterSchema.set("toJSON", { virtuals: true });
 theaterSchema.set("toObject", { virtuals: true });
+// Ensures virtual fields (like city) appear when you call:
 
+// doc.toJSON() (e.g., when sending API responses)
+
+// doc.toObject() (e.g., before manual serialization)
+
+// Without this, virtuals don’t show up in JSON by default.
 module.exports = mongoose.model("Theater", theaterSchema);

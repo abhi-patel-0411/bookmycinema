@@ -1,0 +1,20 @@
+{
+  "short_name": "BookMyCinema",
+  "name": "BookMyCinema by Abhi Patel - Movie Ticket Booking",
+  "description": "BookMyCinema by Abhi Patel - Online movie ticket booking platform",
+  "icons": [
+    {
+      "src": "bookmyshow.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "developer": {
+    "name": "Abhi Patel",
+    "url": "https://github.com/abhi-patel-0411"
+  }
+}
