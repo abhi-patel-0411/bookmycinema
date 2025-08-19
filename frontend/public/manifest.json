@@ -4,7 +4,7 @@
   "description": "BookMyCinema by Abhi Patel - Online movie ticket booking platform",
   "icons": [
     {
-      "src": "bookmyshow.png",
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKyVlE_nyiV-cfEJcuLhzym7JWG9b6SadyYw&s",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     }

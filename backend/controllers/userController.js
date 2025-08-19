@@ -46,7 +46,7 @@ const getAllUsers = async (req, res) => {
         .select("-password") //-password' means exclude password field from results.
         .sort(sortOptions)
         .skip(skip)
-        .limit(parseInt(limit)),
+        .limit(parseInt(limit)),// limit results per page
       User.countDocuments(query),
     ]);
 
