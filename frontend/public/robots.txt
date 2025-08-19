@@ -1,3 +1,11 @@
 User-agent: *
 Allow: /
+Crawl-delay: 1
+
+# Sitemap location
 Sitemap: https://bookmycinema.vercel.app/sitemap.xml
+
+# Additional information
+# BookMyCinema by Abhi Patel
+# Movie ticket booking platform
+# https://bookmycinema.vercel.app
