@@ -2,7 +2,7 @@ const express = require('express');
 const { adminAuth } = require('../middleware/auth');
 const upload = require('../config/multer');
 const Show = require('../models/Show');
-const { getAllMovies, getMovieById, createMovie, updateMovie, deleteMovie, softDeleteMovie, uploadCastImage, refreshMovieStatus } = require('../controllers/movieController');
+const { getAllMovies, getMovieById, createMovie, updateMovie, deleteMovie, softDeleteMovie, refreshMovieStatus } = require('../controllers/movieController');
 
 const router = express.Router();
 
@@ -97,8 +97,7 @@ router.delete('/:id', deleteMovie);
 // Soft delete movie (mark as inactive)
 router.put('/:id/deactivate', softDeleteMovie);
 
-// Upload cast image
-router.post('/upload-cast-image', upload.single('image'), uploadCastImage);
+
 
 // Refresh movie status
 router.post('/refresh-status', refreshMovieStatus);

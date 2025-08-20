@@ -236,43 +236,7 @@ const createMovie = async (req, res) => {
       movieData.genre = movieData.genre.split(",").map((g) => g.trim());
     }
 
-    // Handle cast data with images
-    if (movieData.cast) {
-      // If cast is a string, try to parse it
-      if (typeof movieData.cast === "string") {
-        try {
-          movieData.cast = JSON.parse(movieData.cast);
-        } catch (e) {
-          console.error("Error parsing cast data:", e);
-          throw new Error("Invalid cast data format");
-        }
-      }
 
-      // Handle cast images properly
-      if (Array.isArray(movieData.cast)) {
-        movieData.cast = movieData.cast.map((castMember, index) => {
-          let imageUrl = castMember.image;
-
-          // Check if there's an uploaded file for this cast member
-          const castImageFile =
-            req.files &&
-            req.files[`castImage_${castMember.imageIndex || index}`];
-          if (castImageFile) {
-            // Convert uploaded cast image to base64
-            imageUrl = `data:${
-              castImageFile.mimetype
-            };base64,${castImageFile.buffer.toString("base64")}`;
-            console.log(`Converted cast image ${index} to base64`);
-          }
-
-          return {
-            name: castMember.name,
-            image: imageUrl || null,
-            role: castMember.role || "",
-          };
-        });
-      }
-    }
 
     // Handle isUpcoming flag automatically based on showing period start date
     if (movieData.startDate) {
@@ -385,43 +349,7 @@ const updateMovie = async (req, res) => {
       updateData.genre = updateData.genre.split(",").map((g) => g.trim());
     }
 
-    // Handle cast data with images
-    if (updateData.cast) {
-      // If cast is a string, try to parse it
-      if (typeof updateData.cast === "string") {
-        try {
-          updateData.cast = JSON.parse(updateData.cast);
-        } catch (e) {
-          console.error("Error parsing cast data:", e);
-          throw new Error("Invalid cast data format");
-        }
-      }
 
-      // Handle cast images properly
-      if (Array.isArray(updateData.cast)) {
-        updateData.cast = updateData.cast.map((castMember, index) => {
-          let imageUrl = castMember.image;
-
-          // Check if there's an uploaded file for this cast member
-          const castImageFile =
-            req.files &&
-            req.files[`castImage_${castMember.imageIndex || index}`];
-          if (castImageFile) {
-            // Convert uploaded cast image to base64
-            imageUrl = `data:${
-              castImageFile.mimetype
-            };base64,${castImageFile.buffer.toString("base64")}`;
-            console.log(`Converted cast image ${index} to base64 for update`);
-          }
-
-          return {
-            name: castMember.name || "",
-            image: imageUrl || null,
-            role: castMember.role || "",
-          };
-        });
-      }
-    }
 
     // Handle isUpcoming flag automatically based on showing period start date
     if (updateData.startDate) {
@@ -655,25 +583,7 @@ const checkMovieStatus = async (movieId) => {
   }
 };
 
-// Upload cast image
-const uploadCastImage = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No image file provided" });
-    }
 
-    // Convert uploaded file to base64 for cloud deployment
-    const base64Image = `data:${
-      req.file.mimetype
-    };base64,${req.file.buffer.toString("base64")}`;
-    res.json({ success: true, imagePath: base64Image });
-  } catch (error) {
-    console.error("Error uploading cast image:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 // Manual refresh movie status
 const refreshMovieStatus = async (req, res) => {
@@ -694,7 +604,6 @@ module.exports = {
   deleteMovie,
   softDeleteMovie,
   checkMovieStatus,
-  uploadCastImage,
   updateComingSoonMovies,
   refreshMovieStatus,
 };
