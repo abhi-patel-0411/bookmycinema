@@ -54,6 +54,7 @@ import AdminTheaters from "./pages/admin/AdminTheaters";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminShows from "./pages/admin/AdminShows";
 import AdminUsers from "./pages/admin/AdminUsers";
+import NotFound from "./components/NotFound";
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
@@ -216,6 +217,12 @@ const AppContent = () => {
         
         {/* Payment Test Route - Remove in production */}
         <Route path="/payment-test" element={<PaymentTest />} />
+        
+        {/* 404 Catch-all route */}
+        <Route path="*" element={<NotFound />} />
+        
+        {/* 404 Catch-all route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {!isAdminRoute && !isAuthRoute && location.pathname !== "/payment" && <Footer />}
     </>
