@@ -5,7 +5,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.32.3",
     "@clerk/clerk-sdk-node": "^4.13.23",
-    "@splinetool/react-spline": "^4.0.0",
+
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.4.0",
     "@testing-library/jest-dom": "^5.16.4",
