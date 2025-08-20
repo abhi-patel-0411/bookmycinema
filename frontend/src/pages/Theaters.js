@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AOS from 'aos';
 import ModernLoader from '../components/common/ModernLoader';
+import TheaterListLayout from '../components/theaters/TheaterListLayout';
 import api from '../services/api';
 import showsAPI from '../services/api/showsAPI';
 
@@ -33,11 +34,12 @@ const Theaters = () => {
   const fetchTheaters = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/theaters');
+      const response = await api.get('/theaters/with-shows');
       const theatersData = Array.isArray(response.data) ? response.data : response.data.theaters || [];
       
       setTheaters(theatersData);
-      const uniqueCities = [...new Set(theatersData.map(t => t.address?.city || t.city).filter(Boolean))];
+      const uniqueCities = [...new Set(theatersData.map(t => (t.address?.city || t.city)?.toLowerCase()).filter(Boolean))]
+        .map(city => city.charAt(0).toUpperCase() + city.slice(1));
       setCities(uniqueCities);
     } catch (error) {
       console.error('Fetch theaters error:', error);
@@ -61,74 +63,19 @@ const Theaters = () => {
 
     if (selectedCity) {
       filtered = filtered.filter(theater => 
-        (theater.address?.city || theater.city) === selectedCity
+        (theater.address?.city || theater.city)?.toLowerCase() === selectedCity.toLowerCase()
       );
     }
 
     setFilteredTheaters(filtered);
   };
 
-  const handleTheaterClick = async (theater) => {
-    setSelectedTheater(theater);
-    setLoadingMovies(true);
-    
-    try {
-      const response = await showsAPI.getShowsByTheater(theater._id);
-      const shows = response.data || [];
-      
-      const currentTime = new Date();
-      const futureShows = shows.filter(show => {
-        if (!show.showDate || !show.showTime) return false;
-        
-        const showDateTime = new Date(show.showDate);
-        const [hours, minutes] = show.showTime.split(':');
-        showDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10));
-        
-        return showDateTime > currentTime;
-      });
-      
-      const movieMap = {};
-      futureShows.forEach(show => {
-        if (show.movie && show.theater && show.theater._id === theater._id) {
-          const movieId = show.movie._id;
-          if (!movieMap[movieId]) {
-            movieMap[movieId] = {
-              ...show.movie,
-              shows: []
-            };
-          }
-          movieMap[movieId].shows.push({
-            id: show._id,
-            showTime: show.showTime,
-            showDate: show.showDate,
-            price: show.price,
-            screenNumber: show.screenNumber
-          });
-        }
-      });
-      
-      setTheaterMovies(Object.values(movieMap));
-      
-      if (theater.address?.city || theater.city) {
-        localStorage.setItem('selectedTheaterCity', theater.address?.city || theater.city);
-      }
-    } catch (error) {
-      console.error('Error fetching theater movies:', error);
-      toast.error('Failed to load movies for this theater');
-      setTheaterMovies([]);
-    } finally {
-      setLoadingMovies(false);
-    }
+  const handleMovieClick = (movieId, theater) => {
+    const city = theater.address?.city || theater.city;
+    navigate(`/movie/${movieId}/showtimes?city=${encodeURIComponent(city)}&theaterId=${theater._id}`);
   };
 
-  const handleMovieClick = (movieId) => {
-    navigate(`/movie/${movieId}`);
-  };
 
-  const handleBackToTheaters = () => {
-    setSelectedTheater(null);
-    setTheaterMovies([]);
-  };
 
   if (loading) {
     return (
@@ -143,20 +90,71 @@ const Theaters = () => {
       <Container fluid="xl">
         {/* Hero Section */}
         <motion.div 
-          className="text-center mb-5"
+          className="text-center mb-5 position-relative"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="d-flex align-items-center justify-content-center mb-3">
-            <div className="p-3 rounded-circle me-3" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
-              <FaBuilding size={32} className="text-white" />
+          <div className="d-flex align-items-center justify-content-center mb-4">
+            <motion.div 
+              className="p-4 rounded-circle me-4 position-relative"
+              style={{ 
+                background: 'linear-gradient(135deg, #e50914, #ff4757)',
+                boxShadow: '0 10px 30px rgba(229, 9, 20, 0.2)'
+              }}
+            >
+              <FaBuilding size={36} className="text-white" />
+            </motion.div>
+            <div>
+              <h1 className="fw-bold text-white mb-2" style={{ 
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif', 
+                fontSize: '2.5rem', 
+                letterSpacing: '-0.02em'
+              }}>Premium Theaters</h1>
+              <div className="d-flex align-items-center justify-content-center gap-3">
+                <Badge bg="warning" className="px-3 py-2">
+                  <FaStar className="me-1" /> 4.8 Rating
+                </Badge>
+                <Badge bg="info" className="px-3 py-2">
+                  <FaUsers className="me-1" /> 50K+ Visitors
+                </Badge>
+              </div>
             </div>
-            <h1 className="fw-bold text-white mb-0" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif', fontSize: '2.2rem', letterSpacing: '-0.01em' }}>Premium Theaters</h1>
           </div>
-          <p className="text-light mb-0" style={{ maxWidth: '600px', margin: '0 auto', opacity: 0.85, fontFamily: 'Inter, sans-serif', fontSize: '1rem', fontWeight: '400', lineHeight: '1.5' }}>
-            Discover world-class cinemas with cutting-edge technology and premium experiences
+          <p className="text-light mb-4" style={{ 
+            maxWidth: '700px', 
+            margin: '0 auto', 
+            fontFamily: 'Inter, sans-serif', 
+            fontSize: '1.1rem', 
+            fontWeight: '400', 
+            lineHeight: '1.6',
+            opacity: 0.9
+          }}>
+            Experience cinema like never before with state-of-the-art sound systems, 
+            crystal-clear visuals, and luxury seating in India's finest theaters
           </p>
+          
+          {/* Stats Row */}
+          <Row className="justify-content-center">
+            <Col xs={4} sm={3} md={2}>
+              <div className="text-center">
+                <h3 className="text-white fw-bold mb-1" style={{ fontSize: '1.8rem' }}>{filteredTheaters.length}</h3>
+                <p className="text-light mb-0" style={{ fontSize: '0.9rem', opacity: 0.8 }}>Theaters</p>
+              </div>
+            </Col>
+            <Col xs={4} sm={3} md={2}>
+              <div className="text-center">
+                <h3 className="text-white fw-bold mb-1" style={{ fontSize: '1.8rem' }}>{cities.length}</h3>
+                <p className="text-light mb-0" style={{ fontSize: '0.9rem', opacity: 0.8 }}>Cities</p>
+              </div>
+            </Col>
+            <Col xs={4} sm={3} md={2}>
+              <div className="text-center">
+                <h3 className="text-white fw-bold mb-1" style={{ fontSize: '1.8rem' }}>24/7</h3>
+                <p className="text-light mb-0" style={{ fontSize: '0.9rem', opacity: 0.8 }}>Support</p>
+              </div>
+            </Col>
+          </Row>
         </motion.div>
 
         {/* Search & Filter Section */}
@@ -167,8 +165,13 @@ const Theaters = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="border-0 shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <Card.Body className="p-3">
+            <Card className="border-0 shadow-lg" style={{ 
+              background: 'rgba(255,255,255,0.1)', 
+              backdropFilter: 'blur(20px)', 
+              borderRadius: '16px', 
+              border: '1px solid rgba(255,255,255,0.1)' 
+            }}>
+              <Card.Body className="p-4">
                 <Row className="g-4">
                   <Col lg={6}>
                     <Form.Group>
@@ -185,7 +188,12 @@ const Theaters = () => {
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="text-white border-0"
-                          style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}
+                          style={{ 
+                            backgroundColor: 'rgba(255,255,255,0.1)', 
+                            backdropFilter: 'blur(5px)', 
+                            fontFamily: 'Inter, sans-serif', 
+                            fontSize: '0.875rem' 
+                          }}
                         />
                       </InputGroup>
                     </Form.Group>
@@ -199,11 +207,16 @@ const Theaters = () => {
                         value={selectedCity}
                         onChange={(e) => setSelectedCity(e.target.value)}
                         className="text-white border-0"
-                        style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', fontFamily: 'Inter, sans-serif', fontSize: '0.875rem' }}
+                        style={{ 
+                          backgroundColor: 'rgba(255,255,255,0.1)', 
+                          backdropFilter: 'blur(5px)', 
+                          fontFamily: 'Inter, sans-serif', 
+                          fontSize: '0.875rem' 
+                        }}
                       >
-                        <option value="">All Cities</option>
+                        <option value="" style={{ backgroundColor: '#2a2d3a', color: '#fff' }}>All Cities</option>
                         {cities.map(city => (
-                          <option key={city} value={city}>{city}</option>
+                          <option key={city} value={city} style={{ backgroundColor: '#2a2d3a', color: '#fff' }}>{city}</option>
                         ))}
                       </Form.Select>
                     </Form.Group>
@@ -227,380 +240,79 @@ const Theaters = () => {
           </motion.div>
         )}
 
-        {/* Back Button */}
-        {selectedTheater && (
-          <motion.div 
-            className="mb-4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <Button
-              variant="outline-light"
-              size="lg"
-              className="d-flex align-items-center"
-              style={{ borderRadius: '16px', fontFamily: 'Inter, sans-serif' }}
-              onClick={handleBackToTheaters}
-            >
-              <FaChevronRight className="me-2" style={{ transform: 'rotate(180deg)' }} />
-              Back to All Theaters
-            </Button>
-          </motion.div>
-        )}
+
 
         {/* Results Header */}
-        {!selectedTheater && (
-          <motion.div 
-            className="d-flex align-items-center justify-content-between mb-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="d-flex align-items-center">
-              <div className="me-3 p-3 rounded-circle" style={{ backgroundColor: '#343a40' }}>
-                <FaBuilding className="text-white" size={20} />
-              </div>
-              <div>
-                <h4 className="text-white mb-1 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.25rem', letterSpacing: '-0.01em' }}>
-                  {filteredTheaters.length} Theater{filteredTheaters.length !== 1 ? 's' : ''} Found
-                </h4>
-                {selectedCity && (
-                  <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', fontWeight: '500' }}>
-                    <FaMapMarkerAlt className="me-1" size={14} /> in {selectedCity}
-                  </p>
-                )}
-              </div>
+        <motion.div 
+          className="d-flex align-items-center justify-content-between mb-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="d-flex align-items-center">
+            <div className="me-3 p-3 rounded-circle" style={{ backgroundColor: '#e50914' }}>
+              <FaBuilding className="text-white" size={20} />
             </div>
-          </motion.div>
-        )}
-
-        {/* Theater Cards Grid */}
-        {!selectedTheater && (
-          <Row className="g-3">
-            <AnimatePresence>
-              {filteredTheaters.length > 0 ? (
-                filteredTheaters.map((theater, index) => (
-                  <Col key={theater._id} lg={4} md={6}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      whileHover={{ y: -5, transition: { duration: 0.3 } }}
-                    >
-                      <Card 
-                        className="h-100 shadow-lg"
-                        style={{ 
-                          background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
-                          backdropFilter: 'blur(15px)',
-                          borderRadius: '20px',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                        onClick={() => handleTheaterClick(theater)}
-                      >
-                        <Card.Body className="p-4">
-                          <div className="d-flex align-items-center justify-content-between mb-3">
-                            <div className="d-flex align-items-center">
-                              <div className="me-3 p-2 rounded-circle" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
-                                <FaBuilding className="text-white" size={16} />
-                              </div>
-                              <h5 className="text-white mb-0 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.1rem', letterSpacing: '-0.01em' }}>{theater.name}</h5>
-                            </div>
-                            <Badge style={{ background: 'linear-gradient(135deg, #28a745, #20c997)' }} className="px-3 py-2">
-                              <FaUsers className="me-1" size={12} />
-                              {theater.screens?.length || 0} Screens
-                            </Badge>
-                          </div>
-                          
-                          <div className="d-flex align-items-center mb-2">
-                            <FaMapMarkerAlt className="text-white me-2" size={12} />
-                            <span className="text-white fw-medium" style={{ fontSize: '0.9rem', fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em' }}>
-                              {theater.address?.city || theater.city}
-                            </span>
-                          </div>
-                          
-                          <div className="d-flex align-items-center mb-3">
-                            <FaStar className="text-warning me-1" size={12} />
-                            <span className="text-white fw-medium" style={{ fontSize: '0.85rem', fontFamily: 'Inter, sans-serif' }}>4.5</span>
-                            <span className="text-white-50 ms-1" style={{ fontSize: '0.8rem', fontFamily: 'Inter, sans-serif' }}>(250+)</span>
-                          </div>
-
-                          {theater.amenities && theater.amenities.length > 0 && (
-                            <div className="mb-3">
-                              <div className="d-flex flex-wrap gap-1">
-                                {theater.amenities.slice(0, 2).map((amenity, i) => (
-                                  <Badge 
-                                    key={i}
-                                    style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}
-                                    className="px-2 py-1 text-white"
-                                  >
-                                    {amenity}
-                                  </Badge>
-                                ))}
-                                {theater.amenities.length > 2 && (
-                                  <Badge style={{ backgroundColor: 'rgba(255,255,255,0.15)', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }} className="px-2 py-1 text-white">
-                                    +{theater.amenities.length - 2}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          <Button 
-                            className="w-100 fw-bold"
-                            style={{ 
-                              background: 'linear-gradient(135deg, #e50914, #ff4757)',
-                              border: 'none',
-                              borderRadius: '12px',
-                              padding: '0.75rem',
-                              fontSize: '0.95rem',
-                              fontFamily: 'Inter, sans-serif',
-                              fontWeight: '600',
-                              letterSpacing: '0.01em',
-                              transition: 'all 0.3s ease'
-                            }}
-                          >
-                            View Movies & Shows
-                            <FaChevronRight className="ms-2" size={14} />
-                          </Button>
-                        </Card.Body>
-                      </Card>
-                    </motion.div>
-                  </Col>
-                ))
-              ) : (
-                <Col xs={12}>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                  >
-                    <Card 
-                      className="text-center py-5"
-                      style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', borderRadius: '20px', border: 'none', borderBottom: '3px solid rgba(255,255,255,0.2)' }}
-                    >
-                      <Card.Body>
-                        <div className="mb-4 mx-auto p-4 rounded-circle" style={{ backgroundColor: '#343a40', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FaBuilding size={32} className="text-white" />
-                        </div>
-                        <h4 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.4rem', letterSpacing: '-0.01em' }}>No Theaters Found</h4>
-                        <p className="text-light mb-4" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', lineHeight: '1.6', fontWeight: '400' }}>
-                          We couldn't find any theaters matching your search criteria. Try adjusting your filters.
-                        </p>
-                        <Button
-                          variant="outline-light"
-                          className="px-4 py-2 fw-semibold"
-                          onClick={() => {
-                            setSearchTerm('');
-                            setSelectedCity('');
-                          }}
-                        >
-                          Clear All Filters
-                        </Button>
-                      </Card.Body>
-                    </Card>
-                  </motion.div>
-                </Col>
-              )}
-            </AnimatePresence>
-          </Row>
-        )}
-
-        {/* Theater Detail View */}
-        {selectedTheater && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            {/* Theater Header Card */}
-            <Card className="shadow-lg mb-4" style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', borderRadius: '20px', border: 'none', borderBottom: '3px solid rgba(255,255,255,0.2)' }}>
-              <Card.Body className="p-4">
-                <Row className="align-items-center">
-                  <Col md={8}>
-                    <div className="mb-3">
-                      <h3 className="text-white mb-2 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.75rem', letterSpacing: '-0.02em' }}>{selectedTheater.name}</h3>
-                      <div className="d-flex align-items-center text-light">
-                        <FaMapMarkerAlt className="text-light me-2" />
-                        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', fontWeight: '500' }}>
-                          {selectedTheater.location || selectedTheater.address?.street}, {selectedTheater.address?.city || selectedTheater.city}
-                        </span>
-                      </div>
-                    </div>
-                  </Col>
-                  <Col md={4} className="text-md-end">
-                    <div className="text-md-end">
-                      <Badge bg="secondary" className="px-4 py-2 mb-2">
-                        <FaUsers className="me-2" />
-                        {selectedTheater.screens?.length || 0} Screens Available
-                      </Badge>
-                      <div className="d-flex align-items-center justify-content-md-end">
-                        <FaStar className="text-warning me-1" />
-                        <span className="text-light fw-semibold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.95rem' }}>4.5 Rating</span>
-                        <span className="text-muted ms-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem' }}>(250+ reviews)</span>
-                      </div>
-                    </div>
-                  </Col>
-                </Row>
-                
-                {/* Amenities */}
-                {selectedTheater.amenities && selectedTheater.amenities.length > 0 && (
-                  <div className="mt-4">
-                    <h6 className="text-white mb-3 fw-semibold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.05rem', letterSpacing: '0.01em' }}>Premium Amenities</h6>
-                    <div className="d-flex flex-wrap gap-2">
-                      {selectedTheater.amenities.map((amenity, i) => (
-                        <Badge 
-                          key={i}
-                          bg="dark"
-                          className="px-3 py-2"
-                        >
-                          {amenity}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </Card.Body>
-            </Card>
-
-            {/* Screens Section */}
-            <div className="mb-4">
-              <h5 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.3rem', letterSpacing: '-0.01em' }}>Available Screens</h5>
-              
-              <Row className="g-2">
-                {selectedTheater.screens && selectedTheater.screens.map((screen, index) => (
-                  <Col key={index} md={4} lg={3}>
-                    <Card 
-                      className="shadow h-100"
-                      style={{ 
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: '12px',
-                        border: 'none',
-                        borderBottom: '2px solid rgba(255,255,255,0.2)',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      <Card.Body className="p-3">
-                        <div className="d-flex align-items-center justify-content-between mb-2">
-                          <h6 className="text-white mb-0 fw-bold" style={{ fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em' }}>
-                            Screen {screen.screenNumber || index + 1}
-                          </h6>
-                          <Badge style={{ backgroundColor: 'rgba(255,255,255,0.2)', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }} className="px-2 py-1 text-white">
-                            {screen.screenType || '2D'}
-                          </Badge>
-                        </div>
-                        
-                        <div className="d-flex align-items-center justify-content-between">
-                          <div className="d-flex align-items-center">
-                            <FaUsers className="text-white me-1" size={12} />
-                            <span className="text-white fw-medium" style={{ fontSize: '0.85rem', fontFamily: 'Inter, sans-serif' }}>{screen.capacity}</span>
-                          </div>
-                          
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            </div>
-
-            {/* Movies Section */}
             <div>
-              <h5 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.3rem', letterSpacing: '-0.01em' }}>Now Showing</h5>
-              
-              {loadingMovies ? (
-                <div className="text-center py-4">
-                  <Spinner animation="border" variant="light" size="sm" />
-                  <p className="text-white mt-2" style={{ fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>Loading movies...</p>
-                </div>
-              ) : theaterMovies.length > 0 ? (
-                <Row className="g-3">
-                  {theaterMovies.map((movie, index) => (
-                    <Col key={movie._id} xs={6} sm={4} md={3} lg={2}>
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.02, duration: 0.3 }}
-                      >
-                        <div className="card border-0 h-100 shadow" 
-                             style={{ backgroundColor: '#2a2d3a', borderRadius: '8px', cursor: 'pointer' }}
-                             onClick={() => handleMovieClick(movie._id)}>
-                          
-                          <div className="position-relative" style={{ height: '200px' }}>
-                            <img
-                              src={movie.poster || `https://via.placeholder.com/200x300/333/fff?text=${encodeURIComponent(movie.title)}`}
-                              alt={movie.title}
-                              className="card-img-top w-100 h-100"
-                              style={{ objectFit: 'cover', borderRadius: '8px 8px 0 0' }}
-                              loading="lazy"
-                            />
-                            
-                            {movie.shows && movie.shows.length > 0 && (
-                              <div className="position-absolute top-0 end-0 m-2">
-                                <Badge bg="success" className="d-flex align-items-center px-2 py-1" style={{ fontSize: '0.7rem' }}>
-                                  {movie.shows.length} Shows
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="card-body p-2 d-flex flex-column">
-                            <h6 className="card-title text-white mb-1" 
-                                style={{ fontSize: '0.9rem', lineHeight: '1.3', height: '2.6rem', overflow: 'hidden', fontFamily: 'Inter, sans-serif', fontWeight: '600', letterSpacing: '0.01em' }}>
-                              {movie.title}
-                            </h6>
-                            
-                            <div className="d-flex gap-1 mb-2">
-                              <Badge bg="secondary" style={{ fontSize: '0.65rem', fontFamily: 'Inter, sans-serif', fontWeight: '500' }}>
-                                {Array.isArray(movie.genre) ? movie.genre[0] : (movie.genre || 'Action')}
-                              </Badge>
-                            </div>
-                            
-                            <Button 
-                              variant="primary"
-                              size="sm"
-                              className="w-100 mt-auto"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/movie/${movie._id}/showtimes?city=${encodeURIComponent(selectedTheater.address?.city || selectedTheater.city || '')}&theaterId=${selectedTheater._id}`);
-                              }}
-                              style={{ 
-                                fontSize: '0.75rem', 
-                                padding: '6px 8px',
-                                minHeight: '28px',
-                                fontWeight: '600',
-                                whiteSpace: 'nowrap',
-                                fontFamily: 'Inter, sans-serif',
-                                letterSpacing: '0.01em'
-                              }}
-                            >
-                              Book Now
-                            </Button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </Col>
-                  ))}
-                </Row>
-              ) : (
-                <Card 
-                  className="text-center py-4"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', borderRadius: '16px', border: 'none', borderBottom: '3px solid rgba(255,255,255,0.2)' }}
-                >
-                  <Card.Body>
-                    <div className="mb-3 mx-auto p-3 rounded-circle" style={{ backgroundColor: 'rgba(255,255,255,0.1)', width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <FaFilm size={24} className="text-white" />
-                    </div>
-                    <h6 className="text-white mb-2 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.1rem', letterSpacing: '-0.01em' }}>No Movies Currently Showing</h6>
-                    <p className="text-white" style={{ fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.5', fontWeight: '400' }}>
-                      There are no movies currently scheduled at {selectedTheater.name}. Check back soon for updates!
-                    </p>
-                  </Card.Body>
-                </Card>
+              <h4 className="text-white mb-1 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.25rem', letterSpacing: '-0.01em' }}>
+                {filteredTheaters.length} Theater{filteredTheaters.length !== 1 ? 's' : ''} Found
+              </h4>
+              {selectedCity && (
+                <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', fontWeight: '500', opacity: 0.9 }}>
+                  <FaMapMarkerAlt className="me-1" size={14} /> in {selectedCity}
+                </p>
               )}
             </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.div>
+
+        {/* Theater List Layout */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div 
+            className="theater-list-wrapper"
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: '12px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+              overflow: 'hidden',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}
+          >
+            {filteredTheaters.length > 0 ? (
+              <TheaterListLayout 
+                theaters={filteredTheaters} 
+                onMovieClick={handleMovieClick}
+              />
+            ) : (
+              <div className="text-center py-5" style={{ padding: '60px 20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                <div className="mb-4 mx-auto p-4 rounded-circle" style={{ backgroundColor: 'rgba(255,255,255,0.1)', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FaBuilding size={32} className="text-white" />
+                </div>
+                <h4 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.4rem', letterSpacing: '-0.01em' }}>No Theaters Found</h4>
+                <p className="text-light mb-4" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', lineHeight: '1.6', fontWeight: '400', opacity: 0.9 }}>
+                  We couldn't find any theaters matching your search criteria. Try adjusting your filters.
+                </p>
+                <Button
+                  variant="outline-light"
+                  className="px-4 py-2 fw-semibold"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCity('');
+                  }}
+                >
+                  Clear All Filters
+                </Button>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+
       </Container>
     </div>
   );

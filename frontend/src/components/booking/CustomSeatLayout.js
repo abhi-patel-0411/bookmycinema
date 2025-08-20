@@ -26,10 +26,19 @@ const CustomSeatLayout = ({
     if (rowObj.class) {
       return rowObj.class;
     }
-    // Default class based on row position - silver near screen
-    if (rowIndex < 2) return 'silver';
-    if (rowIndex < 5) return 'gold';
-    return 'premium';
+    const totalRows = seatLayout.length;
+    
+    // Premium: Last 2 rows only
+    if (rowIndex >= totalRows - 2) return 'premium';
+    
+    // Divide remaining rows equally between silver and gold
+    const remainingRows = totalRows - 2;
+    const halfRemaining = Math.floor(remainingRows / 2);
+    
+    // Silver: First half of remaining rows
+    if (rowIndex < halfRemaining) return 'silver';
+    // Gold: Second half of remaining rows
+    return 'gold';
   };
 
   const getSeatPrice = (seatClass) => {
@@ -87,7 +96,28 @@ const CustomSeatLayout = ({
           return (
             <div key={rowIndex}>
               {/* Section Label */}
-              {(rowIndex === 0 || getSeatClass(seatLayout[rowIndex - 1], rowIndex - 1) !== seatClass) && (
+              {(() => {
+                // Only show section label for rows with seats
+                if (rowObj.seats.filter(seat => seat !== null).length === 0) return false;
+                
+                // Show for first row with seats
+                if (rowIndex === 0) return true;
+                
+                // Find the last non-empty row before current row
+                let lastNonEmptyRowIndex = -1;
+                for (let i = rowIndex - 1; i >= 0; i--) {
+                  if (seatLayout[i].seats.filter(seat => seat !== null).length > 0) {
+                    lastNonEmptyRowIndex = i;
+                    break;
+                  }
+                }
+                
+                // If no previous non-empty row found, show section label
+                if (lastNonEmptyRowIndex === -1) return true;
+                
+                // Show section label if seat class is different from last non-empty row
+                return getSeatClass(seatLayout[lastNonEmptyRowIndex], lastNonEmptyRowIndex) !== seatClass;
+              })() && (
                 <div className="text-center mb-2 mt-3">
                   <div className={`section-label ${seatClass}-section`} style={{
                     display: 'inline-block',
@@ -110,11 +140,11 @@ const CustomSeatLayout = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: rowIndex * 0.05 }}
               >
-                <div className="row-label-professional">
-                  {rowObj.row}
-                </div>
-                
-
+                {rowObj.seats.filter(seat => seat !== null).length > 0 && (
+                  <div className="row-label-professional">
+                    {rowObj.row}
+                  </div>
+                )}
                 
                 <div className={`seats-container-professional ${rowObj.seats.filter(seat => seat !== null).length <= 15 ? 'seats-centered' : ''}`}>
                   {rowObj.seats.map((seat, seatIndex) => {

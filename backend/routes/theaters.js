@@ -11,6 +11,7 @@ const {
   deleteScreen,
   getScreen,
   updateSeatLayout,
+  getTheatersWithShows,
   getTheaterAnalytics,
   bulkUpdateTheaters,
   getNearbyTheaters
@@ -20,6 +21,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getAllTheaters);
+router.get('/with-shows', getTheatersWithShows);
 router.get('/nearby', getNearbyTheaters);
 router.get('/analytics', getTheaterAnalytics);
 router.get('/:id', getTheaterById);

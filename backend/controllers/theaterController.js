@@ -23,7 +23,11 @@ const getAllTheaters = async (req, res) => {
     const query = {};
     
     if (isActive !== undefined && isActive !== 'undefined') {
-      query['status.isActive'] = isActive === 'true' || isActive === true;
+      const activeValue = isActive === 'true' || isActive === true;
+      query.$or = [
+        { 'status.isActive': activeValue },
+        { 'isActive': activeValue }
+      ];
     }
     
     if (city) {
@@ -86,6 +90,7 @@ const getAllTheaters = async (req, res) => {
     };
     
     // If no pagination requested, return theaters directly
+    // If the query parameter limit is set to 1000, the API treats this as a special value meaning "return all theaters (skip pagination)".
     if (limit === '1000' || !page) {
       return res.json(theaters);
     }
@@ -160,14 +165,10 @@ const updateTheater = async (req, res) => {
   }
 };
 
-// Delete theater (soft delete)
+// Delete theater (hard delete)
 const deleteTheater = async (req, res) => {
   try {
-    const theater = await Theater.findByIdAndUpdate(
-      req.params.id, 
-      { 'status.isActive': false }, 
-      { new: true }
-    );
+    const theater = await Theater.findByIdAndDelete(req.params.id);
     
     if (!theater) {
       return res.status(404).json({ message: 'Theater not found' });
@@ -253,7 +254,7 @@ const updateScreen = async (req, res) => {
     if (!screen) {
       return res.status(404).json({ message: 'Screen not found' });
     }
-    
+    //target,source
     Object.assign(screen, req.body);
     await theater.save();
     
@@ -289,11 +290,85 @@ const deleteScreen = async (req, res) => {
   }
 };
 
+// Get theaters with shows
+const getTheatersWithShows = async (req, res) => {
+  try {
+    const Show = require('../models/Show');
+    const { city, search } = req.query;
+    
+    const theaterQuery = {
+      $or: [
+        { 'status.isActive': { $ne: false } },
+        { 'isActive': { $ne: false } }
+      ]
+    };
+    if (city) theaterQuery['address.city'] = { $regex: city, $options: 'i' };
+    if (search) {
+      theaterQuery.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } },
+        { 'address.city': { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const theaters = await Theater.find(theaterQuery).lean();
+    
+    const currentTime = new Date();
+    const theatersWithShows = await Promise.all(
+      theaters.map(async (theater) => {
+        const shows = await Show.find({
+          theater: theater._id,
+          showDate: { $gte: currentTime.toISOString().split('T')[0] }
+        })
+        .populate('movie', 'title poster genre duration')
+        .lean();
+        
+        const movieMap = {};
+        shows.forEach(show => {
+          if (show.movie) {
+            const movieId = show.movie._id.toString();
+            if (!movieMap[movieId]) {
+              movieMap[movieId] = {
+                ...show.movie,
+                shows: []
+              };
+            }
+            movieMap[movieId].shows.push({
+              _id: show._id,
+              showTime: show.showTime,
+              showDate: show.showDate,
+              price: show.price,
+              screenNumber: show.screenNumber
+            });
+          }
+        });
+        
+        return {
+          ...theater,
+          movies: Object.values(movieMap)
+        };
+      })
+    );
+    
+    res.json(theatersWithShows);
+  } catch (error) {
+    console.error('Get theaters with shows error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get theater analytics
 const getTheaterAnalytics = async (req, res) => {
   try {
     const analytics = await Theater.aggregate([
-      { $match: { 'status.isActive': true } },
+      { 
+        $match: { 
+          $or: [
+            { 'status.isActive': true },
+            { 'isActive': true }
+          ]
+        } 
+      },
       {
         $group: {
           _id: null,
@@ -308,7 +383,14 @@ const getTheaterAnalytics = async (req, res) => {
     ]);
     
     const cityStats = await Theater.aggregate([
-      { $match: { 'status.isActive': true } },
+      { 
+        $match: { 
+          $or: [
+            { 'status.isActive': true },
+            { 'isActive': true }
+          ]
+        } 
+      },
       {
         $group: {
           _id: '$address.city',
@@ -358,7 +440,10 @@ const getNearbyTheaters = async (req, res) => {
     }
     
     const theaters = await Theater.find({
-      'status.isActive': true,
+      $or: [
+        { 'status.isActive': true },
+        { 'isActive': true }
+      ],
       coordinates: {
         $near: {
           $geometry: {
@@ -450,6 +535,7 @@ module.exports = {
   deleteScreen,
   getScreen,
   updateSeatLayout,
+  getTheatersWithShows,
   getTheaterAnalytics,
   bulkUpdateTheaters,
   getNearbyTheaters

@@ -44,14 +44,25 @@ const theaterSchema = new mongoose.Schema({
     landmark: { type: String, trim: true },
   },
 
-  phone: { type: String, trim: true },
+  contactInfo: {
+    phone: { type: String, trim: true },
+    email: { type: String, trim: true },
+  },
 
   screens: [screenSchema],
   totalScreens: { type: Number, default: 0 },
   totalCapacity: { type: Number, default: 0 },
   amenities: [{ type: String, trim: true }],
   basePrice: { type: Number, default: 150 },
+  
+  status: {
+    isActive: { type: Boolean, default: true },
+    isVerified: { type: Boolean, default: false },
+  },
+  
+  // Backward compatibility
   isActive: { type: Boolean, default: true },
+  
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -59,6 +70,14 @@ const theaterSchema = new mongoose.Schema({
 // Middleware
 theaterSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
+  
+  // Sync status.isActive with isActive for backward compatibility
+  if (this.status && this.status.isActive !== undefined) {
+    this.isActive = this.status.isActive;
+  } else if (this.isActive !== undefined) {
+    if (!this.status) this.status = {};
+    this.status.isActive = this.isActive;
+  }
 
   // Auto-calculate total screens and capacity
   if (this.screens && this.screens.length > 0) {
@@ -74,7 +93,8 @@ theaterSchema.pre("save", function (next) {
 });
 
 // Indexes for better performance
-theaterSchema.index({ "address.city": 1, isActive: 1 });
+theaterSchema.index({ "address.city": 1, "status.isActive": 1 });
+theaterSchema.index({ "address.city": 1, isActive: 1 }); // Backward compatibility
 theaterSchema.index({ name: "text", location: "text" });
 
 // Virtual for backward compatibility

@@ -32,7 +32,8 @@ import ModernLoader from "../components/common/ModernLoader";
 import { useAuth } from "@clerk/clerk-react";
 import { getMoviePosterUrl, getCastImageUrl } from "../utils/imageUtils";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL?.replace("/api", "") || "http://localhost:5000";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -101,15 +102,16 @@ const MovieDetails = () => {
   const fetchRatings = async () => {
     try {
       const timestamp = new Date().getTime();
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const apiUrl =
+        process.env.REACT_APP_API_URL || "http://localhost:5000/api";
       const response = await fetch(
         `${apiUrl}/ratings/movie/${id}?_t=${timestamp}`,
         {
           headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
         }
       );
       if (response.ok) {
@@ -133,16 +135,14 @@ const MovieDetails = () => {
   const fetchUserRating = async () => {
     try {
       const token = await getToken();
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(
-        `${apiUrl}/ratings/movie/${id}/user`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-          },
-        }
-      );
+      const apiUrl =
+        process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+      const response = await fetch(`${apiUrl}/ratings/movie/${id}/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         if (data) {
@@ -189,25 +189,23 @@ const MovieDetails = () => {
 
       const userImageUrl = user?.imageUrl || user?.profileImageUrl || null;
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(
-        `${apiUrl}/ratings/movie/${id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-          },
-          body: JSON.stringify({
-            rating: newReview.rating,
-            comment: newReview.comment.trim(),
-            // These will be used by the backend if needed
-            userName: userFullName,
-            userImage: userImageUrl,
-          }),
-        }
-      );
+      const apiUrl =
+        process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+      const response = await fetch(`${apiUrl}/ratings/movie/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
+        body: JSON.stringify({
+          rating: newReview.rating,
+          comment: newReview.comment.trim(),
+          // These will be used by the backend if needed
+          userName: userFullName,
+          userImage: userImageUrl,
+        }),
+      });
 
       if (response.ok) {
         setNewReview({ rating: 0, comment: "" });
@@ -257,9 +255,9 @@ const MovieDetails = () => {
   };
 
   const scrollToReviews = () => {
-    reviewsRef.current?.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
+    reviewsRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
     });
   };
 
@@ -688,7 +686,11 @@ const MovieDetails = () => {
             data-aos="zoom-in"
             data-aos-delay="200"
           >
-            <h6 className="text-white mb-2 fw-semibold" data-aos="slide-right" data-aos-delay="400">
+            <h6
+              className="text-white mb-2 fw-semibold"
+              data-aos="slide-right"
+              data-aos-delay="400"
+            >
               About the Movie
             </h6>
             <p
@@ -697,7 +699,8 @@ const MovieDetails = () => {
               data-aos="fade-up"
               data-aos-delay="600"
             >
-              {movie.description || "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
+              {movie.description ||
+                "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
             </p>
           </motion.div>
         </motion.section>
@@ -771,23 +774,40 @@ const MovieDetails = () => {
                 className="text-light"
                 style={{ fontSize: "14px", lineHeight: "1.6" }}
               >
-                {movie.description || "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
+                {movie.description ||
+                  "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
               </span>
             </div>
           </motion.div>
         </Container>
       </section>
 
-
-
       {/* Reviews Section */}
       <Container className="py-3" ref={reviewsRef}>
-        <div className="text-center mb-3" data-aos="fade-down" data-aos-duration="800">
-          <FaComment className="text-danger mb-2" size={24} data-aos="bounce" data-aos-delay="200" />
-          <h4 className="text-white fw-bold mb-1" data-aos="zoom-in" data-aos-delay="400">
+        <div
+          className="text-center mb-3"
+          data-aos="fade-down"
+          data-aos-duration="800"
+        >
+          <FaComment
+            className="text-danger mb-2"
+            size={24}
+            data-aos="bounce"
+            data-aos-delay="200"
+          />
+          <h4
+            className="text-white fw-bold mb-1"
+            data-aos="zoom-in"
+            data-aos-delay="400"
+          >
             User Reviews
           </h4>
-          <p className="text-light mb-0" style={{ fontSize: "14px" }} data-aos="fade-up" data-aos-delay="600">
+          <p
+            className="text-light mb-0"
+            style={{ fontSize: "14px" }}
+            data-aos="fade-up"
+            data-aos-delay="600"
+          >
             What our audience thinks about this movie
           </p>
         </div>
@@ -953,8 +973,6 @@ const MovieDetails = () => {
           </Col>
         </Row>
       </Container>
-
-      
 
       {/* Trailer Modal */}
       <Modal

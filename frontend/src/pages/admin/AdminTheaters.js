@@ -793,38 +793,64 @@ const AdminTheaters = () => {
                 />
               </Form.Group>
 
-              <div className="d-flex gap-3">
-                <Form.Check
-                  type="checkbox"
-                  label="Active Theater"
-                  checked={formData.status.isActive}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      status: {
-                        ...formData.status,
-                        isActive: e.target.checked,
-                      },
-                    })
-                  }
-                  style={{ color: "#fff" }}
-                />
-                <Form.Check
-                  type="checkbox"
-                  label="Verified Theater"
-                  checked={formData.status.isVerified}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      status: {
-                        ...formData.status,
-                        isVerified: e.target.checked,
-                      },
-                    })
-                  }
-                  style={{ color: "#fff" }}
-                />
-              </div>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Check
+                      type="checkbox"
+                      id="activeTheater"
+                      label="Active Theater"
+                      checked={formData.status.isActive}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          status: {
+                            ...formData.status,
+                            isActive: e.target.checked,
+                          },
+                        })
+                      }
+                      className="text-white"
+                      style={{ 
+                        color: "#fff",
+                        fontSize: "1rem",
+                        fontWeight: "500"
+                      }}
+                    />
+                    <Form.Text className="text-muted">
+                      Inactive theaters won't be visible to users
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Check
+                      type="checkbox"
+                      id="verifiedTheater"
+                      label="Verified Theater"
+                      checked={formData.status.isVerified}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          status: {
+                            ...formData.status,
+                            isVerified: e.target.checked,
+                          },
+                        })
+                      }
+                      className="text-white"
+                      style={{ 
+                        color: "#fff",
+                        fontSize: "1rem",
+                        fontWeight: "500"
+                      }}
+                    />
+                    <Form.Text className="text-muted">
+                      Mark as verified for premium listing
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+              </Row>
             </Form>
           </Modal.Body>
           <Modal.Footer>

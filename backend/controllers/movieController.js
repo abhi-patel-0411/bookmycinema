@@ -7,34 +7,66 @@ const updateComingSoonMovies = async () => {
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
     
-    // Force update all movies with start dates
-    const movies = await Movie.find({ startDate: { $exists: true } });
+    // Update all movies with start dates
+    const movies = await Movie.find({ 
+      startDate: { $exists: true, $ne: null },
+      isActive: true 
+    });
     let updatedCount = 0;
     
     for (const movie of movies) {
+      if (!movie.startDate) continue;
+      
       const startDate = new Date(movie.startDate);
       startDate.setHours(0, 0, 0, 0);
       
       const shouldBeUpcoming = startDate > currentDate;
       
-      if (movie.isUpcoming !== shouldBeUpcoming) {
-        await Movie.updateOne(
-          { _id: movie._id },
-          { isUpcoming: shouldBeUpcoming }
-        );
+      // Also check if movie should be deactivated based on end date
+      let shouldBeActive = true;
+      if (movie.endDate) {
+        const endDate = new Date(movie.endDate);
+        endDate.setHours(23, 59, 59, 999); // End of day
+        shouldBeActive = currentDate <= endDate;
+      }
+      
+      const needsUpdate = movie.isUpcoming !== shouldBeUpcoming || (movie.isActive && !shouldBeActive);
+      
+      if (needsUpdate) {
+        const updateFields = { isUpcoming: shouldBeUpcoming };
+        if (!shouldBeActive) {
+          updateFields.isActive = false;
+        }
+        
+        await Movie.updateOne({ _id: movie._id }, updateFields);
         updatedCount++;
-        console.log(`Updated ${movie.title}: ${movie.isUpcoming} -> ${shouldBeUpcoming}`);
+        console.log(`Updated ${movie.title}: upcoming ${movie.isUpcoming} -> ${shouldBeUpcoming}${!shouldBeActive ? ', deactivated' : ''}`);
+        
+        // If movie became inactive, delete its shows
+        if (!shouldBeActive && movie.isActive) {
+          const Show = require('../models/Show');
+          await Show.deleteMany({ movie: movie._id });
+          console.log(`Deleted shows for expired movie: ${movie.title}`);
+        }
       }
     }
     
     if (updatedCount > 0) {
-      console.log(`Updated ${updatedCount} movies coming soon status`);
-      emitToUsers("movies-updated", { type: "coming-soon-update", count: updatedCount });
+      console.log(`Updated ${updatedCount} movies status`);
+      emitToUsers("movies-updated", { type: "status-update", count: updatedCount });
     }
+    
+    return updatedCount;
   } catch (error) {
-    console.error('Error updating coming soon movies:', error);
+    console.error('Error updating movies status:', error);
+    return 0;
   }
 };
+
+// Run update every hour
+setInterval(updateComingSoonMovies, 60 * 60 * 1000);
+// Run immediately on startup
+setTimeout(updateComingSoonMovies, 5000);
 
 // Get all movies
 const getAllMovies = async (req, res) => {
@@ -130,6 +162,43 @@ const createMovie = async (req, res) => {
     
     const movieData = { ...req.body };
     
+    // Validate dates - cannot be before current date
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    
+    if (movieData.startDate) {
+      const startDate = new Date(movieData.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      if (startDate < currentDate) {
+        return res.status(400).json({ 
+          message: 'Start date cannot be before current date',
+          field: 'startDate'
+        });
+      }
+    }
+    
+    if (movieData.endDate) {
+      const endDate = new Date(movieData.endDate);
+      endDate.setHours(0, 0, 0, 0);
+      if (endDate < currentDate) {
+        return res.status(400).json({ 
+          message: 'End date cannot be before current date',
+          field: 'endDate'
+        });
+      }
+    }
+    
+    if (movieData.startDate && movieData.endDate) {
+      const startDate = new Date(movieData.startDate);
+      const endDate = new Date(movieData.endDate);
+      if (endDate <= startDate) {
+        return res.status(400).json({ 
+          message: 'End date must be after start date',
+          field: 'endDate'
+        });
+      }
+    }
+    
     // Handle poster upload/URL
     if (req.file) {
       // Convert uploaded file to base64 for cloud deployment
@@ -218,6 +287,9 @@ const createMovie = async (req, res) => {
 
     const movie = new Movie(movieData);
     await movie.save();
+    // Trigger immediate status update for new movie
+    await updateComingSoonMovies();
+    
     emitToUsers("movie-added", movie);
     res.status(201).json(movie);
   } catch (error) {
@@ -233,6 +305,43 @@ const updateMovie = async (req, res) => {
     console.log('Update movie file:', req.file);
     
     const updateData = { ...req.body };
+    
+    // Validate dates - cannot be before current date
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    
+    if (updateData.startDate) {
+      const startDate = new Date(updateData.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      if (startDate < currentDate) {
+        return res.status(400).json({ 
+          message: 'Start date cannot be before current date',
+          field: 'startDate'
+        });
+      }
+    }
+    
+    if (updateData.endDate) {
+      const endDate = new Date(updateData.endDate);
+      endDate.setHours(0, 0, 0, 0);
+      if (endDate < currentDate) {
+        return res.status(400).json({ 
+          message: 'End date cannot be before current date',
+          field: 'endDate'
+        });
+      }
+    }
+    
+    if (updateData.startDate && updateData.endDate) {
+      const startDate = new Date(updateData.startDate);
+      const endDate = new Date(updateData.endDate);
+      if (endDate <= startDate) {
+        return res.status(400).json({ 
+          message: 'End date must be after start date',
+          field: 'endDate'
+        });
+      }
+    }
     
     // Handle poster upload/URL
     if (req.file) {
@@ -352,6 +461,30 @@ const updateMovie = async (req, res) => {
       }
     }
 
+    // Trigger immediate status update if dates were changed
+    if (updateData.startDate || updateData.endDate) {
+      // Manually calculate and set the status immediately
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      
+      if (updateData.startDate) {
+        const startDate = new Date(updateData.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        updateData.isUpcoming = startDate > currentDate;
+      }
+      
+      // Update the movie again with the correct status
+      const finalMovie = await Movie.findByIdAndUpdate(
+        req.params.id, 
+        { isUpcoming: updateData.isUpcoming }, 
+        { new: true }
+      );
+      
+      console.log(`Movie ${finalMovie.title} updated: isUpcoming = ${finalMovie.isUpcoming}`);
+      emitToUsers("movie-updated", finalMovie);
+      return res.json(finalMovie);
+    }
+    
     emitToUsers("movie-updated", movie);
     res.json(movie);
   } catch (error) {
@@ -488,6 +621,17 @@ const uploadCastImage = async (req, res) => {
   }
 };
 
+// Manual refresh movie status
+const refreshMovieStatus = async (req, res) => {
+  try {
+    await updateComingSoonMovies();
+    const movies = await Movie.find({ isActive: true }).sort({ createdAt: -1 });
+    res.json({ message: 'Movie status refreshed', movies });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllMovies,
   getMovieById,
@@ -497,5 +641,6 @@ module.exports = {
   softDeleteMovie,
   checkMovieStatus,
   uploadCastImage,
-  updateComingSoonMovies
+  updateComingSoonMovies,
+  refreshMovieStatus
 };

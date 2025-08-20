@@ -299,9 +299,11 @@ const SeatLayoutBuilder = ({ show, onHide, onSave, initialLayout = [] }) => {
 
       {layout.map((rowObj, rowIndex) => (
         <div key={rowIndex} className="d-flex align-items-center mb-2">
-          <Badge bg="secondary" className="me-3" style={{ minWidth: '30px' }}>
-            {rowObj.row}
-          </Badge>
+          {rowObj.seats.filter(seat => seat !== null).length > 0 && (
+            <Badge bg="secondary" className="me-3" style={{ minWidth: '30px' }}>
+              {rowObj.row}
+            </Badge>
+          )}
           <div className="d-flex gap-1">
             {rowObj.seats.map((seat, seatIndex) => {
               if (seat === null) {

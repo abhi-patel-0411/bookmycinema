@@ -20,11 +20,17 @@ const movieSchema = new mongoose.Schema({
   poster: { type: String, required: false },
   youtubeUrl: { type: String },
   director: { type: String },
+  // cast: [{
+  //   name: { type: String },
+  //   role: { type: String },
+  //   image: { type: String }
+  // }],
   price: { type: Number, default: 199 },
 
   isActive: { type: Boolean, default: true },
-
-
+  isUpcoming: { type: Boolean, default: false },
+  startDate: { type: Date },
+  endDate: { type: Date },
 
   reviews: [reviewSchema],
   totalRatings: { type: Number, default: 0 },
