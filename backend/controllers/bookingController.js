@@ -1,7 +1,11 @@
 const Booking = require("../models/Booking");
 const Show = require("../models/Show");
 const User = require("../models/User");
-const { emitToAdmin, emitToUsers, emitToUser } = require("../middleware/realtime");
+const {
+  emitToAdmin,
+  emitToUsers,
+  emitToUser,
+} = require("../middleware/realtime");
 const { sendBookingConfirmation } = require("../services/emailService");
 
 const getAllBookings = async (req, res) => {
@@ -9,29 +13,29 @@ const getAllBookings = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const search = req.query.search || '';
-    
+    const search = req.query.search || "";
+
     // Build search query
     let query = {};
     if (search) {
       query = {
         $or: [
-          { 'userDetails.email': { $regex: search, $options: 'i' } },
-          { bookingId: { $regex: search, $options: 'i' } },
-          { ticketId: { $regex: search, $options: 'i' } }
-        ]
+          { "userDetails.email": { $regex: search, $options: "i" } },
+          { bookingId: { $regex: search, $options: "i" } },
+          { ticketId: { $regex: search, $options: "i" } },
+        ],
       };
     }
-    
+
     const totalBookings = await Booking.countDocuments(query);
     const bookings = await Booking.find(query)
       .populate({
         path: "show",
         populate: [
-          { 
-            path: "movie", 
+          {
+            path: "movie",
             select: "title poster isActive duration genre rating",
-            match: null // Don't filter out any movies
+            match: null, // Don't filter out any movies
           },
           { path: "theater", select: "name location city" },
         ],
@@ -63,8 +67,8 @@ const getAllBookings = async (req, res) => {
         totalPages: Math.ceil(totalBookings / limit),
         totalBookings,
         hasNext: page < Math.ceil(totalBookings / limit),
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -103,102 +107,124 @@ const cleanExpiredLocks = (showId) => {
   const showLocks = seatLocks.get(showId) || {};
   const now = Date.now();
   let cleaned = false;
-  
+
   Object.keys(showLocks).forEach((seatId) => {
     const lock = showLocks[seatId];
     // Different lock durations based on lock type
-    const lockDuration = lock.type === 'payment_cancelled' ? 2 * 60 * 1000 : // 2 minutes for payment cancellations
-                         lock.type === 'booking' ? 5 * 60 * 1000 : // 5 minutes for actual bookings
-                         1 * 60 * 1000; // 1 minute for regular selections
-    
+    const lockDuration =
+      lock.type === "payment_cancelled"
+        ? 2 * 60 * 1000 // 2 minutes for payment cancellations
+        : lock.type === "booking"
+        ? 5 * 60 * 1000 // 5 minutes for actual bookings
+        : 1 * 60 * 1000; // 1 minute for regular selections
+
     if (now - lock.timestamp > lockDuration) {
       delete showLocks[seatId];
       cleaned = true;
       console.log(`Auto-expired lock for seat ${seatId} in show ${showId}`);
     }
   });
-  
+
   if (cleaned) {
     seatLocks.set(showId, showLocks);
     // Instead of notifying all users, we'll notify specific users about their released seats
     // This is handled in the auto-release timeout for each lock
   }
-  
+
   return showLocks;
 };
 
-const lockSeats = (showId, seats, userId, lockType = 'selection') => {
+const lockSeats = (showId, seats, userId, lockType = "selection") => {
   // First clean any expired locks
   const showLocks = cleanExpiredLocks(showId);
   const now = Date.now();
-  
+
   // Check for conflicts with existing locks
   const conflicts = [];
   const alreadyBooked = [];
-  
+
   seats.forEach((seatId) => {
     // Check if seat is locked by another user
     if (showLocks[seatId] && showLocks[seatId].userId !== userId) {
       conflicts.push(seatId);
     }
   });
-  
+
   if (conflicts.length > 0) {
     return { success: false, conflicts };
   }
-  
+
   // Check if any seats are already booked in the database
   // This would be done in the createBooking function
-  
+
   // Lock seats
   seats.forEach((seatId) => {
     showLocks[seatId] = { userId, timestamp: now, type: lockType };
   });
-  
+
   seatLocks.set(showId, showLocks);
-  
+
   // Set a timeout to automatically release these locks
-  const timeoutDuration = lockType === 'booking' ? 5 * 60 * 1000 : 60 * 1000; // 5 minutes for bookings, 1 minute for selections
-  
+  const timeoutDuration =
+    lockType === "payment_cancelled"
+      ? 2 * 60 * 1000 // 2 minutes for payment cancellations
+      : lockType === "booking"
+      ? 1 * 60 * 1000 // 1 minute for actual bookings
+      : 1 * 60 * 1000; // 1 minute for regular selections
+
   setTimeout(() => {
     const currentLocks = seatLocks.get(showId) || {};
     const expiredSeats = [];
-    
+
     seats.forEach((seatId) => {
-      if (currentLocks[seatId] && 
-          currentLocks[seatId].userId === userId && 
-          currentLocks[seatId].timestamp === now) {
+      if (
+        currentLocks[seatId] &&
+        currentLocks[seatId].userId === userId &&
+        currentLocks[seatId].timestamp === now
+      ) {
         delete currentLocks[seatId];
         expiredSeats.push(seatId);
       }
     });
-    
+
     if (expiredSeats.length > 0) {
       seatLocks.set(showId, currentLocks);
-      console.log(`Auto-released seats for user ${userId} in show ${showId}: ${expiredSeats.join(', ')}`);
+      console.log(
+        `Auto-released seats for user ${userId} in show ${showId}: ${expiredSeats.join(
+          ", "
+        )}`
+      );
       // Notify only the specific user about their expired seats
-      emitToUser(userId, "seats-auto-released", { 
-        showId, 
-        seats: expiredSeats, 
+      emitToUser(userId, "seats-auto-released", {
+        showId,
+        seats: expiredSeats,
         userId,
-        message: `Your seat selection has expired. Please select seats again.`
+        message: `Your seat selection has expired. Please select seats again.`,
       });
-      
+
+      // Also notify all users (including the one who lost seats) about availability
+      emitToUsers("seats-auto-released", {
+        showId,
+        seats: expiredSeats,
+        userId,
+        message: `Seats ${expiredSeats.join(", ")} are now available`,
+      });
+
       // Notify all users that these seats are now available
       emitToUsers("seats-available", {
         showId,
-        seats: expiredSeats
+        seats: expiredSeats,
       });
     }
   }, timeoutDuration);
-  
+
   return { success: true };
 };
 
 const unlockSeats = (showId, seats, userId) => {
   const showLocks = seatLocks.get(showId) || {};
   let unlocked = false;
-  
+
   seats.forEach((seatId) => {
     if (showLocks[seatId] && showLocks[seatId].userId === userId) {
       delete showLocks[seatId];
@@ -206,14 +232,31 @@ const unlockSeats = (showId, seats, userId) => {
       console.log(`Unlocked seat ${seatId} for user ${userId}`);
     }
   });
-  
+
   if (unlocked) {
     seatLocks.set(showId, showLocks);
     // Notify other users about the released seats
     emitToUsers("seats-released", { showId, seats, userId });
   }
-  
+
   return unlocked;
+};
+
+// Get current locked seats for a show
+const getLockedSeats = async (req, res) => {
+  try {
+    const { showId } = req.params;
+
+    // Clean expired locks first
+    cleanExpiredLocks(showId);
+
+    const showLocks = seatLocks.get(showId) || {};
+    const lockedSeats = Object.keys(showLocks);
+
+    res.json({ lockedSeats });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const createBooking = async (req, res) => {
@@ -250,12 +293,12 @@ const createBooking = async (req, res) => {
       return res.status(409).json({
         message: `Seats ${unavailableSeats.join(", ")} are already booked`,
         conflicts: unavailableSeats,
-        type: 'booked'
+        type: "booked",
       });
     }
-    
+
     // Check seat locks next
-    const lockResult = lockSeats(showId, seats, userId, 'booking'); // Use 'booking' type for longer lock
+    const lockResult = lockSeats(showId, seats, userId, "booking"); // Use 'booking' type for longer lock
     if (!lockResult.success) {
       // Send notification only to this specific user
       emitToUser(userId, "seat-conflict", {
@@ -271,7 +314,7 @@ const createBooking = async (req, res) => {
           ", "
         )} are currently being selected by another user. Please try different seats.`,
         conflicts: lockResult.conflicts,
-        type: 'locked'
+        type: "locked",
       });
     }
 
@@ -290,7 +333,7 @@ const createBooking = async (req, res) => {
       .toString(36)
       .substr(2, 4)
       .toUpperCase()}`;
-    
+
     const ticketId = `TKT-${Date.now()}-${Math.random()
       .toString(36)
       .substr(2, 6)
@@ -305,9 +348,9 @@ const createBooking = async (req, res) => {
       },
       show: showId,
       // Store movie and theater details directly for persistence
-      movieTitle: show.movie?.title || 'Unknown Movie',
-      moviePoster: show.movie?.poster || '',
-      theaterName: show.theater?.name || 'Unknown Theater',
+      movieTitle: show.movie?.title || "Unknown Movie",
+      moviePoster: show.movie?.poster || "",
+      theaterName: show.theater?.name || "Unknown Theater",
       movieIsActive: show.movie?.isActive !== false, // Store movie active status
       showDate: show.showDate,
       showTime: show.showTime,
@@ -343,7 +386,7 @@ const createBooking = async (req, res) => {
     // Don't unlock seats after successful booking - they're now actually booked in the database
     // Instead, remove them from the locks map directly
     const showLocks = seatLocks.get(showId) || {};
-    seats.forEach(seat => {
+    seats.forEach((seat) => {
       if (showLocks[seat] && showLocks[seat].userId === userId) {
         delete showLocks[seat];
       }
@@ -354,13 +397,13 @@ const createBooking = async (req, res) => {
     try {
       await sendBookingConfirmation({
         _id: booking._id,
-        user: { name: userEmail.split('@')[0], email: userEmail },
+        user: { name: userEmail.split("@")[0], email: userEmail },
         show: populatedBooking.show,
         seats: seats,
-        totalAmount: totalAmount
+        totalAmount: totalAmount,
       });
     } catch (emailError) {
-      console.error('Email sending failed:', emailError);
+      console.error("Email sending failed:", emailError);
     }
 
     // Emit real-time updates
@@ -385,20 +428,22 @@ const selectSeats = async (req, res) => {
   try {
     const { showId, seats } = req.body;
     const userId = req.user?.id || req.user?._id || `guest_${Date.now()}`;
-    
+
     // First check if these seats are already booked in the database
     const show = await Show.findById(showId);
     if (!show) {
       return res.status(404).json({ message: "Show not found" });
     }
-    
+
     // Check for already booked seats
-    const alreadyBooked = seats.filter(seat => show.bookedSeats.includes(seat));
+    const alreadyBooked = seats.filter((seat) =>
+      show.bookedSeats.includes(seat)
+    );
     if (alreadyBooked.length > 0) {
       return res.status(409).json({
         message: `Seats ${alreadyBooked.join(", ")} are already booked`,
         conflicts: alreadyBooked,
-        type: 'booked'
+        type: "booked",
       });
     }
 
@@ -407,31 +452,33 @@ const selectSeats = async (req, res) => {
 
     if (!lockResult.success) {
       // Create a clear conflict message
-      const conflictMessage = `Seats ${lockResult.conflicts.join(", ")} are currently being selected by another user`;
-      
+      const conflictMessage = `Seats ${lockResult.conflicts.join(
+        ", "
+      )} are currently being selected by another user`;
+
       // Send notification only to this specific user via socket
       emitToUser(userId, "seat-conflict", {
         showId,
         conflicts: lockResult.conflicts,
         userId: userId, // Include userId to ensure notification is only for this user
-        message: conflictMessage
+        message: conflictMessage,
       });
-      
+
       // Also return the conflict in the HTTP response for immediate feedback
       return res.status(409).json({
         message: conflictMessage,
         conflicts: lockResult.conflicts,
-        type: 'locked'
+        type: "locked",
       });
     }
 
     // Emit seat selection to other users
     emitToUsers("seats-selected", { showId, seats, userId });
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: "Seats selected successfully",
-      expiresIn: 60 // Tell client seats will auto-release in 60 seconds
+      expiresIn: 60, // Tell client seats will auto-release in 60 seconds
     });
   } catch (error) {
     console.error("Error selecting seats:", error);
@@ -446,17 +493,19 @@ const releaseSeats = async (req, res) => {
     const userId = req.user?.id || req.user?._id || `guest_${Date.now()}`;
 
     console.log(`Releasing seats for user ${userId}:`, seats);
-    
+
     // The unlockSeats function now handles emitting the event
     const released = unlockSeats(showId, seats, userId);
 
-    res.json({ 
-      success: true, 
-      message: released ? "Seats released successfully" : "No seats were locked by this user",
-      released: released
+    res.json({
+      success: true,
+      message: released
+        ? "Seats released successfully"
+        : "No seats were locked by this user",
+      released: released,
     });
   } catch (error) {
-    console.error('Release seats error:', error);
+    console.error("Release seats error:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -504,10 +553,10 @@ const getUserBookings = async (req, res) => {
       .populate({
         path: "show",
         populate: [
-          { 
-            path: "movie", 
+          {
+            path: "movie",
             select: "title poster duration isActive genre rating",
-            match: null // Show all movies regardless of active status
+            match: null, // Show all movies regardless of active status
           },
           { path: "theater", select: "name location city" },
         ],
@@ -583,8 +632,9 @@ const cancelBooking = async (req, res) => {
 
     if (isPastShow) {
       return res.status(400).json({
-        message: "Cannot cancel booking for past shows. You can only view details.",
-        isPastShow: true
+        message:
+          "Cannot cancel booking for past shows. You can only view details.",
+        isPastShow: true,
       });
     }
 
@@ -664,25 +714,22 @@ const deletePastShowBookings = async (req, res) => {
     cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
 
     const pastBookings = await Booking.find({
-      $or: [
-        { showDate: { $lt: cutoffDate } },
-        { show: { $exists: true } }
-      ]
-    }).populate('show');
+      $or: [{ showDate: { $lt: cutoffDate } }, { show: { $exists: true } }],
+    }).populate("show");
 
-    const bookingsToDelete = pastBookings.filter(booking => {
+    const bookingsToDelete = pastBookings.filter((booking) => {
       const showDate = booking.show?.showDate || booking.showDate;
       const showTime = booking.show?.showTime || booking.showTime;
       return isPastShow(showDate, showTime);
     });
 
-    const deletedIds = bookingsToDelete.map(b => b._id);
+    const deletedIds = bookingsToDelete.map((b) => b._id);
     await Booking.deleteMany({ _id: { $in: deletedIds } });
 
-    res.json({ 
+    res.json({
       message: `Deleted ${deletedIds.length} past show bookings`,
       deletedCount: deletedIds.length,
-      cutoffDate
+      cutoffDate,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -700,5 +747,6 @@ module.exports = {
   deletePastShowBookings,
   selectSeats,
   releaseSeats,
-  isPastShow
+  getLockedSeats,
+  isPastShow,
 };

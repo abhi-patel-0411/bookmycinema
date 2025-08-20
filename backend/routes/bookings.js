@@ -10,7 +10,8 @@ const {
   deleteBooking,
   deletePastShowBookings,
   selectSeats,
-  releaseSeats
+  releaseSeats,
+  getLockedSeats
 } = require('../controllers/bookingController');
 
 const router = express.Router();
@@ -39,6 +40,7 @@ router.get('/debug', async (req, res) => {
 router.post('/', optionalAuth, createBooking);
 router.post('/select-seats', optionalAuth, selectSeats);
 router.post('/release-seats', optionalAuth, releaseSeats);
+router.get('/locked-seats/:showId', getLockedSeats);
 router.get('/my-bookings', auth, getUserBookings);
 router.get('/:id', optionalAuth, getBookingById);
 router.put('/:id/cancel', optionalAuth, cancelBooking);

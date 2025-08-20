@@ -68,6 +68,7 @@ router.post('/', (req, res, next) => {
 }, createMovie);
 
 // Update movie (made public for demo)
+//accept all files from the request, no matter the field name.
 router.put('/:id', (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {

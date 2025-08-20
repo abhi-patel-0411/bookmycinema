@@ -16,6 +16,7 @@ import CustomSeatLayout from "../components/booking/CustomSeatLayout";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../services/api";
 import { toast } from "react-toastify";
+import useSocketSeatUpdates from "../hooks/useSocketSeatUpdates";
 import "../styles/seat-layout.css";
 import "../styles/seat-conflict.css";
 
@@ -32,15 +33,44 @@ const BookingPage = () => {
   const [conflictMessage, setConflictMessage] = useState("");
   const [lockedSeats, setLockedSeats] = useState([]);
 
+  // Add socket hook for real-time seat updates
+  useSocketSeatUpdates(showId, setLockedSeats, setSelectedSeats);
+
   useEffect(() => {
     fetchShowDetails();
     setupRealTimeListeners();
+    
+    // Fetch current locked seats on component mount
+    if (showId) {
+      fetchLockedSeats();
+    }
 
     return () => {
       if (selectedSeats.length > 0) {
         releaseSelectedSeats();
       }
     };
+  }, [showId]);
+
+  const fetchLockedSeats = async () => {
+    try {
+      const response = await api.get(`/bookings/locked-seats/${showId}`);
+      setLockedSeats(response.data.lockedSeats);
+      console.log('Fetched locked seats:', response.data.lockedSeats);
+    } catch (error) {
+      console.error('Error fetching locked seats:', error);
+    }
+  };
+
+  // Periodically refresh locked seats to ensure sync
+  useEffect(() => {
+    if (!showId) return;
+    
+    const interval = setInterval(() => {
+      fetchLockedSeats();
+    }, 5000); // Refresh every 5 seconds
+    
+    return () => clearInterval(interval);
   }, [showId]);
 
   // Add event listener for auto-released seats
@@ -52,26 +82,38 @@ const BookingPage = () => {
         userId: eventUserId,
         message,
       } = event.detail;
-      if (eventShowId === showId && eventUserId === user?.id) {
-        // Update selected seats if they were auto-released
-        setSelectedSeats((prev) =>
-          prev.filter((seat) => !seats.includes(seat.id))
-        );
-        if (seats.length > 0 && message) {
-          toast.warning(message);
+      if (eventShowId === showId) {
+        // Remove from locked seats for all users
+        setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
+        
+        // If this user's seats were auto-released, remove from selected seats
+        if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
+          setSelectedSeats((prev) =>
+            prev.filter((seat) => !seats.includes(seat.id))
+          );
+          if (seats.length > 0 && message) {
+            toast.warning(message);
+          }
         }
       }
     };
 
+    const handleSeatsAvailable = (event) => {
+      const { showId: eventShowId, seats } = event.detail;
+      if (eventShowId === showId) {
+        // Remove from locked seats when they become available
+        setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
+      }
+    };
+
     window.addEventListener("seats-auto-released", handleAutoReleasedSeats);
+    window.addEventListener("seats-available", handleSeatsAvailable);
 
     return () => {
-      window.removeEventListener(
-        "seats-auto-released",
-        handleAutoReleasedSeats
-      );
+      window.removeEventListener("seats-auto-released", handleAutoReleasedSeats);
+      window.removeEventListener("seats-available", handleSeatsAvailable);
     };
-  }, [showId, user]);
+  }, [showId, user, clerkUser]);
 
   const setupRealTimeListeners = () => {
     window.addEventListener("seat-conflict", handleSeatConflict);
@@ -118,7 +160,7 @@ const BookingPage = () => {
       setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
 
       // If these were our seats that got released, also update selectedSeats
-      if (eventUserId === user?.id) {
+      if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
         setSelectedSeats((prev) =>
           prev.filter((seat) => !seats.includes(seat.id))
         );
