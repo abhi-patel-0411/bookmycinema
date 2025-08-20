@@ -18,7 +18,7 @@ api.interceptors.request.use(async (config) => {
   }
   
   // Try to get Clerk token from window (if available)
-  if (window.Clerk && window.Clerk.session) {
+  if (window.Clerk && window.Clerk.session && typeof window.Clerk.session.getToken === 'function') {
     try {
       const token = await window.Clerk.session.getToken();
       if (token) {
@@ -26,7 +26,7 @@ api.interceptors.request.use(async (config) => {
         return config;
       }
     } catch (error) {
-      console.log('Failed to get Clerk token:', error);
+      // Silently handle Clerk token errors
     }
   }
   
@@ -37,6 +37,17 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ERR_NETWORK') {
+      console.warn('Network error - using fallback data');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Movies API
 export const moviesAPI = {

@@ -249,27 +249,7 @@ const Home = () => {
           </video>
         </div>
 
-        {/* Explore Movies Button */}
-        <Button
-          variant="primary"
-          className="position-absolute d-flex align-items-center"
-          style={{
-            bottom: "20px",
-            right: "16px",
-            zIndex: 1000,
-            backgroundColor: "rgba(220, 53, 69, 0.9)",
-            border: "none",
-            borderRadius: "20px",
-            padding: "8px 16px",
-            fontSize: "12px",
-            fontWeight: "600"
-          }}
-          onClick={() => navigate("/movies")}
-        >
-          <FaFilm className="me-2" />
-          <span>Explore Movies</span>
-          <FaArrowRight className="ms-2" />
-        </Button>
+
       </section>
 
       {/* Movie Categories */}

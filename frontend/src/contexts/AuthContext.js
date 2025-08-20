@@ -27,11 +27,18 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       const response = await axios.get('http://localhost:5000/api/auth/me');
       setUser(response.data.user);
     } catch (error) {
+      console.error('Auth error:', error);
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
+      setUser(null);
     } finally {
       setLoading(false);
     }

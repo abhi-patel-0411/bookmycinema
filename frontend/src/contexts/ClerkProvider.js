@@ -8,19 +8,21 @@ const UserSync = ({ children }) => {
   
   useEffect(() => {
     const syncUser = async () => {
-      if (isSignedIn && user) {
+      if (isSignedIn && user && typeof user.getToken === 'function') {
         try {
           // Get token
           const token = await user.getToken();
           
-          // Set token in API
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
-          // Sync user with database
-          await api.post('/auth/sync-clerk-user');
-          console.log('User synced with database');
+          if (token) {
+            // Set token in API
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            
+            // Sync user with database
+            await api.post('/auth/sync-clerk-user');
+            console.log('User synced with database');
+          }
         } catch (error) {
-          console.error('Error syncing user:', error);
+          // Silently handle sync errors
         }
       }
     };
