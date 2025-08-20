@@ -142,4 +142,6 @@ export const useSyncCurrentUser = () => {
   return { synced, loading, error };
 };
 
-export default { useClerkUsers, useSyncCurrentUser };
+const clerkService = { useClerkUsers, useSyncCurrentUser };
+
+export default clerkService;

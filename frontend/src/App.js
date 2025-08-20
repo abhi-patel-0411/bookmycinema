@@ -13,7 +13,6 @@ import ClerkProviderWrapper from "./contexts/ClerkProvider";
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
 // import ClerkUserSync from './components/common/ClerkUserSync';
 import AOS from "aos";
-import { applyBeautifulStyles } from "./utils/applyBeautifulStyles";
 import { ReactLenis } from "lenis/react";
 import useScrollToTop from "./hooks/useScrollToTop";
 
@@ -54,7 +53,6 @@ import AdminTheaters from "./pages/admin/AdminTheaters";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminShows from "./pages/admin/AdminShows";
 import AdminUsers from "./pages/admin/AdminUsers";
-import NotFound from "./components/NotFound";
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
@@ -217,12 +215,6 @@ const AppContent = () => {
         
         {/* Payment Test Route - Remove in production */}
         <Route path="/payment-test" element={<PaymentTest />} />
-        
-        {/* 404 Catch-all route */}
-        <Route path="*" element={<NotFound />} />
-        
-        {/* 404 Catch-all route */}
-        <Route path="*" element={<NotFound />} />
       </Routes>
       {!isAdminRoute && !isAuthRoute && location.pathname !== "/payment" && <Footer />}
     </>
@@ -249,26 +241,23 @@ function App() {
   }, [showBrandAnimation]);
 
   useEffect(() => {
+    // Suppress extension-related errors
+    window.addEventListener('error', (e) => {
+      if (e.message.includes('message channel closed') || 
+          e.message.includes('listener indicated an asynchronous response')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+    
     AOS.init({
-      duration: 1000,
+      duration: 800,
       once: true,
-      easing: "ease-out-cubic",
+      easing: "ease-out-quart",
+      offset: 50,
+      delay: 0,
+      anchorPlacement: 'top-bottom'
     });
-
-    // Apply beautiful styling to all pages
-    applyBeautifulStyles();
-
-    // Set up a mutation observer to apply styles to dynamically added elements
-    const observer = new MutationObserver((mutations) => {
-      applyBeautifulStyles();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-
-    return () => observer.disconnect();
   }, []);
 
   if (showBrandAnimation) {

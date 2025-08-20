@@ -30,10 +30,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import { moviesAPI } from "../services/api";
 import ModernLoader from "../components/common/ModernLoader";
 import { useAuth } from "@clerk/clerk-react";
-import { getMoviePosterUrl, getCastImageUrl } from "../utils/imageUtils";
+
 
 const API_BASE_URL =
   process.env.REACT_APP_API_URL?.replace("/api", "") || "http://localhost:5000";
+
+const getMoviePosterUrl = (posterPath, movieTitle = null) => {
+  if (posterPath) {
+    if (posterPath.startsWith('data:image/') || posterPath.startsWith('http')) return posterPath;
+    return posterPath.startsWith('/') ? posterPath : `/${posterPath}`;
+  }
+  const initial = movieTitle ? movieTitle.charAt(0) : 'M';
+  return `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(initial)}`;
+};
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -283,7 +292,7 @@ const MovieDetails = () => {
   const ratingBreakdown = calculateRatingBreakdown();
 
   return (
-    <div style={{ backgroundColor: "#1f2025", minHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#1f2025", minHeight: "100vh", overflowX: "hidden" }}>
       {/* Desktop Hero Section - Exact BMS Layout */}
       <section
         className="d-none d-md-block"
@@ -539,40 +548,52 @@ const MovieDetails = () => {
               />
             </div>
 
-            {/* Trailer and Book Ticket Buttons */}
+            {/* Trailer and Book Ticket Buttons - Improved Mobile UI */}
             <div
-              className="position-absolute d-flex gap-2"
-              style={{ bottom: "12px", left: "12px", right: "12px" }}
+              className="position-absolute d-flex gap-2 w-100"
+              style={{ 
+                bottom: "8px", 
+                left: "8px", 
+                right: "8px",
+                padding: "0 4px"
+              }}
             >
               {(movie.youtubeUrl || movie.trailer) && (
-                <div
-                  className="d-flex align-items-center gap-1 text-white px-2 py-1"
+                <button
+                  type="button"
+                  className="d-flex align-items-center justify-content-center gap-1 text-white px-2 py-2 border-0"
                   style={{
-                    backgroundColor: "rgba(0,0,0,0.8)",
-                    borderRadius: "6px",
-                    fontSize: "11px",
-                    cursor: "pointer",
-                    backdropFilter: "blur(10px)",
-                    minWidth: "fit-content",
+                    backgroundColor: "rgba(0,0,0,0.85)",
+                    borderRadius: "8px",
+                    fontSize: "10px",
+                    fontWeight: "600",
+                    backdropFilter: "blur(15px)",
+                    minWidth: "60px",
+                    height: "32px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                   }}
                   onClick={() => setShowTrailerModal(true)}
                 >
-                  <FaPlay size={10} />
+                  <FaPlay size={8} />
                   <span>Trailer</span>
-                </div>
+                </button>
               )}
               <button
                 type="button"
-                className="px-3 py-2 fw-semibold btn btn-danger flex-grow-1"
+                className="px-3 py-2 fw-bold btn btn-danger flex-grow-1 border-0"
                 style={{
-                  fontSize: "13px",
-                  borderRadius: "6px",
-                  fontWeight: "500",
-                  minHeight: "36px",
+                  fontSize: "12px",
+                  borderRadius: "8px",
+                  fontWeight: "700",
+                  height: "32px",
+                  background: "linear-gradient(135deg, #dc3545 0%, #c82333 100%)",
+                  boxShadow: "0 2px 8px rgba(220, 53, 69, 0.4)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px"
                 }}
                 onClick={handleBookTickets}
               >
-                Book Tickets
+                Book Now
               </button>
             </div>
 
@@ -675,7 +696,7 @@ const MovieDetails = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           data-aos="fade-up"
-          data-aos-duration="800"
+          data-aos-duration="600"
         >
           <motion.div
             className="p-3 rounded"
@@ -684,12 +705,12 @@ const MovieDetails = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             data-aos="zoom-in"
-            data-aos-delay="200"
+            data-aos-delay="150"
           >
             <h6
               className="text-white mb-2 fw-semibold"
-              data-aos="slide-right"
-              data-aos-delay="400"
+              data-aos="fade-right"
+              data-aos-delay="300"
             >
               About the Movie
             </h6>
@@ -697,7 +718,7 @@ const MovieDetails = () => {
               className="text-light mb-0"
               style={{ fontSize: "14px", lineHeight: "1.6" }}
               data-aos="fade-up"
-              data-aos-delay="600"
+              data-aos-delay="450"
             >
               {movie.description ||
                 "Power. Loyalty. Betrayal. One man's rise to rule it all. A gripping gangster action thriller that will keep you on the edge of your seat."}
@@ -787,7 +808,7 @@ const MovieDetails = () => {
         <div
           className="text-center mb-3"
           data-aos="fade-down"
-          data-aos-duration="800"
+          data-aos-duration="600"
         >
           <FaComment
             className="text-danger mb-2"
@@ -798,7 +819,7 @@ const MovieDetails = () => {
           <h4
             className="text-white fw-bold mb-1"
             data-aos="zoom-in"
-            data-aos-delay="400"
+            data-aos-delay="300"
           >
             User Reviews
           </h4>
@@ -806,7 +827,7 @@ const MovieDetails = () => {
             className="text-light mb-0"
             style={{ fontSize: "14px" }}
             data-aos="fade-up"
-            data-aos-delay="600"
+            data-aos-delay="400"
           >
             What our audience thinks about this movie
           </p>
@@ -819,8 +840,8 @@ const MovieDetails = () => {
               <Card
                 className="border-0 text-white shadow mb-3"
                 style={{ backgroundColor: "#1f2025" }}
-                data-aos="slide-up"
-                data-aos-duration="600"
+                data-aos="fade-up"
+                data-aos-duration="500"
               >
                 <Card.Body className="p-3">
                   <h6 className="text-white mb-2">Write a Review</h6>
@@ -933,9 +954,9 @@ const MovieDetails = () => {
             <Card
               className="border-0 text-white shadow"
               style={{ backgroundColor: "#1f2025" }}
-              data-aos="slide-left"
-              data-aos-duration="800"
-              data-aos-delay="300"
+              data-aos="fade-right"
+              data-aos-duration="600"
+              data-aos-delay="200"
             >
               <Card.Body className="p-3">
                 <h6 className="text-white mb-3">Rating Breakdown</h6>

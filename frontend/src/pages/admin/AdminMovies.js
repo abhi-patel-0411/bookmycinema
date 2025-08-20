@@ -31,8 +31,17 @@ import { moviesAPI } from "../../services/api";
 import AdminLayout from "../../components/admin/AdminLayout";
 import ModernLoader from "../../components/common/ModernLoader";
 import { useSocket } from "../../contexts/SocketContext";
-import { getMoviePosterUrl } from "../../utils/imageUtils";
+
 import moment from "moment";
+
+const getMoviePosterUrl = (posterPath, movieTitle = null) => {
+  if (posterPath) {
+    if (posterPath.startsWith('data:image/') || posterPath.startsWith('http')) return posterPath;
+    return posterPath.startsWith('/') ? posterPath : `/${posterPath}`;
+  }
+  const initial = movieTitle ? movieTitle.charAt(0) : 'M';
+  return `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(initial)}`;
+};
 
 
 

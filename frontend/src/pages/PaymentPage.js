@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { FaArrowLeft, FaTicketAlt, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaCouch, FaLock, FaShieldAlt } from 'react-icons/fa';
 import StripePayment from '../components/payment/StripePayment';
 import api from '../services/api';
-import { testStripeConnection } from '../utils/stripeTest';
+
 import './PaymentPage.css';
 
 const PaymentPage = () => {
@@ -18,13 +18,6 @@ const PaymentPage = () => {
       navigate('/movies');
       return;
     }
-    
-    // Test Stripe connection on component mount
-    testStripeConnection().then(result => {
-      if (!result.success) {
-        console.warn('Stripe connection test failed:', result.error);
-      }
-    });
   }, [bookingData, navigate]);
 
   const handlePaymentSuccess = async (paymentIntent) => {

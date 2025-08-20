@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-export default function NotFound() {
+const NotFound = () => {
     return (
         <div 
             className="d-flex flex-column align-items-center justify-content-center text-center py-5"
@@ -56,4 +56,6 @@ export default function NotFound() {
             </Link>
         </div>
     );
-}
+};
+
+export default NotFound;

@@ -1,8 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { getMoviePosterUrl } from '../../utils/imageUtils';
+
 import '../../styles/trending-carousel.css';
+
+const getMoviePosterUrl = (posterPath, movieTitle = null) => {
+  if (posterPath) {
+    if (posterPath.startsWith('data:image/') || posterPath.startsWith('http')) return posterPath;
+    return posterPath.startsWith('/') ? posterPath : `/${posterPath}`;
+  }
+  const initial = movieTitle ? movieTitle.charAt(0) : 'M';
+  return `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(initial)}`;
+};
 
 const TrendingCarousel = ({ movies = [], title = "Recommended Movies" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);

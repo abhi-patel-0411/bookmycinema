@@ -1,5 +1,5 @@
 import axios from '../axios';
-
+// This is an object property name (a key in an object).
 const theatersAPI = {
   // Basic CRUD
   getAll: (params = {}) => {

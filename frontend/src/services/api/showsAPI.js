@@ -36,7 +36,7 @@ const deleteShow = (id) => {
   return api.delete(`/shows/${id}`);
 };
 
-export default {
+const showsAPI = {
   getAllShows,
   getShowById,
   getShowsByMovie,
@@ -47,3 +47,5 @@ export default {
   deleteShow,
   getCities
 };
+
+export default showsAPI;

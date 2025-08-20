@@ -25,8 +25,17 @@ import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import ModernLoader from "../components/common/ModernLoader";
 import api from "../services/api";
-import { getMoviePosterUrl } from "../utils/imageUtils";
+
 import "../styles/movies-cards-simple.css";
+
+const getMoviePosterUrl = (posterPath, movieTitle = null) => {
+  if (posterPath) {
+    if (posterPath.startsWith('data:image/') || posterPath.startsWith('http')) return posterPath;
+    return posterPath.startsWith('/') ? posterPath : `/${posterPath}`;
+  }
+  const initial = movieTitle ? movieTitle.charAt(0) : 'M';
+  return `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(initial)}`;
+};
 
 const Movies = () => {
   const navigate = useNavigate();
@@ -277,12 +286,12 @@ const Movies = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-5"
           data-aos="fade-down"
-          data-aos-duration="1000"
+          data-aos-duration="600"
         >
-          <h1 className="display-4 fw-bold text-white mb-3" data-aos="zoom-in" data-aos-delay="200">
+          <h1 className="display-4 fw-bold text-white mb-3" data-aos="zoom-in" data-aos-delay="150">
             All Movies
           </h1>
-          <p className="lead text-light" data-aos="fade-up" data-aos-delay="400">
+          <p className="lead text-light" data-aos="fade-up" data-aos-delay="300">
             Discover and book tickets for the latest blockbuster movies
           </p>
         </motion.div>
@@ -292,12 +301,12 @@ const Movies = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-4"
-          data-aos="slide-up"
-          data-aos-duration="800"
-          data-aos-delay="600"
+          data-aos="fade-up"
+          data-aos-duration="600"
+          data-aos-delay="400"
         >
           <Row className="align-items-center mb-3">
-            <Col lg={6} md={8} className="mb-3 mb-md-0" data-aos="slide-right" data-aos-delay="800">
+            <Col lg={6} md={8} className="mb-3 mb-md-0">
               <div
                 className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden"
                 style={{ height: "46px" }}
@@ -328,7 +337,7 @@ const Movies = () => {
               </div>
             </Col>
 
-            <Col lg={3} md={4} className="mb-3 mb-md-0" data-aos="slide-left" data-aos-delay="1000">
+            <Col lg={3} md={4} className="mb-3 mb-md-0">
               <Button
                 variant="outline-primary"
                 className="w-100 d-flex align-items-center justify-content-center"
@@ -858,9 +867,9 @@ const Movies = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.02, duration: 0.3 }}
-                        data-aos="flip-up"
-                        data-aos-delay={index * 50}
-                        data-aos-duration="600"
+                        data-aos="fade-up"
+                        data-aos-delay={Math.min(index * 30, 300)}
+                        data-aos-duration="500"
                       >
                         <div
                           className="movie-card-simple"
