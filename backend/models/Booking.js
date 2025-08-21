@@ -10,7 +10,10 @@ const bookingSchema = new mongoose.Schema({
   // Store movie and theater details directly in case the movie gets deactivated
   movieTitle: { type: String },
   moviePoster: { type: String },
+  movieRating: { type: String },
   theaterName: { type: String },
+  screenNumber: { type: Number },
+  screenName: { type: String },
   showDate: { type: Date },
   showTime: { type: String },
   seats: [{ type: String, required: true }],

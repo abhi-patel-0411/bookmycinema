@@ -92,48 +92,7 @@ const BookingPage = () => {
     return () => clearInterval(interval);
   }, [showId]);
 
-  // Add event listener for auto-released seats
-  useEffect(() => {
-    const handleAutoReleasedSeats = (event) => {
-      const {
-        showId: eventShowId,
-        seats,
-        userId: eventUserId,
-        message,
-      } = event.detail;
-      if (eventShowId === showId) {
-        // Remove from locked seats for all users (other users see seats become available)
-        setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
-
-        // If this user's seats were auto-released, clear their selected seats
-        if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
-          setSelectedSeats([]);
-          if (seats.length > 0 && message) {
-            toast.warning(message);
-          }
-        }
-      }
-    };
-
-    const handleSeatsAvailable = (event) => {
-      const { showId: eventShowId, seats } = event.detail;
-      if (eventShowId === showId) {
-        // Remove from locked seats when they become available
-        setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
-      }
-    };
-
-    window.addEventListener("seats-auto-released", handleAutoReleasedSeats);
-    window.addEventListener("seats-available", handleSeatsAvailable);
-
-    return () => {
-      window.removeEventListener(
-        "seats-auto-released",
-        handleAutoReleasedSeats
-      );
-      window.removeEventListener("seats-available", handleSeatsAvailable);
-    };
-  }, [showId, user, clerkUser]);
+  // Auto-release functionality removed
 
   const setupRealTimeListeners = () => {
     window.addEventListener("seat-conflict", handleSeatConflict);
@@ -177,15 +136,15 @@ const BookingPage = () => {
   const handleSeatsReleased = (event) => {
     const { showId: eventShowId, seats, userId: eventUserId } = event.detail;
     if (eventShowId === showId) {
-      // Remove from locked seats for all users (other users see seats become available)
+      // Remove from locked seats for all users (seats become available for everyone)
       setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
 
-      // If these were our seats that got released, clear all selected seats
+      // If these were our seats that got released, clear selected seats
       if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
         setSelectedSeats([]);
         if (seats.length > 0) {
           toast.warning(
-            "Your seat selection has expired. Please select seats again."
+            "Your seat selection has been released."
           );
         }
       }
@@ -218,7 +177,7 @@ const BookingPage = () => {
         // Show conflict message immediately
         toast.error(message);
         setConflictMessage(message);
-        setTimeout(() => setConflictMessage(""), 5000);
+        setTimeout(() => setConflictMessage(""), 2000);
 
         // Update locked seats to reflect the conflict
         setLockedSeats((prev) => [...new Set([...prev, ...conflicts])]);
@@ -333,6 +292,7 @@ const BookingPage = () => {
   const handleSeatClick = async (seat) => {
     if (bookedSeats.includes(seat.id)) return;
 
+    // Check if seat is locked by another user
     if (
       lockedSeats.includes(seat.id) &&
       !selectedSeats.some((s) => s.id === seat.id)
@@ -341,7 +301,7 @@ const BookingPage = () => {
       const conflictMessage = `Seat ${seat.id} is currently being selected by another user`;
       toast.error(conflictMessage);
       setConflictMessage(conflictMessage);
-      setTimeout(() => setConflictMessage(""), 5000);
+      setTimeout(() => setConflictMessage(""), 3000);
 
       // Highlight the locked seat visually
       const seatElement = document.querySelector(`button[title*="${seat.id}"]`);
@@ -358,6 +318,7 @@ const BookingPage = () => {
     const isSelected = selectedSeats.some((s) => s.id === seat.id);
 
     if (isSelected) {
+      // Deselect seat
       setSelectedSeats((prev) => prev.filter((s) => s.id !== seat.id));
 
       try {
@@ -367,9 +328,11 @@ const BookingPage = () => {
         });
       } catch (error) {
         console.error("Error releasing seat:", error);
+        // Revert the local state if API call fails
         setSelectedSeats((prev) => [...prev, seat]);
       }
     } else {
+      // Select seat
       if (selectedSeats.length >= 10) {
         toast.warning("Maximum 10 seats can be selected");
         return;
@@ -378,6 +341,9 @@ const BookingPage = () => {
       const result = await selectSeatsOnServer([seat]);
       if (result.success) {
         setSelectedSeats((prev) => [...prev, seat]);
+      } else {
+        // If selection failed due to conflict, refresh locked seats
+        fetchLockedSeats();
       }
     }
   };

@@ -109,12 +109,12 @@ const MovieTicket = ({ booking }) => {
                       ? booking.show?.movie?.genre[0]
                       : booking.show?.movie?.genre || "Movie"}
                   </Badge>
-                  <div className="d-flex align-items-center text-warning">
+                  {/* <div className="d-flex align-items-center text-warning">
                     <FaStar className="me-1" size={14} />
                     <span className="small">
-                      {booking.show?.movie?.rating || "N/A"}
+                      {booking.show?.movie?.rating || booking.movieRating || "N/A"}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -126,14 +126,15 @@ const MovieTicket = ({ booking }) => {
                       <h6 className="mb-0 text-light">Theater</h6>
                     </div>
                     <p className="mb-0 h5">
-                      {booking.show?.theater?.name || "Theater"}
+                      {booking.show?.theater?.name || booking.theaterName || "Theater"}
                     </p>
                     <small className="text-light opacity-75">
-                      Screen{" "}
-                      {booking.show?.theater?.screen ||
-                        booking.show?.screenNumber ||
-                        booking.show?.screen ||
-                        "N/A"}
+                      {booking.screenName ||
+                        booking.show?.theater?.screens?.find(screen => 
+                          screen.screenNumber === booking.show?.screenNumber
+                        )?.name ||
+                        `Screen ${booking.show?.screenNumber || booking.screenNumber}` ||
+                        "Screen N/A"}
                     </small>
                   </div>
 

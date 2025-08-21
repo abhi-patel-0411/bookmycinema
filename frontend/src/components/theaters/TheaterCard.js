@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Badge, Button } from 'react-bootstrap';
-import { FaMapMarkerAlt, FaPhone, FaDesktop, FaStar, FaEye, FaWifi, FaParking, FaCoffee, FaRestroom } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhone, FaDesktop, FaStar, FaFilm, FaWifi, FaParking, FaCoffee, FaRestroom } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 const TheaterCard = ({ theater, index }) => {

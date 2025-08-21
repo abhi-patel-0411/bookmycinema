@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import { motion } from 'framer-motion';
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { motion } from "framer-motion";
 import {
   FaFilm,
   FaTicketAlt,
@@ -17,6 +17,7 @@ import {
 } from "react-icons/fa";
 import "./About.css";
 import BrandLogo from "../components/common/BrandLogo";
+import { Link } from "react-router-dom";
 
 const About = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -94,14 +95,38 @@ const About = () => {
   ];
 
   return (
-    <div className="about-page" style={{ backgroundColor: '#1f2025', minHeight: '100vh' }}>
+    <div
+      className="about-page"
+      style={{ backgroundColor: "#1f2025", minHeight: "100vh" }}
+    >
       {/* Hero Section */}
-      <section className="hero-section" style={{ paddingTop: '120px', paddingBottom: '80px', background: 'linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, #1f2025 100%)', position: 'relative', overflow: 'hidden' }}>
-        <div className="hero-background" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(circle at 20% 80%, rgba(229, 9, 20, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(229, 9, 20, 0.1) 0%, transparent 50%)' }}></div>
+      <section
+        className="hero-section"
+        style={{
+          paddingTop: "120px",
+          paddingBottom: "80px",
+          background:
+            "linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, #1f2025 100%)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          className="hero-background"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background:
+              "radial-gradient(circle at 20% 80%, rgba(229, 9, 20, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(229, 9, 20, 0.1) 0%, transparent 50%)",
+          }}
+        ></div>
         <Container className="position-relative">
           <Row className="justify-content-center text-center">
             <Col lg={10} xl={8}>
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
@@ -109,26 +134,73 @@ const About = () => {
                 data-aos="fade-up"
                 data-aos-duration="1000"
               >
-                <div className="d-flex justify-content-center align-items-center mb-4" data-aos="zoom-in" data-aos-delay="200">
+                <div
+                  className="d-flex justify-content-center align-items-center mb-4"
+                  data-aos="zoom-in"
+                  data-aos-delay="200"
+                >
                   <BrandLogo />
                 </div>
-                <p className="text-light mb-4" style={{ fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)', fontFamily: 'Inter, sans-serif', fontWeight: '400', lineHeight: '1.6', maxWidth: '600px', margin: '0 auto 2rem' }} data-aos="fade-up" data-aos-delay="400">
-                  Your premier destination for seamless movie booking experiences with cutting-edge technology
+                <p
+                  className="text-light mb-4"
+                  style={{
+                    fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: "400",
+                    lineHeight: "1.6",
+                    maxWidth: "600px",
+                    margin: "0 auto 2rem",
+                  }}
+                  data-aos="fade-up"
+                  data-aos-delay="400"
+                >
+                  Your premier destination for seamless movie booking
+                  experiences with cutting-edge technology
                 </p>
-                <div className="d-flex align-items-center justify-content-center gap-3 mb-4" data-aos="slide-up" data-aos-delay="600">
-                  <div style={{ width: '60px', height: '2px', background: 'linear-gradient(135deg, transparent, #e50914, transparent)' }}></div>
+                <div
+                  className="d-flex align-items-center justify-content-center gap-3 mb-4"
+                  data-aos="slide-up"
+                  data-aos-delay="600"
+                >
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "2px",
+                      background:
+                        "linear-gradient(135deg, transparent, #e50914, transparent)",
+                    }}
+                  ></div>
                   <FaPlay className="text-danger" size={20} />
-                  <div style={{ width: '60px', height: '2px', background: 'linear-gradient(135deg, transparent, #e50914, transparent)' }}></div>
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "2px",
+                      background:
+                        "linear-gradient(135deg, transparent, #e50914, transparent)",
+                    }}
+                  ></div>
                 </div>
-                <Button 
-                  variant="danger" 
-                  size="lg" 
+                <Button
+                  variant="danger"
+                  size="lg"
                   className="px-5 py-3 fw-semibold"
-                  style={{ fontFamily: 'Inter, sans-serif', borderRadius: '50px', fontSize: '1.1rem', letterSpacing: '0.5px' }}
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    borderRadius: "50px",
+                    fontSize: "1.1rem",
+                    letterSpacing: "0.5px",
+                    textDecoration: "none",
+                  }}
                   data-aos="bounce"
                   data-aos-delay="800"
                 >
-                  Explore Movies
+                  <Link
+                    to="/movies"
+                    style={{ textDecoration: "none", color: "#fff" }}
+                  >
+                    {" "}
+                    Explore Movies
+                  </Link>
                 </Button>
               </motion.div>
             </Col>
@@ -137,7 +209,7 @@ const About = () => {
       </section>
 
       {/* Stats Section */}
-      <section style={{ padding: '80px 0', backgroundColor: '#1f2025' }}>
+      <section style={{ padding: "80px 0", backgroundColor: "#1f2025" }}>
         <Container>
           <Row className="g-4">
             <Col md={4}>
@@ -150,15 +222,43 @@ const About = () => {
                 data-aos-delay="100"
                 data-aos-duration="800"
               >
-                <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <Card
+                  className="h-100 border-0 shadow-lg"
+                  style={{
+                    backgroundColor: "#1f2025",
+                    backdropFilter: "blur(20px)",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
                   <Card.Body className="text-center p-4">
-                    <div className="mb-3 p-3 rounded-circle d-inline-flex" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
+                    <div
+                      className="mb-3 p-3 rounded-circle d-inline-flex"
+                      style={{
+                        background: "linear-gradient(135deg, #e50914, #ff4757)",
+                      }}
+                    >
                       <FaFilm size={32} className="text-white" />
                     </div>
-                    <h3 className="fw-bold text-white mb-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '2.5rem' }}>
+                    <h3
+                      className="fw-bold text-white mb-2"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "2.5rem",
+                      }}
+                    >
                       {counters.movies.toLocaleString()}+
                     </h3>
-                    <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.1rem', fontWeight: '500' }}>Movies Available</p>
+                    <p
+                      className="text-light mb-0"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1.1rem",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Movies Available
+                    </p>
                   </Card.Body>
                 </Card>
               </motion.div>
@@ -173,15 +273,43 @@ const About = () => {
                 data-aos-delay="300"
                 data-aos-duration="800"
               >
-                <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <Card
+                  className="h-100 border-0 shadow-lg"
+                  style={{
+                    backgroundColor: "#1f2025",
+                    backdropFilter: "blur(20px)",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
                   <Card.Body className="text-center p-4">
-                    <div className="mb-3 p-3 rounded-circle d-inline-flex" style={{ background: 'linear-gradient(135deg, #28a745, #20c997)' }}>
+                    <div
+                      className="mb-3 p-3 rounded-circle d-inline-flex"
+                      style={{
+                        background: "linear-gradient(135deg, #28a745, #20c997)",
+                      }}
+                    >
                       <FaUsers size={32} className="text-white" />
                     </div>
-                    <h3 className="fw-bold text-white mb-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '2.5rem' }}>
+                    <h3
+                      className="fw-bold text-white mb-2"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "2.5rem",
+                      }}
+                    >
                       {counters.users.toLocaleString()}+
                     </h3>
-                    <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.1rem', fontWeight: '500' }}>Happy Users</p>
+                    <p
+                      className="text-light mb-0"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1.1rem",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Happy Users
+                    </p>
                   </Card.Body>
                 </Card>
               </motion.div>
@@ -196,15 +324,43 @@ const About = () => {
                 data-aos-delay="500"
                 data-aos-duration="800"
               >
-                <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <Card
+                  className="h-100 border-0 shadow-lg"
+                  style={{
+                    backgroundColor: "#1f2025",
+                    backdropFilter: "blur(20px)",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
                   <Card.Body className="text-center p-4">
-                    <div className="mb-3 p-3 rounded-circle d-inline-flex" style={{ background: 'linear-gradient(135deg, #ffc107, #fd7e14)' }}>
+                    <div
+                      className="mb-3 p-3 rounded-circle d-inline-flex"
+                      style={{
+                        background: "linear-gradient(135deg, #ffc107, #fd7e14)",
+                      }}
+                    >
                       <FaTicketAlt size={32} className="text-white" />
                     </div>
-                    <h3 className="fw-bold text-white mb-2" style={{ fontFamily: 'Inter, sans-serif', fontSize: '2.5rem' }}>
+                    <h3
+                      className="fw-bold text-white mb-2"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "2.5rem",
+                      }}
+                    >
                       {counters.bookings.toLocaleString()}+
                     </h3>
-                    <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.1rem', fontWeight: '500' }}>Tickets Booked</p>
+                    <p
+                      className="text-light mb-0"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1.1rem",
+                        fontWeight: "500",
+                      }}
+                    >
+                      Tickets Booked
+                    </p>
                   </Card.Body>
                 </Card>
               </motion.div>
@@ -214,7 +370,7 @@ const About = () => {
       </section>
 
       {/* Features Section */}
-      <section style={{ padding: '100px 0', backgroundColor: '#1f2025' }}>
+      <section style={{ padding: "100px 0", backgroundColor: "#1f2025" }}>
         <Container>
           <Row className="justify-content-center mb-5">
             <Col lg={8} className="text-center">
@@ -226,9 +382,31 @@ const About = () => {
                 data-aos="fade-down"
                 data-aos-duration="800"
               >
-                <h2 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(2rem, 4vw, 2.8rem)', letterSpacing: '-0.01em' }} data-aos="zoom-in" data-aos-delay="200">Why Choose Book My Cinema?</h2>
-                <p className="text-light" style={{ fontSize: '1.2rem', fontFamily: 'Inter, sans-serif', fontWeight: '400', lineHeight: '1.6' }} data-aos="fade-up" data-aos-delay="400">
-                  Experience the future of movie booking with our cutting-edge platform
+                <h2
+                  className="fw-bold text-white mb-3"
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: "clamp(2rem, 4vw, 2.8rem)",
+                    letterSpacing: "-0.01em",
+                  }}
+                  data-aos="zoom-in"
+                  data-aos-delay="200"
+                >
+                  Why Choose Book My Cinema?
+                </h2>
+                <p
+                  className="text-light"
+                  style={{
+                    fontSize: "1.2rem",
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: "400",
+                    lineHeight: "1.6",
+                  }}
+                  data-aos="fade-up"
+                  data-aos-delay="400"
+                >
+                  Experience the future of movie booking with our cutting-edge
+                  platform
                 </p>
               </motion.div>
             </Col>
@@ -246,13 +424,48 @@ const About = () => {
                   data-aos-delay={index * 150}
                   data-aos-duration="600"
                 >
-                  <Card className="h-100 border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.1)', transition: 'all 0.3s ease' }}>
+                  <Card
+                    className="h-100 border-0 shadow-lg"
+                    style={{
+                      backgroundColor: "#1f2025",
+                      backdropFilter: "blur(20px)",
+                      borderRadius: "20px",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      transition: "all 0.3s ease",
+                    }}
+                  >
                     <Card.Body className="text-center p-4">
-                      <div className="mb-3 p-3 rounded-circle d-inline-flex" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
-                        {React.cloneElement(feature.icon, { size: 28, className: 'text-white' })}
+                      <div
+                        className="mb-3 p-3 rounded-circle d-inline-flex"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, #e50914, #ff4757)",
+                        }}
+                      >
+                        {React.cloneElement(feature.icon, {
+                          size: 28,
+                          className: "text-white",
+                        })}
                       </div>
-                      <h4 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.3rem' }}>{feature.title}</h4>
-                      <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', lineHeight: '1.6' }}>{feature.description}</p>
+                      <h4
+                        className="fw-bold text-white mb-3"
+                        style={{
+                          fontFamily: "Inter, sans-serif",
+                          fontSize: "1.3rem",
+                        }}
+                      >
+                        {feature.title}
+                      </h4>
+                      <p
+                        className="text-light mb-0"
+                        style={{
+                          fontFamily: "Inter, sans-serif",
+                          fontSize: "1rem",
+                          lineHeight: "1.6",
+                        }}
+                      >
+                        {feature.description}
+                      </p>
                     </Card.Body>
                   </Card>
                 </motion.div>
@@ -263,7 +476,13 @@ const About = () => {
       </section>
 
       {/* Mission Section */}
-      <section style={{ padding: '100px 0', background: 'linear-gradient(135deg, rgba(229, 9, 20, 0.05), #1f2025)' }}>
+      <section
+        style={{
+          padding: "100px 0",
+          background:
+            "linear-gradient(135deg, rgba(229, 9, 20, 0.05), #1f2025)",
+        }}
+      >
         <Container>
           <Row className="align-items-center">
             <Col lg={6} className="mb-4 mb-lg-0">
@@ -275,28 +494,90 @@ const About = () => {
                 data-aos="slide-right"
                 data-aos-duration="1000"
               >
-                <h2 className="fw-bold text-white mb-4" style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(2rem, 4vw, 2.5rem)', letterSpacing: '-0.01em' }} data-aos="fade-up" data-aos-delay="200">Our Mission</h2>
-                <p className="text-light mb-4" style={{ fontSize: '1.1rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.8', fontWeight: '400' }}>
-                  At Book My Cinema, we believe that going to the movies should be effortless and enjoyable. Our mission is to revolutionize the way people discover, book, and experience cinema by providing a seamless, user-friendly platform that connects movie lovers with their favorite films.
+                <h2
+                  className="fw-bold text-white mb-4"
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: "clamp(2rem, 4vw, 2.5rem)",
+                    letterSpacing: "-0.01em",
+                  }}
+                  data-aos="fade-up"
+                  data-aos-delay="200"
+                >
+                  Our Mission
+                </h2>
+                <p
+                  className="text-light mb-4"
+                  style={{
+                    fontSize: "1.1rem",
+                    fontFamily: "Inter, sans-serif",
+                    lineHeight: "1.8",
+                    fontWeight: "400",
+                  }}
+                >
+                  At Book My Cinema, we believe that going to the movies should
+                  be effortless and enjoyable. Our mission is to revolutionize
+                  the way people discover, book, and experience cinema by
+                  providing a seamless, user-friendly platform that connects
+                  movie lovers with their favorite films.
                 </p>
                 <div className="d-flex flex-column gap-3">
                   <div className="d-flex align-items-center gap-3">
-                    <div className="p-2 rounded-circle" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
+                    <div
+                      className="p-2 rounded-circle"
+                      style={{
+                        background: "linear-gradient(135deg, #e50914, #ff4757)",
+                      }}
+                    >
                       <FaClock className="text-white" size={16} />
                     </div>
-                    <span className="text-white fw-medium" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem' }}>24/7 Booking Available</span>
+                    <span
+                      className="text-white fw-medium"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1rem",
+                      }}
+                    >
+                      24/7 Booking Available
+                    </span>
                   </div>
                   <div className="d-flex align-items-center gap-3">
-                    <div className="p-2 rounded-circle" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
+                    <div
+                      className="p-2 rounded-circle"
+                      style={{
+                        background: "linear-gradient(135deg, #e50914, #ff4757)",
+                      }}
+                    >
                       <FaHeart className="text-white" size={16} />
                     </div>
-                    <span className="text-white fw-medium" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem' }}>Customer-Centric Approach</span>
+                    <span
+                      className="text-white fw-medium"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1rem",
+                      }}
+                    >
+                      Customer-Centric Approach
+                    </span>
                   </div>
                   <div className="d-flex align-items-center gap-3">
-                    <div className="p-2 rounded-circle" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
+                    <div
+                      className="p-2 rounded-circle"
+                      style={{
+                        background: "linear-gradient(135deg, #e50914, #ff4757)",
+                      }}
+                    >
                       <FaAward className="text-white" size={16} />
                     </div>
-                    <span className="text-white fw-medium" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem' }}>Premium Quality Service</span>
+                    <span
+                      className="text-white fw-medium"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1rem",
+                      }}
+                    >
+                      Premium Quality Service
+                    </span>
                   </div>
                 </div>
               </motion.div>
@@ -312,13 +593,45 @@ const About = () => {
                 data-aos-duration="1000"
                 data-aos-delay="300"
               >
-                <Card className="border-0 shadow-lg" style={{ backgroundColor: '#1f2025', backdropFilter: 'blur(20px)', borderRadius: '25px', maxWidth: '400px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <Card
+                  className="border-0 shadow-lg"
+                  style={{
+                    backgroundColor: "#1f2025",
+                    backdropFilter: "blur(20px)",
+                    borderRadius: "25px",
+                    maxWidth: "400px",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                  }}
+                >
                   <Card.Body className="text-center p-5">
-                    <div className="mb-4 p-4 rounded-circle d-inline-flex" style={{ background: 'linear-gradient(135deg, #e50914, #ff4757)' }}>
+                    <div
+                      className="mb-4 p-4 rounded-circle d-inline-flex"
+                      style={{
+                        background: "linear-gradient(135deg, #e50914, #ff4757)",
+                      }}
+                    >
                       <FaGlobe size={48} className="text-white" />
                     </div>
-                    <h3 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.5rem' }}>Premium Cinema Experience</h3>
-                    <p className="text-light mb-0" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1rem', lineHeight: '1.6' }}>Bringing the magic of movies to your fingertips with cutting-edge technology</p>
+                    <h3
+                      className="fw-bold text-white mb-3"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1.5rem",
+                      }}
+                    >
+                      Premium Cinema Experience
+                    </h3>
+                    <p
+                      className="text-light mb-0"
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "1rem",
+                        lineHeight: "1.6",
+                      }}
+                    >
+                      Bringing the magic of movies to your fingertips with
+                      cutting-edge technology
+                    </p>
                   </Card.Body>
                 </Card>
               </motion.div>
@@ -328,7 +641,7 @@ const About = () => {
       </section>
 
       {/* Footer Section */}
-      <section style={{ padding: '80px 0 40px', backgroundColor: '#1f2025' }}>
+      <section style={{ padding: "80px 0 40px", backgroundColor: "#1f2025" }}>
         <Container>
           <Row className="justify-content-center text-center">
             <Col lg={8}>
@@ -340,26 +653,75 @@ const About = () => {
                 data-aos="fade-up"
                 data-aos-duration="800"
               >
-                <h3 className="fw-bold text-white mb-3" style={{ fontFamily: 'Inter, sans-serif', fontSize: '2rem', letterSpacing: '-0.01em' }} data-aos="zoom-in" data-aos-delay="200">Ready to Start Your Journey?</h3>
-                <p className="text-light mb-4" style={{ fontSize: '1.1rem', fontFamily: 'Inter, sans-serif', lineHeight: '1.6', fontWeight: '400' }}>
-                  Join thousands of movie enthusiasts who trust Book My Cinema for their entertainment needs.
+                <h3
+                  className="fw-bold text-white mb-3"
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: "2rem",
+                    letterSpacing: "-0.01em",
+                  }}
+                  data-aos="zoom-in"
+                  data-aos-delay="200"
+                >
+                  Ready to Start Your Journey?
+                </h3>
+                <p
+                  className="text-light mb-4"
+                  style={{
+                    fontSize: "1.1rem",
+                    fontFamily: "Inter, sans-serif",
+                    lineHeight: "1.6",
+                    fontWeight: "400",
+                  }}
+                >
+                  Join thousands of movie enthusiasts who trust Book My Cinema
+                  for their entertainment needs.
                 </p>
                 <div className="d-flex align-items-center justify-content-center gap-3 mb-4">
-                  <div style={{ width: '60px', height: '2px', background: 'linear-gradient(135deg, transparent, #e50914, transparent)' }}></div>
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "2px",
+                      background:
+                        "linear-gradient(135deg, transparent, #e50914, transparent)",
+                    }}
+                  ></div>
                   <FaStar className="text-warning" size={20} />
-                  <div style={{ width: '60px', height: '2px', background: 'linear-gradient(135deg, transparent, #e50914, transparent)' }}></div>
+                  <div
+                    style={{
+                      width: "60px",
+                      height: "2px",
+                      background:
+                        "linear-gradient(135deg, transparent, #e50914, transparent)",
+                    }}
+                  ></div>
                 </div>
-                <Button 
-                  variant="outline-light" 
-                  size="lg" 
+                <Button
+                  variant="outline-light"
+                  size="lg"
                   className="px-5 py-3 fw-semibold mb-4"
-                  style={{ fontFamily: 'Inter, sans-serif', borderRadius: '50px', fontSize: '1.1rem', letterSpacing: '0.5px' }}
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    borderRadius: "50px",
+                    fontSize: "1.1rem",
+                    letterSpacing: "0.5px",
+                  }}
                 >
                   Get Started Today
                 </Button>
-                <p className="text-muted mt-4" style={{ fontSize: '0.9rem', fontFamily: 'Inter, sans-serif' }}>
+                <p
+                  className="text-muted mt-4"
+                  style={{
+                    fontSize: "0.9rem",
+                    fontFamily: "Inter, sans-serif",
+                  }}
+                >
                   © 2025 Book My Cinema. All rights reserved. Made with{" "}
-                  <FaHeart className="text-danger mx-1" style={{ animation: 'heartBeat 1.5s ease-in-out infinite' }} /> for movie lovers.
+                  <FaHeart
+                    className="text-danger mx-1"
+                    style={{ animation: "heartBeat 1.5s ease-in-out infinite" }}
+                  />{" "}
+                  for movie lovers.
                 </p>
               </motion.div>
             </Col>
