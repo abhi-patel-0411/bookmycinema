@@ -49,12 +49,7 @@ const CustomSeatLayout = ({
     if (status === 'booked') return '#dc3545';
     if (status === 'selected') return '#28a745';
     
-    switch (seatClass) {
-      case 'premium': return '#8b5cf6'; // Purple
-      case 'gold': return '#fbbf24'; // Gold
-      case 'silver': return '#6b7280'; // Gray
-      default: return '#6b7280';
-    }
+    return 'rgba(184, 184, 184, 0.3)';
   };
 
   const handleSeatClick = (row, seatNumber, rowIndex, seatClass) => {

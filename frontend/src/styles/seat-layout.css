@@ -123,14 +123,14 @@
 }
 
 .seat-selected {
-  background: linear-gradient(135deg, #dc3545, #ff6b35);
+  background: #ff9800;
   border: 2px solid #ffffff;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
 }
 
 .seat-booked {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: #fd0505;
   cursor: not-allowed;
   opacity: 0.7;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -148,43 +148,43 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Premium seats - Royal Purple */
+/* Premium seats */
 .seat-premium {
-  background: linear-gradient(135deg, #9333ea, #7e22ce);
-  border: 2px solid rgba(147, 51, 234, 0.3);
-  box-shadow: 0 2px 6px rgba(147, 51, 234, 0.4);
+  background: rgba(184, 184, 184, 0.3);
+  border: 2px solid transparent;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .seat-premium:hover {
-  background: linear-gradient(135deg, #7e22ce, #6b21a8);
+  background: #66bb6a;
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.5);
+  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
 }
 
-/* Gold seats - Rich Gold */
+/* Gold seats */
 .gold-seat {
-  background: linear-gradient(135deg, #eab308, #ca8a04);
-  border: 2px solid rgba(234, 179, 8, 0.3);
-  box-shadow: 0 2px 6px rgba(234, 179, 8, 0.4);
+  background: rgba(184, 184, 184, 0.3);
+  border: 2px solid transparent;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .gold-seat:hover {
-  background: linear-gradient(135deg, #ca8a04, #a16207);
+  background: #66bb6a;
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.5);
+  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
 }
 
-/* Silver seats - Elegant Silver */
+/* Silver seats */
 .silver-seat {
-  background: linear-gradient(135deg, #94a3b8, #64748b);
-  border: 2px solid rgba(148, 163, 184, 0.3);
-  box-shadow: 0 2px 6px rgba(148, 163, 184, 0.4);
+  background: rgba(184, 184, 184, 0.3);
+  border: 2px solid transparent;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .silver-seat:hover {
-  background: linear-gradient(135deg, #64748b, #475569);
+  background: #66bb6a;
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.5);
+  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
 }
 
 .seat-gap {

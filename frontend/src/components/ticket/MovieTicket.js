@@ -112,7 +112,7 @@ const MovieTicket = ({ booking }) => {
                   <div className="d-flex align-items-center text-warning">
                     <FaStar className="me-1" size={14} />
                     <span className="small">
-                      {booking.show?.movie?.rating || "8.5"}
+                      {booking.show?.movie?.rating || "N/A"}
                     </span>
                   </div>
                 </div>
@@ -132,7 +132,8 @@ const MovieTicket = ({ booking }) => {
                       Screen{" "}
                       {booking.show?.theater?.screen ||
                         booking.show?.screenNumber ||
-                        "1"}
+                        booking.show?.screen ||
+                        "N/A"}
                     </small>
                   </div>
 

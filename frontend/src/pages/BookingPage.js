@@ -40,12 +40,24 @@ const BookingPage = () => {
     fetchShowDetails();
     setupRealTimeListeners();
     
-    // Fetch current locked seats on component mount
-    if (showId) {
-      fetchLockedSeats();
-    }
+    // Don't fetch locked seats on page load - start with clean state
+    // Locked seats will be updated via socket events only
+
+    // Clear ALL selected seats on page refresh
+    const handleBeforeUnload = () => {
+      // Clear your selected seats
+      if (selectedSeats.length > 0) {
+        releaseSelectedSeats();
+      }
+      // Clear local state immediately
+      setSelectedSeats([]);
+      setLockedSeats([]);
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       if (selectedSeats.length > 0) {
         releaseSelectedSeats();
       }
@@ -55,10 +67,17 @@ const BookingPage = () => {
   const fetchLockedSeats = async () => {
     try {
       const response = await api.get(`/bookings/locked-seats/${showId}`);
-      setLockedSeats(response.data.lockedSeats);
-      console.log('Fetched locked seats:', response.data.lockedSeats);
+      const lockedSeatsData = response.data.lockedSeats || [];
+      setLockedSeats(lockedSeatsData);
+      console.log('Fetched locked seats:', lockedSeatsData);
+      
+      // Force re-render of seat layout if locked seats changed
+      if (lockedSeatsData.length > 0) {
+        console.log('Locked seats found, updating display');
+      }
     } catch (error) {
       console.error('Error fetching locked seats:', error);
+      // Don't clear locked seats on error, keep existing state
     }
   };
 
@@ -83,14 +102,12 @@ const BookingPage = () => {
         message,
       } = event.detail;
       if (eventShowId === showId) {
-        // Remove from locked seats for all users
+        // Remove from locked seats for all users (other users see seats become available)
         setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
         
-        // If this user's seats were auto-released, remove from selected seats
+        // If this user's seats were auto-released, clear their selected seats
         if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
-          setSelectedSeats((prev) =>
-            prev.filter((seat) => !seats.includes(seat.id))
-          );
+          setSelectedSeats([]);
           if (seats.length > 0 && message) {
             toast.warning(message);
           }
@@ -157,13 +174,12 @@ const BookingPage = () => {
   const handleSeatsReleased = (event) => {
     const { showId: eventShowId, seats, userId: eventUserId } = event.detail;
     if (eventShowId === showId) {
+      // Remove from locked seats for all users (other users see seats become available)
       setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
 
-      // If these were our seats that got released, also update selectedSeats
+      // If these were our seats that got released, clear all selected seats
       if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
-        setSelectedSeats((prev) =>
-          prev.filter((seat) => !seats.includes(seat.id))
-        );
+        setSelectedSeats([]);
         if (seats.length > 0) {
           toast.warning(
             "Your seat selection has expired. Please select seats again."
@@ -214,13 +230,14 @@ const BookingPage = () => {
   };
 
   const releaseSelectedSeats = async () => {
-    if (selectedSeats.length === 0) return;
+    if (selectedSeats.length === 0 || !show?._id) return;
 
     try {
       await api.post("/bookings/release-seats", {
         showId: show._id,
         seats: selectedSeats.map((seat) => seat.id),
       });
+      console.log('Released seats:', selectedSeats.map(seat => seat.id));
     } catch (error) {
       console.error("Error releasing seats:", error);
     }
