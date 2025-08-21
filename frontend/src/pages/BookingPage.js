@@ -39,7 +39,7 @@ const BookingPage = () => {
   useEffect(() => {
     fetchShowDetails();
     setupRealTimeListeners();
-    
+
     // Don't fetch locked seats on page load - start with clean state
     // Locked seats will be updated via socket events only
 
@@ -53,11 +53,11 @@ const BookingPage = () => {
       setSelectedSeats([]);
       setLockedSeats([]);
     };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       if (selectedSeats.length > 0) {
         releaseSelectedSeats();
       }
@@ -69,14 +69,14 @@ const BookingPage = () => {
       const response = await api.get(`/bookings/locked-seats/${showId}`);
       const lockedSeatsData = response.data.lockedSeats || [];
       setLockedSeats(lockedSeatsData);
-      console.log('Fetched locked seats:', lockedSeatsData);
-      
+      console.log("Fetched locked seats:", lockedSeatsData);
+
       // Force re-render of seat layout if locked seats changed
       if (lockedSeatsData.length > 0) {
-        console.log('Locked seats found, updating display');
+        console.log("Locked seats found, updating display");
       }
     } catch (error) {
-      console.error('Error fetching locked seats:', error);
+      console.error("Error fetching locked seats:", error);
       // Don't clear locked seats on error, keep existing state
     }
   };
@@ -84,11 +84,11 @@ const BookingPage = () => {
   // Periodically refresh locked seats to ensure sync
   useEffect(() => {
     if (!showId) return;
-    
+
     const interval = setInterval(() => {
       fetchLockedSeats();
     }, 5000); // Refresh every 5 seconds
-    
+
     return () => clearInterval(interval);
   }, [showId]);
 
@@ -104,7 +104,7 @@ const BookingPage = () => {
       if (eventShowId === showId) {
         // Remove from locked seats for all users (other users see seats become available)
         setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
-        
+
         // If this user's seats were auto-released, clear their selected seats
         if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
           setSelectedSeats([]);
@@ -127,7 +127,10 @@ const BookingPage = () => {
     window.addEventListener("seats-available", handleSeatsAvailable);
 
     return () => {
-      window.removeEventListener("seats-auto-released", handleAutoReleasedSeats);
+      window.removeEventListener(
+        "seats-auto-released",
+        handleAutoReleasedSeats
+      );
       window.removeEventListener("seats-available", handleSeatsAvailable);
     };
   }, [showId, user, clerkUser]);
@@ -237,7 +240,10 @@ const BookingPage = () => {
         showId: show._id,
         seats: selectedSeats.map((seat) => seat.id),
       });
-      console.log('Released seats:', selectedSeats.map(seat => seat.id));
+      console.log(
+        "Released seats:",
+        selectedSeats.map((seat) => seat.id)
+      );
     } catch (error) {
       console.error("Error releasing seats:", error);
     }
@@ -485,7 +491,9 @@ const BookingPage = () => {
                 {show.theater?.type || "2D"}
               </Badge>
               <div className="text-light small">Starting from</div>
-              <div className="text-white h4 fw-bold">₹{show.pricing?.silver || show.price}</div>
+              <div className="text-white h4 fw-bold">
+                ₹{show.pricing?.silver || show.price}
+              </div>
             </Col>
           </Row>
         </motion.div>
@@ -531,8 +539,6 @@ const BookingPage = () => {
             />
           </div>
 
-
-
           {/* Seat Legend */}
           <div className="text-center">
             <h6 className="text-white fw-semibold mb-3">Seat Legend</h6>
@@ -544,7 +550,7 @@ const BookingPage = () => {
                     style={{
                       width: "20px",
                       height: "20px",
-                      background: "linear-gradient(135deg, #10b981, #059669)",
+                      background: "rgba(184, 184, 184, 0.3)",
                     }}
                   ></div>
                   <small className="text-light">Available</small>
@@ -557,7 +563,7 @@ const BookingPage = () => {
                     style={{
                       width: "20px",
                       height: "20px",
-                      background: "linear-gradient(135deg, #dc3545, #ff6b35)",
+                      background: "#ff9800",
                     }}
                   ></div>
                   <small className="text-light">Selected</small>
@@ -570,7 +576,7 @@ const BookingPage = () => {
                     style={{
                       width: "20px",
                       height: "20px",
-                      background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                      background: "#fd0505",
                       fontSize: "10px",
                     }}
                   >
@@ -579,7 +585,7 @@ const BookingPage = () => {
                   <small className="text-light">Booked</small>
                 </div>
               </Col>
-              <Col xs={6} sm={4} md={2}>
+              {/* <Col xs={6} sm={4} md={2}>
                 <div className="d-flex align-items-center justify-content-center">
                   <div
                     className="rounded me-2"
@@ -591,7 +597,7 @@ const BookingPage = () => {
                   ></div>
                   <small className="text-light">Premium</small>
                 </div>
-              </Col>
+              </Col> */}
               <Col xs={6} sm={4} md={2}>
                 <div className="d-flex align-items-center justify-content-center">
                   <div

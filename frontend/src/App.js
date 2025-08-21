@@ -92,6 +92,13 @@ const AppContentWrapper = () => {
         touchMultiplier: 1.5,
         lerp: 0.12,
         normalizeWheel: true,
+        //         Stands for Linear Interpolation.
+
+        // Controls scroll smoothing: how quickly the scroll position reaches the target.
+
+        // Lower values → slower, smoother scrolling.
+
+        // Higher values → snappier, less smooth.
       }}
     >
       <div className="App">
@@ -105,8 +112,10 @@ const AppContent = () => {
   const location = useLocation();
   const { user, loading } = useAuth();
   const isAdminRoute = location.pathname.startsWith("/admin");
-  const isAuthRoute = location.pathname.startsWith("/sign-in") || location.pathname.startsWith("/sign-up");
-  
+  const isAuthRoute =
+    location.pathname.startsWith("/sign-in") ||
+    location.pathname.startsWith("/sign-up");
+
   useScrollToTop();
 
   // No loading screens - direct access to all pages
@@ -130,7 +139,7 @@ const AppContent = () => {
         <Route path="/movie/:movieId/showtimes" element={<ShowTimes />} />
 
         <Route path="/booking/:showId" element={<BookingPage />} />
-        
+
         <Route
           path="/payment"
           element={
@@ -212,11 +221,13 @@ const AppContent = () => {
             </ClerkProtectedRoute>
           }
         />
-        
+
         {/* Payment Test Route - Remove in production */}
         <Route path="/payment-test" element={<PaymentTest />} />
       </Routes>
-      {!isAdminRoute && !isAuthRoute && location.pathname !== "/payment" && <Footer />}
+      {!isAdminRoute && !isAuthRoute && location.pathname !== "/payment" && (
+        <Footer />
+      )}
     </>
   );
 };
@@ -242,21 +253,23 @@ function App() {
 
   useEffect(() => {
     // Suppress extension-related errors
-    window.addEventListener('error', (e) => {
-      if (e.message.includes('message channel closed') || 
-          e.message.includes('listener indicated an asynchronous response')) {
+    window.addEventListener("error", (e) => {
+      if (
+        e.message.includes("message channel closed") ||
+        e.message.includes("listener indicated an asynchronous response")
+      ) {
         e.preventDefault();
         return false;
       }
     });
-    
+
     AOS.init({
       duration: 800,
       once: true,
       easing: "ease-out-quart",
       offset: 50,
       delay: 0,
-      anchorPlacement: 'top-bottom'
+      anchorPlacement: "top-bottom",
     });
   }, []);
 
@@ -270,7 +283,7 @@ function App() {
         }}
         onClick={handleBrandComplete}
       >
-        <div style={{ transform: 'scale(2)' }}>
+        <div style={{ transform: "scale(2)" }}>
           <BrandLogo />
         </div>
       </div>
