@@ -201,27 +201,7 @@ const AdminMovies = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Make dates optional but validate if provided
-      if (
-        (formData.startDate && !formData.endDate) ||
-        (!formData.startDate && formData.endDate)
-      ) {
-        toast.error("Both start date and end date must be provided together");
-        return;
-      }
-
-      // If both dates are provided, validate them
-      if (formData.startDate && formData.endDate) {
-        const startDate = new Date(formData.startDate);
-        const endDate = new Date(formData.endDate);
-        const minEndDate = new Date(startDate);
-        minEndDate.setDate(minEndDate.getDate() + 7);
-
-        if (endDate < minEndDate) {
-          toast.error("End date must be at least 7 days after start date");
-          return;
-        }
-      }
+      // Dates are optional, no validation required
 
       const movieFormData = new FormData();
 
@@ -1193,10 +1173,9 @@ const AdminMovies = () => {
                         
                         // Calculate end date (7 days after start date)
                         const endDate = startDate
-                          ? moment(startDate)
-                              .add(7, "days")
-                              .format("YYYY-MM-DD")
+                          ? moment(startDate).add(7, "days").format("YYYY-MM-DD")
                           : "";
+                        
                         setFormData({ ...formData, startDate, endDate, isUpcoming });
                       }}
                       style={{
@@ -1211,7 +1190,7 @@ const AdminMovies = () => {
                     />
                     <small className="text-white d-flex align-items-center mt-1">
                       <FaCalendarAlt className="me-1" size={12} />
-                      First day movie will be shown (optional)
+                      First day movie will be shown (any date allowed)
                     </small>
                   </Form.Group>
                 </Col>
@@ -1233,18 +1212,11 @@ const AdminMovies = () => {
                           ? "0 0 0 0.2rem rgba(40, 167, 69, 0.25)"
                           : "none",
                       }}
-                      min={
-                        formData.startDate
-                          ? moment(formData.startDate)
-                              .add(7, "days")
-                              .format("YYYY-MM-DD")
-                          : ""
-                      }
-                      disabled={!formData.startDate}
+
                     />
                     <small className="text-white d-flex align-items-center mt-1">
                       <FaCalendarAlt className="me-1" size={12} />
-                      Last day movie will be shown (min 7 days after start)
+                      Last day movie will be shown (any date allowed)
                     </small>
                   </Form.Group>
                 </Col>

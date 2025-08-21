@@ -171,42 +171,7 @@ const createMovie = async (req, res) => {
 
     const movieData = { ...req.body };
 
-    // Validate dates - cannot be before current date
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    if (movieData.startDate) {
-      const startDate = new Date(movieData.startDate);
-      startDate.setHours(0, 0, 0, 0);
-      if (startDate < currentDate) {
-        return res.status(400).json({
-          message: "Start date cannot be before current date",
-          field: "startDate",
-        });
-      }
-    }
-
-    if (movieData.endDate) {
-      const endDate = new Date(movieData.endDate);
-      endDate.setHours(0, 0, 0, 0);
-      if (endDate < currentDate) {
-        return res.status(400).json({
-          message: "End date cannot be before current date",
-          field: "endDate",
-        });
-      }
-    }
-
-    if (movieData.startDate && movieData.endDate) {
-      const startDate = new Date(movieData.startDate);
-      const endDate = new Date(movieData.endDate);
-      if (endDate <= startDate) {
-        return res.status(400).json({
-          message: "End date must be after start date",
-          field: "endDate",
-        });
-      }
-    }
+    // No date validation - admin can set any dates
 
     // Handle poster upload/URL
     if (req.file) {
@@ -292,42 +257,7 @@ const updateMovie = async (req, res) => {
 
     const updateData = { ...req.body };
 
-    // Validate dates - cannot be before current date
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    if (updateData.startDate) {
-      const startDate = new Date(updateData.startDate);
-      startDate.setHours(0, 0, 0, 0);
-      if (startDate < currentDate) {
-        return res.status(400).json({
-          message: "Start date cannot be before current date",
-          field: "startDate",
-        });
-      }
-    }
-
-    if (updateData.endDate) {
-      const endDate = new Date(updateData.endDate);
-      endDate.setHours(0, 0, 0, 0);
-      if (endDate < currentDate) {
-        return res.status(400).json({
-          message: "End date cannot be before current date",
-          field: "endDate",
-        });
-      }
-    }
-
-    if (updateData.startDate && updateData.endDate) {
-      const startDate = new Date(updateData.startDate);
-      const endDate = new Date(updateData.endDate);
-      if (endDate <= startDate) {
-        return res.status(400).json({
-          message: "End date must be after start date",
-          field: "endDate",
-        });
-      }
-    }
+    // No date validation - admin can set any dates
 
     // Handle poster upload/URL
     if (req.file) {

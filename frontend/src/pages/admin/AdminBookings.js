@@ -68,6 +68,8 @@ const AdminBookings = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const [refreshing, setRefreshing] = useState(false);
   const [theaters, setTheaters] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -117,11 +119,7 @@ const AdminBookings = () => {
 
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: "20",
-        ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter && { status: statusFilter }),
-        ...(dateFilter && { date: dateFilter }),
-        ...(theaterFilter && { theater: theaterFilter }),
+        limit: "100", // Fetch more records for client-side filtering
       });
 
       const timestamp = new Date().getTime();
@@ -355,8 +353,82 @@ const AdminBookings = () => {
     return <Badge bg={config.bg}>{config.text}</Badge>;
   };
 
-  // Use bookings directly since filtering is done server-side
-  const filteredBookings = Array.isArray(bookings) ? bookings : [];
+  // Client-side filtering to make filters work dynamically
+  const filteredBookings = React.useMemo(() => {
+    let filtered = Array.isArray(bookings) ? bookings : [];
+    
+    // Search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(booking => 
+        (booking.customerName || booking.user?.name || '').toLowerCase().includes(search) ||
+        (booking.customerEmail || booking.user?.email || '').toLowerCase().includes(search) ||
+        (booking.bookingId || '').toLowerCase().includes(search) ||
+        (booking.show?.movie?.title || booking.movieTitle || '').toLowerCase().includes(search)
+      );
+    }
+    
+    // Status filter
+    if (statusFilter) {
+      filtered = filtered.filter(booking => booking.status === statusFilter);
+    }
+    
+    // Date filter
+    if (dateFilter) {
+      filtered = filtered.filter(booking => {
+        const bookingDate = moment(booking.show?.showDate || booking.showDate || booking.bookingDate).format('YYYY-MM-DD');
+        return bookingDate === dateFilter;
+      });
+    }
+    
+    // Theater filter
+    if (theaterFilter) {
+      filtered = filtered.filter(booking => 
+        booking.show?.theater?._id === theaterFilter ||
+        booking.show?.theater?.name === theaters.find(t => t._id === theaterFilter)?.name
+      );
+    }
+    
+    // Sort bookings
+    filtered.sort((a, b) => {
+      let aVal, bVal;
+      
+      switch (sortBy) {
+        case 'totalAmount':
+          aVal = a.totalAmount || 0;
+          bVal = b.totalAmount || 0;
+          break;
+        case 'status':
+          aVal = a.status || '';
+          bVal = b.status || '';
+          break;
+        case 'customerName':
+          aVal = (a.customerName || a.user?.name || '').toLowerCase();
+          bVal = (b.customerName || b.user?.name || '').toLowerCase();
+          break;
+        default: // bookingDate
+          aVal = new Date(a.bookingDate || 0);
+          bVal = new Date(b.bookingDate || 0);
+      }
+      
+      if (sortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+    
+    return filtered;
+  }, [bookings, searchTerm, statusFilter, dateFilter, theaterFilter, sortBy, sortOrder, theaters]);
+
+  // Client-side pagination
+  const paginatedBookings = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredBookings.slice(startIndex, endIndex);
+  }, [filteredBookings, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
 
   const stats = getBookingStats();
 
@@ -371,14 +443,7 @@ const AdminBookings = () => {
     return () => clearInterval(interval);
   }, [loading, refreshing, pagination.currentPage]);
 
-  // Fetch bookings when filters change (reset to page 1)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchBookings(1);
-    }, 300);
 
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, statusFilter, dateFilter, theaterFilter, sortBy, sortOrder]);
 
   // Handle sort change
   const handleSort = (field) => {
@@ -434,6 +499,7 @@ const AdminBookings = () => {
     setTheaterFilter("");
     setSortBy("bookingDate");
     setSortOrder("desc");
+    setCurrentPage(1);
   };
 
   // Handle cleanup of past show bookings
@@ -709,7 +775,7 @@ const AdminBookings = () => {
             </div>
             
             <Row className="g-3">
-              <Col lg={6} md={8} xs={12}>
+              <Col lg={5} md={6} xs={12}>
                 <div className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden" style={{ height: '46px' }}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 30 30" fill="#6B7280">
                     <path d="M13 3C7.489 3 3 7.489 3 13s4.489 10 10 10a9.95 9.95 0 0 0 6.322-2.264l5.971 5.971a1 1 0 1 0 1.414-1.414l-5.97-5.97A9.95 9.95 0 0 0 23 13c0-5.511-4.489-10-10-10m0 2c4.43 0 8 3.57 8 8s-3.57 8-8 8-8-3.57-8-8 3.57-8 8-8"/>
@@ -731,7 +797,7 @@ const AdminBookings = () => {
                 </div>
               </Col>
 
-              <Col lg={2} md={4} xs={6}>
+              <Col lg={2} md={3} xs={6}>
                 <div className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden" style={{ height: '46px' }}>
                   <FaCalendarAlt className="text-secondary" />
                   <Form.Control
@@ -750,7 +816,7 @@ const AdminBookings = () => {
                 </div>
               </Col>
               
-              <Col lg={2} md={4} xs={6}>
+              <Col lg={2} md={3} xs={6}>
                 <div className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden" style={{ height: '46px' }}>
                   <FaCheck className="text-secondary" />
                   <Form.Select
@@ -770,21 +836,19 @@ const AdminBookings = () => {
                   >
                     <option value="">All Status</option>
                     <option value="confirmed">Confirmed</option>
-                    <option value="pending">Pending</option>
                     <option value="cancelled">Cancelled</option>
-                    <option value="completed">Completed</option>
                   </Form.Select>
                 </div>
               </Col>
               
-              <Col lg={2} md={4} xs={12}>
+              <Col lg={3} md={12} xs={12}>
                 <Button
                   variant="outline-secondary"
                   onClick={clearFilters}
                   className="w-100 rounded-pill"
                   style={{ height: '46px' }}
                 >
-                  Clear Filters
+                  Clear All Filters
                 </Button>
               </Col>
             </Row>
@@ -890,6 +954,11 @@ const AdminBookings = () => {
                 <FaChartLine className="me-2" />
                 <span>
                   <strong>{filteredBookings.length}</strong> bookings found
+                  {totalPages > 1 && (
+                    <span className="ms-2 text-primary">
+                      (Page {currentPage} of {totalPages})
+                    </span>
+                  )}
                 </span>
               </div>
               <div className="d-flex align-items-center text-secondary">
@@ -911,7 +980,7 @@ const AdminBookings = () => {
             <>
               <div className="table-responsive" style={{ borderRadius: '20px', overflow: 'hidden' }}>
                 <AdminBookingsTable
-                  bookings={filteredBookings}
+                  bookings={paginatedBookings}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onStatusUpdate={handleStatusUpdate}
@@ -919,26 +988,49 @@ const AdminBookings = () => {
                 />
               </div>
 
-              {/* Professional Mobile Pagination */}
-              {pagination.totalPages > 1 && (
+              {/* Pagination */}
+              {totalPages > 1 && (
                 <div className="mt-3 p-2 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <small className="text-light">{(pagination.currentPage - 1) * 20 + 1}-{Math.min(pagination.currentPage * 20, pagination.totalBookings)} of {pagination.totalBookings}</small>
-                    <small className="text-primary">{pagination.currentPage}/{pagination.totalPages}</small>
+                    <small className="text-light">
+                      {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredBookings.length)} of {filteredBookings.length}
+                    </small>
+                    <small className="text-primary">{currentPage}/{totalPages}</small>
                   </div>
                   <div className="d-flex justify-content-center gap-1">
-                    <button className="btn btn-outline-light btn-sm" disabled={pagination.currentPage === 1} onClick={() => fetchBookings(pagination.currentPage - 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>‹</button>
+                    <button 
+                      className="btn btn-outline-light btn-sm" 
+                      disabled={currentPage === 1} 
+                      onClick={() => setCurrentPage(currentPage - 1)} 
+                      style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}
+                    >
+                      ‹
+                    </button>
                     {(() => {
-                      const c = pagination.currentPage, t = pagination.totalPages;
+                      const c = currentPage, t = totalPages;
                       if (t <= 5) return Array.from({length: t}, (_, i) => i + 1);
                       if (c <= 3) return [1, 2, 3, '...', t];
                       if (c >= t - 2) return [1, '...', t - 2, t - 1, t];
                       return [1, '...', c - 1, c, c + 1, '...', t];
                     })().map((p, i) => 
                       p === '...' ? <span key={i} className="px-1 text-secondary">...</span> :
-                      <button key={p} className={`btn btn-sm ${p === pagination.currentPage ? 'btn-primary' : 'btn-outline-light'}`} onClick={() => fetchBookings(p)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '12px' }}>{p}</button>
+                      <button 
+                        key={p} 
+                        className={`btn btn-sm ${p === currentPage ? 'btn-primary' : 'btn-outline-light'}`} 
+                        onClick={() => setCurrentPage(p)} 
+                        style={{ width: '32px', height: '32px', padding: '0', fontSize: '12px' }}
+                      >
+                        {p}
+                      </button>
                     )}
-                    <button className="btn btn-outline-light btn-sm" disabled={pagination.currentPage === pagination.totalPages} onClick={() => fetchBookings(pagination.currentPage + 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>›</button>
+                    <button 
+                      className="btn btn-outline-light btn-sm" 
+                      disabled={currentPage === totalPages} 
+                      onClick={() => setCurrentPage(currentPage + 1)} 
+                      style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}
+                    >
+                      ›
+                    </button>
                   </div>
                 </div>
               )}

@@ -1,5 +1,7 @@
 import moment from "moment";
+// Parse dates ("2025-08-21" → Date object)
 
+// Format dates (Aug 21, 2025)
 /**
  * Filter movies by their showing status
  * @param {Array} movies - Array of movie objects

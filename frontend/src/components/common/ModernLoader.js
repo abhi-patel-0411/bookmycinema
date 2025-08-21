@@ -6,7 +6,13 @@ const ModernLoader = ({ size = 'medium', inline = false }) => {
     medium: { container: '120px', ring1: '120px', ring2: '80px', core: '40px', particle: '8px' },
     large: { container: '180px', ring1: '180px', ring2: '120px', core: '60px', particle: '12px' }
   };
+// container → overall loader space.
 
+// ring1, ring2 → rotating rings.
+
+// core → center glowing circle.
+
+// particle → orbiting small dots.
   const currentSize = sizes[size];
 
   const containerStyle = inline 
