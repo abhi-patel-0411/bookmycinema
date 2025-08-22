@@ -558,22 +558,7 @@ const AdminBookings = () => {
                 <FaSyncAlt className={refreshing ? "fa-spin" : ""} />
                 <span className="d-none d-sm-inline ms-1">Refresh</span>
               </Button>
-              <Dropdown>
-                <Dropdown.Toggle variant="outline-success" size="sm">
-                  <FaDownload />
-                  <span className="d-none d-sm-inline ms-1">Export</span>
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={exportToCSV}>
-                    <FaFileExcel className="me-2" />
-                    Export CSV
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => window.print()}>
-                    <FaPrint className="me-2" />
-                    Print
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+
               <Button
                 variant="outline-warning"
                 size="sm"

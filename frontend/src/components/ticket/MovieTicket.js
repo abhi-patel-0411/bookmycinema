@@ -133,8 +133,7 @@ const MovieTicket = ({ booking }) => {
                         booking.show?.theater?.screens?.find(screen => 
                           screen.screenNumber === booking.show?.screenNumber
                         )?.name ||
-                        `Screen ${booking.show?.screenNumber || booking.screenNumber}` ||
-                        "Screen N/A"}
+                        `Screen ${booking.show?.screenNumber || booking.screenNumber || 1}`}
                     </small>
                   </div>
 

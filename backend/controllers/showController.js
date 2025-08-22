@@ -95,7 +95,10 @@ const getAllShows = async (req, res) => {
     
     let shows = await Show.find(query)
       .populate('movie')
-      .populate('theater')
+      .populate({
+        path: 'theater',
+        select: 'name location city address screens amenities facilities'
+      })
       .sort({ showDate: 1, showTime: 1 });
     
     // For user side (not admin), filter out past shows
@@ -145,7 +148,10 @@ const getShowById = async (req, res) => {
   try {
     const show = await Show.findById(req.params.id)
       .populate('movie')
-      .populate('theater');
+      .populate({
+        path: 'theater',
+        select: 'name location city address screens amenities facilities'
+      });
     
     if (!show) {
       return res.status(404).json({ message: 'Show not found' });
@@ -257,7 +263,10 @@ const getShowsByTheater = async (req, res) => {
     
     const shows = await Show.find({ theater: req.params.theaterId })
       .populate('movie')
-      .populate('theater')
+      .populate({
+        path: 'theater',
+        select: 'name location city address screens amenities facilities'
+      })
       .sort({ showDate: 1, showTime: 1 });
     
     res.json(shows);
@@ -280,7 +289,10 @@ const getShowsByDate = async (req, res) => {
       }
     })
       .populate('movie')
-      .populate('theater')
+      .populate({
+        path: 'theater',
+        select: 'name location city address screens amenities facilities'
+      })
       .sort({ showTime: 1 });
     
     res.json(shows);
@@ -388,7 +400,10 @@ const createShow = async (req, res) => {
     
     const populatedShow = await Show.findById(savedShow._id)
       .populate('movie')
-      .populate('theater');
+      .populate({
+        path: 'theater',
+        select: 'name location city address screens amenities facilities'
+      });
     
     if (!populatedShow.theater) {
       console.error('Theater not populated in saved show');
@@ -439,7 +454,10 @@ const updateShow = async (req, res) => {
     
     const populatedShow = await Show.findById(updatedShow._id)
       .populate('movie')
-      .populate('theater');
+      .populate({
+        path: 'theater',
+        select: 'name location city address screens amenities facilities'
+      });
     
     emitToUsers('show-updated', populatedShow);
     res.json(populatedShow);

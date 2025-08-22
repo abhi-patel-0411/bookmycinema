@@ -151,7 +151,7 @@ const SeatLayoutBuilder = ({ show, onHide, onSave, initialLayout = [] }) => {
   const renderSeatLayoutBuilder = () => (
     <div className="seat-layout-builder">
       <div className="mb-4 text-center">
-        <div className="screen aos-init aos-animate" data-aos="fade-up">
+        <div className="screen aos-init aos-animate" data-aos="fade-up" style={{ color: "#fff" }}>
           Screen
         </div>
       </div>
@@ -318,11 +318,11 @@ const SeatLayoutBuilder = ({ show, onHide, onSave, initialLayout = [] }) => {
         style={{ background: "rgba(255,255,255,0.05)" }}
       >
         <h6 className="text-white">Layout Summary</h6>
-        <p className="text-secondary mb-1">Total Rows: {layout.length}</p>
-        <p className="text-secondary mb-1">
+        <p className="text-white mb-1">Total Rows: {layout.length}</p>
+        <p className="text-white mb-1">
           Total Capacity: {calculateTotalCapacity()}
         </p>
-        <p className="text-secondary mb-0">
+        <p className="text-white mb-0">
           Layout:{" "}
           {layout
             .map(
@@ -338,7 +338,7 @@ const SeatLayoutBuilder = ({ show, onHide, onSave, initialLayout = [] }) => {
   const renderPreview = () => (
     <div className="seat-layout-preview">
       <div className="mb-4 text-center">
-        <div className="screen aos-init aos-animate" data-aos="fade-up">
+        <div className="screen aos-init aos-animate" data-aos="fade-up" style={{ color: "#fff" }}>
           Screen
         </div>
       </div>
@@ -446,7 +446,7 @@ const SeatLayoutBuilder = ({ show, onHide, onSave, initialLayout = [] }) => {
         )}
       </Modal.Footer>
 
-      <style jsx>{`
+      <style>{`
         .seat-legend.available {
           width: 20px;
           height: 20px;

@@ -150,17 +150,24 @@ const AdminTheaters = () => {
       return;
     }
 
-    const theater = theaters.find(t => t._id === theaterId);
-    const confirmMessage = `Are you sure you want to permanently delete "${theaterName || theater?.name || 'this theater'}"?\n\nThis will:\n• Remove the theater completely from the database\n• Delete all screens and seat layouts\n• Cancel all shows and bookings for this theater\n\nThis action cannot be undone!`;
+    const theater = theaters.find((t) => t._id === theaterId);
+    const confirmMessage = `Are you sure you want to permanently delete "${
+      theaterName || theater?.name || "this theater"
+    }"?\n\nThis will:\n• Remove the theater completely from the database\n• Delete all screens and seat layouts\n• Cancel all shows and bookings for this theater\n\nThis action cannot be undone!`;
 
     if (window.confirm(confirmMessage)) {
       try {
         await api.delete(`/theaters/${theaterId}`);
-        toast.success(`"${theaterName || theater?.name || 'Theater'}" deleted successfully!`);
+        toast.success(
+          `"${theaterName || theater?.name || "Theater"}" deleted successfully!`
+        );
         await fetchTheaters();
       } catch (error) {
         console.error("Theater delete error:", error);
-        toast.error("Failed to delete theater: " + (error.response?.data?.message || error.message));
+        toast.error(
+          "Failed to delete theater: " +
+            (error.response?.data?.message || error.message)
+        );
       }
     }
   };
@@ -224,22 +231,30 @@ const AdminTheaters = () => {
     }
 
     try {
-      console.log('Adding screen to theater:', selectedTheater._id);
-      console.log('Screen form data:', screenFormData);
-      
-      const screenData = {
-        name: screenFormData.name || `Screen ${(selectedTheater.screens?.length || 0) + 1}`,
-        screenType: screenFormData.screenType || '2D',
-        soundSystem: screenFormData.soundSystem || 'Stereo',
-        projectionType: screenFormData.projectionType || 'Digital',
-        seatLayout: screenFormData.seatLayout?.length > 0 ? screenFormData.seatLayout : undefined,
-      };
-      
-      console.log('Sending screen data:', screenData);
+      console.log("Adding screen to theater:", selectedTheater._id);
+      console.log("Screen form data:", screenFormData);
 
-      const response = await api.post(`/theaters/${selectedTheater._id}/screens`, screenData);
-      console.log('Screen added response:', response.data);
-      
+      const screenData = {
+        name:
+          screenFormData.name ||
+          `Screen ${(selectedTheater.screens?.length || 0) + 1}`,
+        screenType: screenFormData.screenType || "2D",
+        soundSystem: screenFormData.soundSystem || "Stereo",
+        projectionType: screenFormData.projectionType || "Digital",
+        seatLayout:
+          screenFormData.seatLayout?.length > 0
+            ? screenFormData.seatLayout
+            : undefined,
+      };
+
+      console.log("Sending screen data:", screenData);
+
+      const response = await api.post(
+        `/theaters/${selectedTheater._id}/screens`,
+        screenData
+      );
+      console.log("Screen added response:", response.data);
+
       toast.success("Screen added successfully!");
       await fetchTheaters();
       setShowScreenModal(false);
@@ -252,27 +267,35 @@ const AdminTheaters = () => {
       });
     } catch (error) {
       console.error("Add screen error:", error);
-      const errorMessage = error.response?.data?.message || error.message || "Failed to add screen";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to add screen";
       toast.error(errorMessage);
     }
   };
 
   const handleDeleteScreen = async (theaterId, screenId, screenName) => {
-    const theater = theaters.find(t => t._id === theaterId);
-    const screen = theater?.screens?.find(s => s._id === screenId);
-    const theaterName = theater?.name || 'Unknown Theater';
-    const displayScreenName = screenName || screen?.name || 'Unknown Screen';
-    
+    const theater = theaters.find((t) => t._id === theaterId);
+    const screen = theater?.screens?.find((s) => s._id === screenId);
+    const theaterName = theater?.name || "Unknown Theater";
+    const displayScreenName = screenName || screen?.name || "Unknown Screen";
+
     const confirmMessage = `Are you sure you want to delete "${displayScreenName}" from "${theaterName}"?\n\nThis will:\n• Remove the screen permanently\n• Delete the seat layout\n• Cancel all shows for this screen\n\nThis action cannot be undone!`;
-    
+
     if (window.confirm(confirmMessage)) {
       try {
         await api.delete(`/theaters/${theaterId}/screens/${screenId}`);
-        toast.success(`"${displayScreenName}" deleted successfully from "${theaterName}"!`);
+        toast.success(
+          `"${displayScreenName}" deleted successfully from "${theaterName}"!`
+        );
         await fetchTheaters();
       } catch (error) {
         console.error("Delete screen error:", error);
-        toast.error("Failed to delete screen: " + (error.response?.data?.message || error.message));
+        toast.error(
+          "Failed to delete screen: " +
+            (error.response?.data?.message || error.message)
+        );
       }
     }
   };
@@ -323,7 +346,7 @@ const AdminTheaters = () => {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h1 className="gradient-text mb-2">Theater Management</h1>
+            <h1 className=" mb-2">Theater Management</h1>
             <p className="text-secondary mb-0">
               Manage cinema theaters and screens
             </p>
@@ -350,25 +373,37 @@ const AdminTheaters = () => {
         </Alert>
 
         {/* Search - matching shows page layout */}
-        <div className="filters-container mb-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div
+          className="filters-container mb-4 pb-3"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+        >
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
             <h5 className="text-white mb-2 mb-md-0 d-flex align-items-center">
               <FaSearch className="me-2 text-primary" />
               Search Theaters
             </h5>
-            <Button 
+            <Button
               variant="outline-secondary"
               size="sm"
-              onClick={() => setSearchTerm('')}
+              onClick={() => setSearchTerm("")}
             >
               Clear Search
             </Button>
           </div>
           <Row className="g-3">
             <Col lg={8} md={8} xs={12}>
-              <div className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden" style={{ height: '46px' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 30 30" fill="#6B7280">
-                  <path d="M13 3C7.489 3 3 7.489 3 13s4.489 10 10 10a9.95 9.95 0 0 0 6.322-2.264l5.971 5.971a1 1 0 1 0 1.414-1.414l-5.97-5.97A9.95 9.95 0 0 0 23 13c0-5.511-4.489-10-10-10m0 2c4.43 0 8 3.57 8 8s-3.57 8-8 8-8-3.57-8-8 3.57-8 8-8"/>
+              <div
+                className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden"
+                style={{ height: "46px" }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 30 30"
+                  fill="#6B7280"
+                >
+                  <path d="M13 3C7.489 3 3 7.489 3 13s4.489 10 10 10a9.95 9.95 0 0 0 6.322-2.264l5.971 5.971a1 1 0 1 0 1.414-1.414l-5.97-5.97A9.95 9.95 0 0 0 23 13c0-5.511-4.489-10-10-10m0 2c4.43 0 8 3.57 8 8s-3.57 8-8 8-8-3.57-8-8 3.57-8 8-8" />
                 </svg>
                 <Form.Control
                   type="text"
@@ -376,12 +411,12 @@ const AdminTheaters = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border-0 bg-transparent w-100 h-100 ms-2"
-                  style={{ 
-                    outline: 'none', 
-                    boxShadow: 'none', 
-                    color: '#ffffff', 
-                    fontSize: '16px',
-                    fontWeight: '400'
+                  style={{
+                    outline: "none",
+                    boxShadow: "none",
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "400",
                   }}
                 />
               </div>
@@ -389,9 +424,9 @@ const AdminTheaters = () => {
             <Col lg={4} md={4} xs={12}>
               <Button
                 variant="outline-secondary"
-                onClick={() => setSearchTerm('')}
+                onClick={() => setSearchTerm("")}
                 className="w-100 rounded-pill"
-                style={{ height: '46px' }}
+                style={{ height: "46px" }}
               >
                 Clear Search
               </Button>
@@ -408,7 +443,10 @@ const AdminTheaters = () => {
         >
           <Tab eventKey="theaters" title="Theaters">
             {/* Theater Cards - Professional Layout */}
-            <div className="cards-container mb-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <div
+              className="cards-container mb-4 pb-3"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+            >
               {filteredTheaters.length > 0 ? (
                 <Row className="g-4">
                   {filteredTheaters.map((theater) => {
@@ -418,8 +456,21 @@ const AdminTheaters = () => {
                     }
 
                     return (
-                      <Col key={theater._id} xl={4} lg={6} md={6} sm={12} className="d-flex">
-                        <Card className="theater-card h-100 w-100" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <Col
+                        key={theater._id}
+                        xl={4}
+                        lg={6}
+                        md={6}
+                        sm={12}
+                        className="d-flex"
+                      >
+                        <Card
+                          className="theater-card h-100 w-100"
+                          style={{
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                          }}
+                        >
                           <Card.Body>
                             <div className="d-flex justify-content-between align-items-start mb-3">
                               <h5 className="mb-0 text-white fw-bold">
@@ -454,7 +505,9 @@ const AdminTheaters = () => {
                                 />
                                 <small style={{ color: "#adb5bd" }}>
                                   City:{" "}
-                                  {theater.address?.city || theater.city || "N/A"}
+                                  {theater.address?.city ||
+                                    theater.city ||
+                                    "N/A"}
                                 </small>
                               </div>
 
@@ -533,8 +586,18 @@ const AdminTheaters = () => {
                   })}
                 </Row>
               ) : (
-                <div className="text-center py-5" style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '15px' }}>
-                  <FaBuilding className="text-primary mb-3" size={50} style={{ opacity: 0.5 }} />
+                <div
+                  className="text-center py-5"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    borderRadius: "15px",
+                  }}
+                >
+                  <FaBuilding
+                    className="text-primary mb-3"
+                    size={50}
+                    style={{ opacity: 0.5 }}
+                  />
                   <h4 className="text-white mb-3">No Theaters Found</h4>
                   <p className="text-secondary mb-4">
                     {theaters.length === 0
@@ -556,7 +619,10 @@ const AdminTheaters = () => {
 
           <Tab eventKey="screens" title="Screen Management">
             {/* Screen Management */}
-            <div className="screens-container mb-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <div
+              className="screens-container mb-4 pb-3"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+            >
               {theaters.map((theater) =>
                 theater.screens && theater.screens.length > 0 ? (
                   <div key={theater._id} className="mb-4">
@@ -578,7 +644,11 @@ const AdminTheaters = () => {
                         </small>
                       </Card.Header>
                       <Card.Body>
-                        <Table responsive variant="dark" className="mb-0 theater-table">
+                        <Table
+                          responsive
+                          variant="dark"
+                          className="mb-0 theater-table"
+                        >
                           <thead>
                             <tr>
                               <th>Screen</th>
@@ -594,14 +664,23 @@ const AdminTheaters = () => {
                               <tr key={screen._id}>
                                 <td>{screen.name}</td>
                                 <td>
-                                  <Badge bg="info" className={`screen-type-badge screen-type-${screen.screenType.toLowerCase()}`}>{screen.screenType}</Badge>
+                                  <Badge
+                                    bg="info"
+                                    className={`screen-type-badge screen-type-${screen.screenType.toLowerCase()}`}
+                                  >
+                                    {screen.screenType}
+                                  </Badge>
                                 </td>
                                 <td>{screen.capacity} seats</td>
                                 <td>{screen.soundSystem}</td>
                                 <td>
                                   <Badge
                                     bg={screen.isActive ? "success" : "danger"}
-                                    className={screen.isActive ? "theater-badge-success" : "theater-badge-danger"}
+                                    className={
+                                      screen.isActive
+                                        ? "theater-badge-success"
+                                        : "theater-badge-danger"
+                                    }
                                   >
                                     {screen.isActive ? "Active" : "Inactive"}
                                   </Badge>
@@ -657,17 +736,18 @@ const AdminTheaters = () => {
         >
           <Modal.Header
             closeButton
+            style={{ background: "#1f2025", borderBottom: "1px solid #6c757d" }}
           >
             <Modal.Title style={{ color: "#fff" }}>
               {editingTheater ? "Edit Theater" : "Add New Theater"}
             </Modal.Title>
           </Modal.Header>
-          <Modal.Body>
+          <Modal.Body style={{ background: "#1f2025" }}>
             <Form onSubmit={handleSubmit}>
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>
+                    <Form.Label style={{ color: "#fff" }}>
                       Theater Name *
                     </Form.Label>
                     <Form.Control
@@ -677,13 +757,17 @@ const AdminTheaters = () => {
                         setFormData({ ...formData, name: e.target.value })
                       }
                       required
-                      className="theater-form-control"
+                      style={{
+                        background: "#1f2025",
+                        border: "1px solid #6c757d",
+                        color: "#fff",
+                      }}
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>City *</Form.Label>
+                    <Form.Label style={{ color: "#fff" }}>City *</Form.Label>
                     <Form.Control
                       type="text"
                       value={formData.address.city}
@@ -697,7 +781,11 @@ const AdminTheaters = () => {
                         })
                       }
                       required
-                      className="theater-form-control"
+                      style={{
+                        background: "#1f2025",
+                        border: "1px solid #6c757d",
+                        color: "#fff",
+                      }}
                     />
                   </Form.Group>
                 </Col>
@@ -716,7 +804,7 @@ const AdminTheaters = () => {
                   }
                   required
                   style={{
-                    background: "#495057",
+                    background: "#1f2025",
                     border: "1px solid #6c757d",
                     color: "#fff",
                   }}
@@ -742,7 +830,7 @@ const AdminTheaters = () => {
                         })
                       }
                       style={{
-                        background: "#495057",
+                        background: "#1f2025",
                         border: "1px solid #6c757d",
                         color: "#fff",
                       }}
@@ -765,7 +853,7 @@ const AdminTheaters = () => {
                         })
                       }
                       style={{
-                        background: "#495057",
+                        background: "#1f2025",
                         border: "1px solid #6c757d",
                         color: "#fff",
                       }}
@@ -786,7 +874,7 @@ const AdminTheaters = () => {
                   }
                   placeholder="AC, Parking, Food Court, etc."
                   style={{
-                    background: "#495057",
+                    background: "#1f2025",
                     border: "1px solid #6c757d",
                     color: "#fff",
                   }}
@@ -796,71 +884,71 @@ const AdminTheaters = () => {
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Check
-                      type="checkbox"
-                      id="activeTheater"
-                      label="Active Theater"
-                      checked={formData.status.isActive}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          status: {
-                            ...formData.status,
-                            isActive: e.target.checked,
-                          },
-                        })
-                      }
-                      className="text-white"
-                      style={{ 
-                        color: "#fff",
-                        fontSize: "1rem",
-                        fontWeight: "500"
-                      }}
-                    />
-                    <Form.Text className="text-muted">
-                      Inactive theaters won't be visible to users
-                    </Form.Text>
+                    <div style={{ color: "#fff" }}>
+                      <Form.Check
+                        type="checkbox"
+                        id="activeTheater"
+                        label="Active Theater"
+                        checked={formData.status.isActive}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            status: {
+                              ...formData.status,
+                              isActive: e.target.checked,
+                            },
+                          })
+                        }
+                        style={{
+                          color: "#fff",
+                        }}
+                      />
+                      <Form.Text style={{ color: "#adb5bd" }}>
+                        Inactive theaters won't be visible to users
+                      </Form.Text>
+                    </div>
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Check
-                      type="checkbox"
-                      id="verifiedTheater"
-                      label="Verified Theater"
-                      checked={formData.status.isVerified}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          status: {
-                            ...formData.status,
-                            isVerified: e.target.checked,
-                          },
-                        })
-                      }
-                      className="text-white"
-                      style={{ 
-                        color: "#fff",
-                        fontSize: "1rem",
-                        fontWeight: "500"
-                      }}
-                    />
-                    <Form.Text className="text-muted">
-                      Mark as verified for premium listing
-                    </Form.Text>
+                    <div style={{ color: "#fff" }}>
+                      <Form.Check
+                        type="checkbox"
+                        id="verifiedTheater"
+                        label="Verified Theater"
+                        checked={formData.status.isVerified}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            status: {
+                              ...formData.status,
+                              isVerified: e.target.checked,
+                            },
+                          })
+                        }
+                        style={{
+                          color: "#fff",
+                        }}
+                      />
+                      <Form.Text style={{ color: "#adb5bd" }}>
+                        Mark as verified for premium listing
+                      </Form.Text>
+                    </div>
                   </Form.Group>
                 </Col>
               </Row>
             </Form>
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer
+            style={{ background: "#1f2025", borderTop: "1px solid #6c757d" }}
+          >
             <Button variant="secondary" onClick={handleCloseModal}>
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
               style={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #e63946, #f84565)",
                 border: "none",
               }}
             >

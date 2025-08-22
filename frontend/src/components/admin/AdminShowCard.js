@@ -84,7 +84,9 @@ const AdminShowCard = ({ show, onEdit, onDelete, index }) => {
             </div>
             <div className="d-flex align-items-center">
               <FaFilm className="text-primary me-2" size={12} />
-              <span className="text-white" style={{ fontSize: '0.8rem' }}>Screen {show.screenNumber || 1}</span>
+              <span className="text-white" style={{ fontSize: '0.8rem' }}>
+                {show.theater?.screens?.find(screen => screen.screenNumber === show.screenNumber)?.name || `Screen ${show.screenNumber || 1}`}
+              </span>
             </div>
           </div>
           

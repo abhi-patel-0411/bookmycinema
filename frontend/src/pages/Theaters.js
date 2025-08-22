@@ -166,7 +166,7 @@ const Theaters = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Card className="border-0 shadow-lg" style={{ 
-              background: 'rgba(255,255,255,0.1)', 
+              background: '#1f2025', 
               backdropFilter: 'blur(20px)', 
               borderRadius: '16px', 
               border: '1px solid rgba(255,255,255,0.1)' 
@@ -189,7 +189,7 @@ const Theaters = () => {
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="text-white border-0"
                           style={{ 
-                            backgroundColor: 'rgba(255,255,255,0.1)', 
+                            backgroundColor: '#1f2025', 
                             backdropFilter: 'blur(5px)', 
                             fontFamily: 'Inter, sans-serif', 
                             fontSize: '0.875rem' 
@@ -208,7 +208,7 @@ const Theaters = () => {
                         onChange={(e) => setSelectedCity(e.target.value)}
                         className="text-white border-0"
                         style={{ 
-                          backgroundColor: 'rgba(255,255,255,0.1)', 
+                          backgroundColor: '#1f2025', 
                           backdropFilter: 'blur(5px)', 
                           fontFamily: 'Inter, sans-serif', 
                           fontSize: '0.875rem' 
@@ -275,7 +275,7 @@ const Theaters = () => {
           <div 
             className="theater-list-wrapper"
             style={{
-              background: 'rgba(255,255,255,0.05)',
+              background: '#1f2025',
               borderRadius: '12px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
               overflow: 'hidden',
@@ -289,8 +289,8 @@ const Theaters = () => {
                 onMovieClick={handleMovieClick}
               />
             ) : (
-              <div className="text-center py-5" style={{ padding: '60px 20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                <div className="mb-4 mx-auto p-4 rounded-circle" style={{ backgroundColor: 'rgba(255,255,255,0.1)', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="text-center py-5" style={{ padding: '60px 20px', background: '#1f2025', borderRadius: '12px' }}>
+                <div className="mb-4 mx-auto p-4 rounded-circle" style={{ backgroundColor: '#1f2025', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
                   <FaBuilding size={32} className="text-white" />
                 </div>
                 <h4 className="text-white mb-3 fw-bold" style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.4rem', letterSpacing: '-0.01em' }}>No Theaters Found</h4>

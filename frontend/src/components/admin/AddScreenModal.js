@@ -228,8 +228,7 @@ const AddScreenModal = ({
             type="submit"
             className="btn btn-primary btn-beautiful-primary"
             style={{
-              background:
-                "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)",
+              background: "linear-gradient(135deg, #e63946, #f84565)",
               border: "none",
               borderRadius: "30px",
             }}

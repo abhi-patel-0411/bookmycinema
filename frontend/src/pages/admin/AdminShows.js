@@ -410,14 +410,14 @@ const AdminShows = () => {
             <Modal.Header
               closeButton
               className="border-0"
-              style={{ background: "var(--card-bg)" }}
+              style={{ background: "#1f2025", borderBottom: "1px solid #6c757d" }}
             >
               <Modal.Title className="text-white fw-bold">
                 <FaCalendarAlt className="me-2 text-primary" />
                 {editingShow ? "Edit Show" : "Add New Show"}
               </Modal.Title>
             </Modal.Header>
-            <Modal.Body style={{ background: "var(--card-bg)" }}>
+            <Modal.Body style={{ background: "#1f2025" }}>
               <Form>
                 <Row>
                   <Col md={6}>
@@ -631,7 +631,7 @@ const AdminShows = () => {
             </Modal.Body>
             <Modal.Footer
               className="border-0"
-              style={{ background: "var(--card-bg)" }}
+              style={{ background: "#1f2025", borderTop: "1px solid #6c757d" }}
             >
               <Button
                 variant="outline-secondary"
@@ -1022,14 +1022,14 @@ const AdminShows = () => {
           <Modal.Header
             closeButton
             className="border-0"
-            style={{ background: "var(--card-bg)" }}
+            style={{ background: "#1f2025", borderBottom: "1px solid #6c757d" }}
           >
             <Modal.Title className="text-white fw-bold">
               <FaCalendarAlt className="me-2 text-primary" />
               {editingShow ? "Edit Show" : "Add New Show"}
             </Modal.Title>
           </Modal.Header>
-          <Modal.Body style={{ background: "var(--card-bg)" }}>
+          <Modal.Body style={{ background: "#1f2025" }}>
             <Form>
               <Row>
                 <Col md={6}>
@@ -1062,6 +1062,7 @@ const AdminShows = () => {
                         const theater = theaters.find(
                           (t) => t._id === theaterId
                         );
+                        console.log('Selected theater with screens:', theater?.screens);
                         setFormData({
                           ...formData,
                           theater: theaterId,
@@ -1131,7 +1132,7 @@ const AdminShows = () => {
                       selectedTheater.screens.length > 0
                         ? selectedTheater.screens.map((screen) => (
                             <option
-                              key={screen.screenNumber}
+                              key={screen.screenNumber || screen._id}
                               value={screen.screenNumber}
                             >
                               {screen.name || `Screen ${screen.screenNumber}`}
@@ -1207,7 +1208,7 @@ const AdminShows = () => {
           </Modal.Body>
           <Modal.Footer
             className="border-0"
-            style={{ background: "var(--card-bg)" }}
+            style={{ background: "#1f2025", borderTop: "1px solid #6c757d" }}
           >
             <Button
               variant="outline-secondary"
