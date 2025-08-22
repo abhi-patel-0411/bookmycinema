@@ -102,14 +102,41 @@ const getBookingById = async (req, res) => {
 // Seat locking mechanism
 const seatLocks = new Map(); // showId -> { seatId: { userId, timestamp, type } }
 
-// Function to get current locks for a show (no auto-expiry)
-const getCurrentLocks = (showId) => {
-  return seatLocks.get(showId) || {};
+// Function to clean expired locks for a show
+const cleanExpiredLocks = (showId) => {
+  const showLocks = seatLocks.get(showId) || {};
+  const now = Date.now();
+  let cleaned = false;
+
+  Object.keys(showLocks).forEach((seatId) => {
+    const lock = showLocks[seatId];
+    // Different lock durations based on lock type
+    const lockDuration =
+      lock.type === "payment_cancelled"
+        ? 2 * 60 * 1000 // 2 minutes for payment cancellations
+        : lock.type === "booking"
+        ? 1 * 60 * 1000 // 5 minutes for actual bookings
+        : 1 * 60 * 1000; // 1 minute for regular selections
+
+    if (now - lock.timestamp > lockDuration) {
+      delete showLocks[seatId];
+      cleaned = true;
+      console.log(`Auto-expired lock for seat ${seatId} in show ${showId}`);
+    }
+  });
+
+  if (cleaned) {
+    seatLocks.set(showId, showLocks);
+    // Instead of notifying all users, we'll notify specific users about their released seats
+    // This is handled in the auto-release timeout for each lock
+  }
+
+  return showLocks;
 };
 
 const lockSeats = (showId, seats, userId, lockType = "selection") => {
-  // Get current locks without auto-expiry
-  const showLocks = getCurrentLocks(showId);
+  // First clean any expired locks
+  const showLocks = cleanExpiredLocks(showId);
   const now = Date.now();
 
   // Check for conflicts with existing locks
@@ -137,7 +164,46 @@ const lockSeats = (showId, seats, userId, lockType = "selection") => {
 
   seatLocks.set(showId, showLocks);
 
-  // Auto-release functionality removed - seats will only be released manually
+  // Set a timeout to automatically release these locks
+  const timeoutDuration = lockType === "booking" ? 5 * 60 * 1000 : 60 * 1000; // 5 minutes for bookings, 1 minute for selections
+
+  setTimeout(() => {
+    const currentLocks = seatLocks.get(showId) || {};
+    const expiredSeats = [];
+
+    seats.forEach((seatId) => {
+      if (
+        currentLocks[seatId] &&
+        currentLocks[seatId].userId === userId &&
+        currentLocks[seatId].timestamp === now
+      ) {
+        delete currentLocks[seatId];
+        expiredSeats.push(seatId);
+      }
+    });
+
+    if (expiredSeats.length > 0) {
+      seatLocks.set(showId, currentLocks);
+      console.log(
+        `Auto-released seats for user ${userId} in show ${showId}: ${expiredSeats.join(
+          ", "
+        )}`
+      );
+      // Notify only the specific user about their expired seats
+      emitToUser(userId, "seats-auto-released", {
+        showId,
+        seats: expiredSeats,
+        userId,
+        message: `Your seat selection has expired. Please select seats again.`,
+      });
+
+      // Notify all users that these seats are now available
+      emitToUsers("seats-available", {
+        showId,
+        seats: expiredSeats,
+      });
+    }
+  }, timeoutDuration);
 
   return { success: true };
 };
@@ -163,23 +229,6 @@ const unlockSeats = (showId, seats, userId) => {
   return unlocked;
 };
 
-// Get current locked seats for a show
-const getLockedSeats = async (req, res) => {
-  try {
-    const { showId } = req.params;
-
-    // Clean expired locks first
-    cleanExpiredLocks(showId);
-
-    const showLocks = seatLocks.get(showId) || {};
-    const lockedSeats = Object.keys(showLocks);
-
-    res.json({ lockedSeats });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 const createBooking = async (req, res) => {
   try {
     const { showId, seats, totalAmount, seatDetails } = req.body;
@@ -199,20 +248,8 @@ const createBooking = async (req, res) => {
 
     // Validate show exists
     const show = await Show.findById(showId)
-      .populate("movie", "title poster rating")
-      .populate("theater", "name location screens");
-    
-    // Get screen name from theater screens
-    const screenName = show.theater?.screens?.find(screen => 
-      screen.screenNumber === show.screenNumber
-    )?.name || `Screen ${show.screenNumber}`;
-    
-    console.log('Show data for booking:', {
-      screenNumber: show.screenNumber,
-      screenName: screenName,
-      theaterName: show.theater?.name,
-      movieRating: show.movie?.rating
-    });
+      .populate("movie", "title")
+      .populate("theater", "name");
 
     if (!show) {
       return res.status(404).json({ message: "Show not found" });
@@ -283,10 +320,7 @@ const createBooking = async (req, res) => {
       // Store movie and theater details directly for persistence
       movieTitle: show.movie?.title || "Unknown Movie",
       moviePoster: show.movie?.poster || "",
-      movieRating: show.movie?.rating || null,
       theaterName: show.theater?.name || "Unknown Theater",
-      screenNumber: show.screenNumber || show.theater?.screenNumber || 1,
-      screenName: screenName,
       movieIsActive: show.movie?.isActive !== false, // Store movie active status
       showDate: show.showDate,
       showTime: show.showTime,
@@ -668,6 +702,28 @@ const deletePastShowBookings = async (req, res) => {
       cutoffDate,
     });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get locked seats for a show
+const getLockedSeats = async (req, res) => {
+  try {
+    const { showId } = req.params;
+
+    // Clean expired locks first
+    const showLocks = cleanExpiredLocks(showId);
+
+    // Get all locked seat IDs for this show
+    const lockedSeats = Object.keys(showLocks);
+
+    res.json({
+      showId,
+      lockedSeats,
+      count: lockedSeats.length,
+    });
+  } catch (error) {
+    console.error("Error getting locked seats:", error);
     res.status(500).json({ message: error.message });
   }
 };

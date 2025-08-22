@@ -16,7 +16,6 @@ import CustomSeatLayout from "../components/booking/CustomSeatLayout";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../services/api";
 import { toast } from "react-toastify";
-import useSocketSeatUpdates from "../hooks/useSocketSeatUpdates";
 import "../styles/seat-layout.css";
 import "../styles/seat-conflict.css";
 
@@ -33,78 +32,62 @@ const BookingPage = () => {
   const [conflictMessage, setConflictMessage] = useState("");
   const [lockedSeats, setLockedSeats] = useState([]);
 
-  // Add socket hook for real-time seat updates
-  useSocketSeatUpdates(showId, setLockedSeats, setSelectedSeats);
-
   useEffect(() => {
     fetchShowDetails();
     setupRealTimeListeners();
 
-    // Don't fetch locked seats on page load - start with clean state
-    // Locked seats will be updated via socket events only
-
-    // Clear ALL selected seats on page refresh
-    const handleBeforeUnload = () => {
-      // Clear your selected seats
+    return () => {
       if (selectedSeats.length > 0) {
         releaseSelectedSeats();
       }
-      // Clear local state immediately
-      setSelectedSeats([]);
-      setLockedSeats([]);
+    };
+  }, [showId]);
+
+  // Add event listener for auto-released seats
+  useEffect(() => {
+    const handleAutoReleasedSeats = (event) => {
+      const {
+        showId: eventShowId,
+        seats,
+        userId: eventUserId,
+        message,
+      } = event.detail;
+      if (eventShowId === showId && eventUserId === user?.id) {
+        // Update selected seats if they were auto-released
+        setSelectedSeats((prev) =>
+          prev.filter((seat) => !seats.includes(seat.id))
+        );
+        if (seats.length > 0 && message) {
+          toast.warning(message);
+        }
+      }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("seats-auto-released", handleAutoReleasedSeats);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      if (selectedSeats.length > 0) {
-        releaseSelectedSeats();
-      }
+      window.removeEventListener(
+        "seats-auto-released",
+        handleAutoReleasedSeats
+      );
     };
-  }, [showId]);
-
-  const fetchLockedSeats = async () => {
-    try {
-      const response = await api.get(`/bookings/locked-seats/${showId}`);
-      const lockedSeatsData = response.data.lockedSeats || [];
-      setLockedSeats(lockedSeatsData);
-      console.log("Fetched locked seats:", lockedSeatsData);
-
-      // Force re-render of seat layout if locked seats changed
-      if (lockedSeatsData.length > 0) {
-        console.log("Locked seats found, updating display");
-      }
-    } catch (error) {
-      console.error("Error fetching locked seats:", error);
-      // Don't clear locked seats on error, keep existing state
-    }
-  };
-
-  // Periodically refresh locked seats to ensure sync
-  useEffect(() => {
-    if (!showId) return;
-
-    const interval = setInterval(() => {
-      fetchLockedSeats();
-    }, 5000); // Refresh every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [showId]);
-
-  // Auto-release functionality removed
+  }, [showId, user]);
 
   const setupRealTimeListeners = () => {
     window.addEventListener("seat-conflict", handleSeatConflict);
     window.addEventListener("seats-selected", handleSeatsSelected);
     window.addEventListener("seats-released", handleSeatsReleased);
     window.addEventListener("seats-booked", handleSeatsBooked);
+    window.addEventListener("seats-auto-released", handleAutoReleasedSeats);
+    window.addEventListener("seats-available", handleSeatsAvailable);
 
     return () => {
       window.removeEventListener("seat-conflict", handleSeatConflict);
       window.removeEventListener("seats-selected", handleSeatsSelected);
       window.removeEventListener("seats-released", handleSeatsReleased);
       window.removeEventListener("seats-booked", handleSeatsBooked);
+      window.removeEventListener("seats-auto-released", handleAutoReleasedSeats);
+      window.removeEventListener("seats-available", handleSeatsAvailable);
     };
   };
 
@@ -127,24 +110,30 @@ const BookingPage = () => {
   };
 
   const handleSeatsSelected = (event) => {
-    const { showId: eventShowId, seats } = event.detail;
+    const { showId: eventShowId, seats, userId: eventUserId } = event.detail;
     if (eventShowId === showId) {
       setLockedSeats((prev) => [...new Set([...prev, ...seats])]);
+      
+      // If another user selected seats that we had selected, remove them from our selection
+      if (eventUserId !== user?.id && eventUserId !== clerkUser?.id) {
+        setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
+      }
     }
   };
 
   const handleSeatsReleased = (event) => {
     const { showId: eventShowId, seats, userId: eventUserId } = event.detail;
     if (eventShowId === showId) {
-      // Remove from locked seats for all users (seats become available for everyone)
       setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
 
-      // If these were our seats that got released, clear selected seats
-      if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
-        setSelectedSeats([]);
+      // If these were our seats that got released, also update selectedSeats
+      if (eventUserId === user?.id) {
+        setSelectedSeats((prev) =>
+          prev.filter((seat) => !seats.includes(seat.id))
+        );
         if (seats.length > 0) {
           toast.warning(
-            "Your seat selection has been released."
+            "Your seat selection has expired. Please select seats again."
           );
         }
       }
@@ -158,6 +147,35 @@ const BookingPage = () => {
       setLockedSeats((prev) =>
         prev.filter((seat) => !newBookedSeats.includes(seat))
       );
+    }
+  };
+
+  const handleAutoReleasedSeats = (event) => {
+    const {
+      showId: eventShowId,
+      seats,
+      userId: eventUserId,
+      message,
+    } = event.detail;
+    if (eventShowId === showId) {
+      // Remove from locked seats for all users
+      setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
+      
+      // If this user's seats were auto-released, clear their selected seats
+      if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
+        setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
+        if (seats.length > 0 && message) {
+          toast.warning(message);
+        }
+      }
+    }
+  };
+
+  const handleSeatsAvailable = (event) => {
+    const { showId: eventShowId, seats } = event.detail;
+    if (eventShowId === showId) {
+      // Remove from locked seats when they become available
+      setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
     }
   };
 
@@ -177,7 +195,7 @@ const BookingPage = () => {
         // Show conflict message immediately
         toast.error(message);
         setConflictMessage(message);
-        setTimeout(() => setConflictMessage(""), 2000);
+        setTimeout(() => setConflictMessage(""), 5000);
 
         // Update locked seats to reflect the conflict
         setLockedSeats((prev) => [...new Set([...prev, ...conflicts])]);
@@ -192,17 +210,13 @@ const BookingPage = () => {
   };
 
   const releaseSelectedSeats = async () => {
-    if (selectedSeats.length === 0 || !show?._id) return;
+    if (selectedSeats.length === 0) return;
 
     try {
       await api.post("/bookings/release-seats", {
         showId: show._id,
         seats: selectedSeats.map((seat) => seat.id),
       });
-      console.log(
-        "Released seats:",
-        selectedSeats.map((seat) => seat.id)
-      );
     } catch (error) {
       console.error("Error releasing seats:", error);
     }
@@ -292,7 +306,6 @@ const BookingPage = () => {
   const handleSeatClick = async (seat) => {
     if (bookedSeats.includes(seat.id)) return;
 
-    // Check if seat is locked by another user
     if (
       lockedSeats.includes(seat.id) &&
       !selectedSeats.some((s) => s.id === seat.id)
@@ -301,7 +314,7 @@ const BookingPage = () => {
       const conflictMessage = `Seat ${seat.id} is currently being selected by another user`;
       toast.error(conflictMessage);
       setConflictMessage(conflictMessage);
-      setTimeout(() => setConflictMessage(""), 3000);
+      setTimeout(() => setConflictMessage(""), 5000);
 
       // Highlight the locked seat visually
       const seatElement = document.querySelector(`button[title*="${seat.id}"]`);
@@ -318,7 +331,6 @@ const BookingPage = () => {
     const isSelected = selectedSeats.some((s) => s.id === seat.id);
 
     if (isSelected) {
-      // Deselect seat
       setSelectedSeats((prev) => prev.filter((s) => s.id !== seat.id));
 
       try {
@@ -328,11 +340,9 @@ const BookingPage = () => {
         });
       } catch (error) {
         console.error("Error releasing seat:", error);
-        // Revert the local state if API call fails
         setSelectedSeats((prev) => [...prev, seat]);
       }
     } else {
-      // Select seat
       if (selectedSeats.length >= 10) {
         toast.warning("Maximum 10 seats can be selected");
         return;
@@ -341,9 +351,6 @@ const BookingPage = () => {
       const result = await selectSeatsOnServer([seat]);
       if (result.success) {
         setSelectedSeats((prev) => [...prev, seat]);
-      } else {
-        // If selection failed due to conflict, refresh locked seats
-        fetchLockedSeats();
       }
     }
   };
@@ -516,7 +523,7 @@ const BookingPage = () => {
                     style={{
                       width: "20px",
                       height: "20px",
-                      background: "rgba(184, 184, 184, 0.3)",
+                      background: "linear-gradient(135deg, #10b981, #059669)",
                     }}
                   ></div>
                   <small className="text-light">Available</small>
@@ -529,7 +536,7 @@ const BookingPage = () => {
                     style={{
                       width: "20px",
                       height: "20px",
-                      background: "#ff9800",
+                      background: "linear-gradient(135deg, #dc3545, #ff6b35)",
                     }}
                   ></div>
                   <small className="text-light">Selected</small>
@@ -542,7 +549,7 @@ const BookingPage = () => {
                     style={{
                       width: "20px",
                       height: "20px",
-                      background: "#fd0505",
+                      background: "linear-gradient(135deg, #ef4444, #dc2626)",
                       fontSize: "10px",
                     }}
                   >
@@ -551,7 +558,7 @@ const BookingPage = () => {
                   <small className="text-light">Booked</small>
                 </div>
               </Col>
-              {/* <Col xs={6} sm={4} md={2}>
+              <Col xs={6} sm={4} md={2}>
                 <div className="d-flex align-items-center justify-content-center">
                   <div
                     className="rounded me-2"
@@ -563,7 +570,7 @@ const BookingPage = () => {
                   ></div>
                   <small className="text-light">Premium</small>
                 </div>
-              </Col> */}
+              </Col>
               <Col xs={6} sm={4} md={2}>
                 <div className="d-flex align-items-center justify-content-center">
                   <div
