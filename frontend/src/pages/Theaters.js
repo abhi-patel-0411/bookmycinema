@@ -165,11 +165,11 @@ const Theaters = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="border-0 shadow-lg" style={{ 
+            <Card className="shadow-lg" style={{ 
               background: '#1f2025', 
               backdropFilter: 'blur(20px)', 
               borderRadius: '16px', 
-              border: '1px solid rgba(255,255,255,0.1)' 
+              border: '1px solid rgba(255,255,255,0.2)' 
             }}>
               <Card.Body className="p-4">
                 <Row className="g-4">
@@ -179,7 +179,12 @@ const Theaters = () => {
                         <FaSearch className="me-2 text-light" size={14} /> Search Theaters
                       </Form.Label>
                       <InputGroup size="lg">
-                        <InputGroup.Text className="bg-dark text-light border-0">
+                        <InputGroup.Text style={{
+                          backgroundColor: '#1f2025',
+                          color: 'white',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRight: 'none'
+                        }}>
                           <FaSearch />
                         </InputGroup.Text>
                         <Form.Control
@@ -187,9 +192,12 @@ const Theaters = () => {
                           placeholder="Search by name or location..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="text-white border-0"
+                          className="text-white"
                           style={{ 
-                            backgroundColor: '#1f2025', 
+                            backgroundColor: '#1f2025 !important', 
+                            color: 'white !important',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            borderLeft: 'none',
                             backdropFilter: 'blur(5px)', 
                             fontFamily: 'Inter, sans-serif', 
                             fontSize: '0.875rem' 
@@ -206,9 +214,11 @@ const Theaters = () => {
                       <Form.Select
                         value={selectedCity}
                         onChange={(e) => setSelectedCity(e.target.value)}
-                        className="text-white border-0"
+                        className="text-white"
                         style={{ 
-                          backgroundColor: '#1f2025', 
+                          backgroundColor: '#1f2025 !important',
+                          color: 'white !important',
+                          border: '1px solid rgba(255,255,255,0.2)',
                           backdropFilter: 'blur(5px)', 
                           fontFamily: 'Inter, sans-serif', 
                           fontSize: '0.875rem' 

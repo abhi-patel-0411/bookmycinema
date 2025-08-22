@@ -401,6 +401,11 @@ const ShowTimes = () => {
                     .date-scroll::-webkit-scrollbar {
                       display: none;
                     }
+                    .date-button:hover {
+                      background-color: rgb(220, 53, 69) !important;
+                      border-color: rgb(220, 53, 69) !important;
+                      color: white !important;
+                    }
                   `}
                 </style>
                 {availableDates.map((dateObj) => (
@@ -411,7 +416,7 @@ const ShowTimes = () => {
                   >
                     <Button
                       variant={selectedDate?.id === dateObj.id ? "danger" : "outline-light"}
-                      className="flex-shrink-0 text-center"
+                      className="flex-shrink-0 text-center date-button"
                       style={{
                         minWidth: '80px',
                         height: '80px',
