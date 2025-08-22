@@ -1,2 +1,0 @@
-# bookmycinema
-mern project
