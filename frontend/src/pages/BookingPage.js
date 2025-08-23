@@ -558,7 +558,7 @@ const BookingPage = () => {
                   <small className="text-light">Booked</small>
                 </div>
               </Col>
-              <Col xs={6} sm={4} md={2}>
+              {/* <Col xs={6} sm={4} md={2}>
                 <div className="d-flex align-items-center justify-content-center">
                   <div
                     className="rounded me-2"
@@ -570,7 +570,7 @@ const BookingPage = () => {
                   ></div>
                   <small className="text-light">Premium</small>
                 </div>
-              </Col>
+              </Col> */}
               <Col xs={6} sm={4} md={2}>
                 <div className="d-flex align-items-center justify-content-center">
                   <div
