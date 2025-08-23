@@ -80,7 +80,7 @@ const Movies = () => {
     const languages = new Set();
 
     movies.forEach((movie) => {
-      // Extract genres
+      // Extract genres with case normalization
       if (movie.genre) {
         if (Array.isArray(movie.genre)) {
           movie.genre.forEach((g) => g && genres.add(g.trim()));
@@ -91,14 +91,34 @@ const Movies = () => {
         }
       }
 
-      // Extract languages
+      // Extract languages with case normalization - avoid duplicates
       if (movie.language) {
         if (Array.isArray(movie.language)) {
-          movie.language.forEach((l) => l && languages.add(l.trim()));
+          movie.language.forEach((l) => {
+            if (l) {
+              const normalized = l.trim();
+              const lowerCase = normalized.toLowerCase();
+              const exists = Array.from(languages).some(
+                (existing) => existing.toLowerCase() === lowerCase
+              );
+              if (!exists) {
+                languages.add(normalized);
+              }
+            }
+          });
         } else if (typeof movie.language === "string") {
-          movie.language
-            .split(",")
-            .forEach((l) => l.trim() && languages.add(l.trim()));
+          movie.language.split(",").forEach((l) => {
+            if (l.trim()) {
+              const normalized = l.trim();
+              const lowerCase = normalized.toLowerCase();
+              const exists = Array.from(languages).some(
+                (existing) => existing.toLowerCase() === lowerCase
+              );
+              if (!exists) {
+                languages.add(normalized);
+              }
+            }
+          });
         }
       }
     });
@@ -193,7 +213,7 @@ const Movies = () => {
         }
 
         if (typeof movie.genre === "string") {
-          // Handle comma-separated genres
+          // Handle comma-separated genres with case insensitivity
           const genres = movie.genre
             .split(",")
             .map((g) => g.trim().toLowerCase());
@@ -221,6 +241,7 @@ const Movies = () => {
         }
 
         if (typeof movie.language === "string") {
+          // Handle comma-separated languages with case insensitivity
           const languages = movie.language
             .split(",")
             .map((l) => l.trim().toLowerCase());
@@ -374,6 +395,8 @@ const Movies = () => {
                   onChange={setSelectedGenre}
                   placeholder="All Genres"
                   isClearable
+                  isSearchable={false}
+                  menuShouldBlockScroll={true}
                   menuPortalTarget={document.body}
                   styles={{
                     control: (base, state) => ({
@@ -405,8 +428,17 @@ const Movies = () => {
                       backdropFilter: "blur(20px)",
                       boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
                       zIndex: 9999,
+                      position: "absolute",
+                      width: "100%",
+                      marginTop: "4px",
                     }),
-                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    menuList: (base) => ({
+                      ...base,
+                      maxHeight: "none", // Remove height restriction
+                      overflowY: "visible", // Remove scroll
+                      overflowX: "hidden",
+                      padding: "8px",
+                    }),
                     option: (base, state) => ({
                       ...base,
                       background: state.isFocused
@@ -438,6 +470,9 @@ const Movies = () => {
                   onChange={setSelectedLanguage}
                   placeholder="All Languages"
                   isClearable
+                  isSearchable={false}
+                  maxMenuHeight={120}
+                  menuShouldBlockScroll={true}
                   menuPortalTarget={document.body}
                   styles={{
                     control: (base, state) => ({
@@ -469,6 +504,12 @@ const Movies = () => {
                       backdropFilter: "blur(20px)",
                       boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
                       zIndex: 9999,
+                    }),
+                    menuList: (base) => ({
+                      ...base,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                      overflowX: "hidden",
                     }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                     option: (base, state) => ({

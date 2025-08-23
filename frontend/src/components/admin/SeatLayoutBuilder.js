@@ -104,6 +104,7 @@ const SeatLayoutBuilder = ({ show, onHide, onSave, initialLayout = [] }) => {
   const removeSeat = (rowIndex, seatIndex) => {
     const newLayout = [...layout];
     newLayout[rowIndex].seats.splice(seatIndex, 1);//remove for use splice
+    // let removed = arr.splice(1, 2); // start at index 1, remove 2
     setLayout(newLayout);
   };
 

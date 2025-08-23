@@ -36,14 +36,15 @@ import moment from "moment";
 
 const getMoviePosterUrl = (posterPath, movieTitle = null) => {
   if (posterPath) {
-    if (posterPath.startsWith('data:image/') || posterPath.startsWith('http')) return posterPath;
-    return posterPath.startsWith('/') ? posterPath : `/${posterPath}`;
+    if (posterPath.startsWith("data:image/") || posterPath.startsWith("http"))
+      return posterPath;
+    return posterPath.startsWith("/") ? posterPath : `/${posterPath}`;
   }
-  const initial = movieTitle ? movieTitle.charAt(0) : 'M';
-  return `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(initial)}`;
+  const initial = movieTitle ? movieTitle.charAt(0) : "M";
+  return `https://via.placeholder.com/300x450/1e293b/ffffff?text=${encodeURIComponent(
+    initial
+  )}`;
 };
-
-
 
 const AdminMovies = () => {
   const [movies, setMovies] = useState([]);
@@ -75,8 +76,6 @@ const AdminMovies = () => {
     poster: null,
     posterUrl: "",
   });
-
-
 
   const [posterPreview, setPosterPreview] = useState("");
 
@@ -142,7 +141,8 @@ const AdminMovies = () => {
       // Fetch ratings for each movie
       const ratingsPromises = moviesData.map(async (movie) => {
         try {
-          const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+          const API_URL =
+            process.env.REACT_APP_API_URL || "http://localhost:5000/api";
           const ratingResponse = await fetch(
             `${API_URL}/ratings/movie/${movie._id}`
           );
@@ -235,13 +235,16 @@ const AdminMovies = () => {
         ) {
           const genres = formData[key].split(",").map((g) => g.trim());
           movieFormData.append("genre", genres);
-
         } else if (key === "startDate" || key === "endDate") {
           // Only add dates if they're provided
           if (formData[key]) {
             movieFormData.append(key, formData[key]);
           }
-        } else if (key !== "isUpcoming" && key !== "isActive" && key !== "posterUrl") {
+        } else if (
+          key !== "isUpcoming" &&
+          key !== "isActive" &&
+          key !== "posterUrl"
+        ) {
           // Skip isUpcoming, isActive, and posterUrl as we already handled them
           movieFormData.append(key, formData[key]);
         }
@@ -276,7 +279,7 @@ const AdminMovies = () => {
 
   const handleDelete = async (id, movieTitle) => {
     const confirmMessage = `Are you sure you want to permanently delete "${movieTitle}"?\n\nThis will:\n• Remove the movie completely from the database\n• Delete all related shows\n• Cancel all bookings for this movie\n\nThis action cannot be undone!`;
-    
+
     if (window.confirm(confirmMessage)) {
       try {
         await moviesAPI.delete(id);
@@ -284,14 +287,17 @@ const AdminMovies = () => {
         fetchMovies();
       } catch (error) {
         console.error("Error deleting movie:", error);
-        toast.error("Failed to delete movie: " + (error.response?.data?.message || error.message));
+        toast.error(
+          "Failed to delete movie: " +
+            (error.response?.data?.message || error.message)
+        );
       }
     }
   };
 
   const handleSoftDelete = async (id, movieTitle) => {
     const confirmMessage = `Are you sure you want to deactivate "${movieTitle}"?\n\nThis will:\n• Mark the movie as inactive\n• Delete all related shows\n• Hide the movie from users\n\nYou can reactivate it later if needed.`;
-    
+
     if (window.confirm(confirmMessage)) {
       try {
         await moviesAPI.softDelete(id);
@@ -299,7 +305,10 @@ const AdminMovies = () => {
         fetchMovies();
       } catch (error) {
         console.error("Error deactivating movie:", error);
-        toast.error("Failed to deactivate movie: " + (error.response?.data?.message || error.message));
+        toast.error(
+          "Failed to deactivate movie: " +
+            (error.response?.data?.message || error.message)
+        );
       }
     }
   };
@@ -329,7 +338,8 @@ const AdminMovies = () => {
       price: movie.price || "",
       youtubeUrl: movie.youtubeUrl || "",
       poster: null,
-      posterUrl: movie.poster && movie.poster.startsWith('http') ? movie.poster : "",
+      posterUrl:
+        movie.poster && movie.poster.startsWith("http") ? movie.poster : "",
     });
 
     if (movie.poster) {
@@ -366,13 +376,11 @@ const AdminMovies = () => {
   const handlePosterChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, poster: file, posterUrl: '' });
+      setFormData({ ...formData, poster: file, posterUrl: "" });
       const previewUrl = URL.createObjectURL(file);
       setPosterPreview(previewUrl);
     }
   };
-
-
 
   const filteredMovies = movies.filter((movie) => {
     const matchesSearch =
@@ -393,7 +401,13 @@ const AdminMovies = () => {
       !filterDate ||
       (movie.releaseDate &&
         new Date(movie.releaseDate).toISOString().split("T")[0] === filterDate);
-    return matchesSearch && matchesGenre && matchesStatus && matchesLanguage && matchesDate;
+    return (
+      matchesSearch &&
+      matchesGenre &&
+      matchesStatus &&
+      matchesLanguage &&
+      matchesDate
+    );
   });
 
   // Pagination logic
@@ -447,9 +461,18 @@ const AdminMovies = () => {
               <style>
                 {`.search-input::placeholder { color: #ffffff !important; }`}
               </style>
-              <div className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden" style={{ height: '46px' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 30 30" fill="#6B7280">
-                  <path d="M13 3C7.489 3 3 7.489 3 13s4.489 10 10 10a9.95 9.95 0 0 0 6.322-2.264l5.971 5.971a1 1 0 1 0 1.414-1.414l-5.97-5.97A9.95 9.95 0 0 0 23 13c0-5.511-4.489-10-10-10m0 2c4.43 0 8 3.57 8 8s-3.57 8-8 8-8-3.57-8-8 3.57-8 8-8"/>
+              <div
+                className="d-flex align-items-center border border-secondary rounded-pill px-3 overflow-hidden"
+                style={{ height: "46px" }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 30 30"
+                  fill="#6B7280"
+                >
+                  <path d="M13 3C7.489 3 3 7.489 3 13s4.489 10 10 10a9.95 9.95 0 0 0 6.322-2.264l5.971 5.971a1 1 0 1 0 1.414-1.414l-5.97-5.97A9.95 9.95 0 0 0 23 13c0-5.511-4.489-10-10-10m0 2c4.43 0 8 3.57 8 8s-3.57 8-8 8-8-3.57-8-8 3.57-8 8-8" />
                 </svg>
                 <Form.Control
                   type="text"
@@ -458,14 +481,26 @@ const AdminMovies = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border-0 bg-transparent w-100 h-100 ms-2 search-input"
                   style={{
-                    outline: 'none',
-                    boxShadow: 'none',
-                    color: '#ffffff',
-                    fontSize: '16px',
-                    fontWeight: '400'
+                    outline: "none",
+                    boxShadow: "none",
+                    color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "400",
                   }}
-                  onFocus={(e) => e.target.style.setProperty('--bs-form-control-placeholder-color', '#ffffff', 'important')}
-                  onBlur={(e) => e.target.style.setProperty('--bs-form-control-placeholder-color', '#ffffff', 'important')}
+                  onFocus={(e) =>
+                    e.target.style.setProperty(
+                      "--bs-form-control-placeholder-color",
+                      "#ffffff",
+                      "important"
+                    )
+                  }
+                  onBlur={(e) =>
+                    e.target.style.setProperty(
+                      "--bs-form-control-placeholder-color",
+                      "#ffffff",
+                      "important"
+                    )
+                  }
                 />
               </div>
             </Col>
@@ -476,7 +511,7 @@ const AdminMovies = () => {
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
                     className="bg-dark border-secondary text-white rounded-pill"
-                    style={{ height: '46px' }}
+                    style={{ height: "46px" }}
                   >
                     <option value="">All Status</option>
                     <option value="active">Active Movies</option>
@@ -488,11 +523,13 @@ const AdminMovies = () => {
                     value={filterGenre}
                     onChange={(e) => setFilterGenre(e.target.value)}
                     className="bg-dark border-secondary text-white rounded-pill"
-                    style={{ height: '46px' }}
+                    style={{ height: "46px" }}
                   >
                     <option value="">All Genres</option>
                     {genres.map((genre) => (
-                      <option key={genre} value={genre}>{genre}</option>
+                      <option key={genre} value={genre}>
+                        {genre}
+                      </option>
                     ))}
                   </Form.Select>
                 </Col>
@@ -501,11 +538,13 @@ const AdminMovies = () => {
                     value={filterLanguage}
                     onChange={(e) => setFilterLanguage(e.target.value)}
                     className="bg-dark border-secondary text-white rounded-pill"
-                    style={{ height: '46px' }}
+                    style={{ height: "46px" }}
                   >
                     <option value="">All Languages</option>
                     {languages.map((language) => (
-                      <option key={language} value={language}>{language}</option>
+                      <option key={language} value={language}>
+                        {language}
+                      </option>
                     ))}
                   </Form.Select>
                 </Col>
@@ -515,7 +554,7 @@ const AdminMovies = () => {
                     value={filterDate}
                     onChange={(e) => setFilterDate(e.target.value)}
                     className="bg-dark border-secondary text-white rounded-pill"
-                    style={{ height: '46px' }}
+                    style={{ height: "46px" }}
                     placeholder="Filter by date"
                   />
                 </Col>
@@ -530,7 +569,7 @@ const AdminMovies = () => {
                   <span>{filteredMovies.length} movies found</span>
                 </div>
                 <div className="d-flex gap-3">
-                  <Form.Check
+                  {/* <Form.Check
                     type="switch"
                     id="show-expired-switch"
                     label="Show expired movies"
@@ -540,16 +579,16 @@ const AdminMovies = () => {
                       fetchMovies();
                     }}
                     className="text-white"
-                  />
+                  /> */}
                   <Button
                     variant="outline-secondary"
                     size="sm"
                     onClick={() => {
-                      setSearchTerm('');
-                      setFilterGenre('');
-                      setFilterStatus('');
-                      setFilterLanguage('');
-                      setFilterDate('');
+                      setSearchTerm("");
+                      setFilterGenre("");
+                      setFilterStatus("");
+                      setFilterLanguage("");
+                      setFilterDate("");
                     }}
                     className="rounded-pill"
                   >
@@ -572,7 +611,14 @@ const AdminMovies = () => {
                 boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
               }}
             >
-              <div className="table-responsive" style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <div
+                className="table-responsive"
+                style={{
+                  overflowX: "auto",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
                 <style>
                   {`.table-responsive::-webkit-scrollbar { display: none; }`}
                 </style>
@@ -583,10 +629,7 @@ const AdminMovies = () => {
                     }}
                   >
                     <tr>
-                      <th
-                        className="text-center"
-                        style={{ width: "80px" }}
-                      >
+                      <th className="text-center" style={{ width: "80px" }}>
                         #
                       </th>
                       <th style={{ width: "100px" }}>Poster</th>
@@ -686,7 +729,9 @@ const AdminMovies = () => {
                         <td>
                           <div className="d-flex align-items-center">
                             <FaClock className="me-1 text-white" size={12} />
-                            <span className="text-white">{movie.duration || "120"} min</span>
+                            <span className="text-white">
+                              {movie.duration || "120"} min
+                            </span>
                           </div>
                         </td>
                         <td>
@@ -850,7 +895,9 @@ const AdminMovies = () => {
                             <Button
                               variant="outline-danger"
                               size="sm"
-                              onClick={() => handleDelete(movie._id, movie.title)}
+                              onClick={() =>
+                                handleDelete(movie._id, movie.title)
+                              }
                               title="Permanently Delete Movie"
                               style={{ borderRadius: "8px" }}
                             >
@@ -860,7 +907,9 @@ const AdminMovies = () => {
                               <Button
                                 variant="outline-warning"
                                 size="sm"
-                                onClick={() => handleSoftDelete(movie._id, movie.title)}
+                                onClick={() =>
+                                  handleSoftDelete(movie._id, movie.title)
+                                }
                                 title="Deactivate Movie"
                                 style={{ borderRadius: "8px" }}
                               >
@@ -878,26 +927,37 @@ const AdminMovies = () => {
                                   ) {
                                     const movieData = new FormData();
                                     movieData.append("isActive", "true");
-                                    
+
                                     // Set start date to current date
-                                    const startDate = moment().format("YYYY-MM-DD");
+                                    const startDate =
+                                      moment().format("YYYY-MM-DD");
                                     // Set end date to 7 days from current date
-                                    const endDate = moment().add(7, "days").format("YYYY-MM-DD");
-                                    
+                                    const endDate = moment()
+                                      .add(7, "days")
+                                      .format("YYYY-MM-DD");
+
                                     movieData.append("startDate", startDate);
                                     movieData.append("endDate", endDate);
-                                    
+
                                     console.log(
                                       "Reactivating movie with ID:",
                                       movie._id,
-                                      "Start:", startDate,
-                                      "End:", endDate
+                                      "Start:",
+                                      startDate,
+                                      "End:",
+                                      endDate
                                     );
                                     moviesAPI
                                       .update(movie._id, movieData)
                                       .then(() => {
                                         toast.success(
-                                          `"${movie.title}" has been reactivated and scheduled from ${moment().format('MMM DD')} to ${moment().add(7, 'days').format('MMM DD, YYYY')}`
+                                          `"${
+                                            movie.title
+                                          }" has been reactivated and scheduled from ${moment().format(
+                                            "MMM DD"
+                                          )} to ${moment()
+                                            .add(7, "days")
+                                            .format("MMM DD, YYYY")}`
                                         );
                                         fetchMovies();
                                       })
@@ -929,24 +989,83 @@ const AdminMovies = () => {
 
             {/* Professional Mobile Pagination */}
             {totalPages > 1 && (
-              <div className="mt-3 p-2 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div
+                className="mt-3 p-2 rounded"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <small className="text-light">{indexOfFirstMovie + 1}-{Math.min(indexOfLastMovie, filteredMovies.length)} of {filteredMovies.length}</small>
-                  <small className="text-primary">{currentPage}/{totalPages}</small>
+                  <small className="text-light">
+                    {indexOfFirstMovie + 1}-
+                    {Math.min(indexOfLastMovie, filteredMovies.length)} of{" "}
+                    {filteredMovies.length}
+                  </small>
+                  <small className="text-primary">
+                    {currentPage}/{totalPages}
+                  </small>
                 </div>
                 <div className="d-flex justify-content-center gap-1">
-                  <button className="btn btn-outline-light btn-sm" disabled={currentPage === 1} onClick={() => paginate(currentPage - 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>‹</button>
+                  <button
+                    className="btn btn-outline-light btn-sm"
+                    disabled={currentPage === 1}
+                    onClick={() => paginate(currentPage - 1)}
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      padding: "0",
+                      fontSize: "14px",
+                    }}
+                  >
+                    ‹
+                  </button>
                   {(() => {
-                    const c = currentPage, t = totalPages;
-                    if (t <= 5) return Array.from({length: t}, (_, i) => i + 1);
-                    if (c <= 3) return [1, 2, 3, '...', t];
-                    if (c >= t - 2) return [1, '...', t - 2, t - 1, t];
-                    return [1, '...', c - 1, c, c + 1, '...', t];
-                  })().map((p, i) => 
-                    p === '...' ? <span key={i} className="px-1 text-secondary">...</span> :
-                    <button key={p} className={`btn btn-sm ${p === currentPage ? 'btn-primary' : 'btn-outline-light'}`} onClick={() => paginate(p)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '12px' }}>{p}</button>
+                    const c = currentPage,
+                      t = totalPages;
+                    if (t <= 5)
+                      return Array.from({ length: t }, (_, i) => i + 1);
+                    if (c <= 3) return [1, 2, 3, "...", t];
+                    if (c >= t - 2) return [1, "...", t - 2, t - 1, t];
+                    return [1, "...", c - 1, c, c + 1, "...", t];
+                  })().map((p, i) =>
+                    p === "..." ? (
+                      <span key={i} className="px-1 text-secondary">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        className={`btn btn-sm ${
+                          p === currentPage
+                            ? "btn-primary"
+                            : "btn-outline-light"
+                        }`}
+                        onClick={() => paginate(p)}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          padding: "0",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {p}
+                      </button>
+                    )
                   )}
-                  <button className="btn btn-outline-light btn-sm" disabled={currentPage === totalPages} onClick={() => paginate(currentPage + 1)} style={{ width: '32px', height: '32px', padding: '0', fontSize: '14px' }}>›</button>
+                  <button
+                    className="btn btn-outline-light btn-sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => paginate(currentPage + 1)}
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      padding: "0",
+                      fontSize: "14px",
+                    }}
+                  >
+                    ›
+                  </button>
                 </div>
               </div>
             )}
@@ -1168,15 +1287,24 @@ const AdminMovies = () => {
                       value={formData.startDate}
                       onChange={(e) => {
                         const startDate = e.target.value;
-                        const currentDate = new Date().toISOString().split('T')[0];
+                        const currentDate = new Date()
+                          .toISOString()
+                          .split("T")[0];
                         const isUpcoming = startDate > currentDate;
-                        
+
                         // Calculate end date (7 days after start date)
                         const endDate = startDate
-                          ? moment(startDate).add(7, "days").format("YYYY-MM-DD")
+                          ? moment(startDate)
+                              .add(7, "days")
+                              .format("YYYY-MM-DD")
                           : "";
-                        
-                        setFormData({ ...formData, startDate, endDate, isUpcoming });
+
+                        setFormData({
+                          ...formData,
+                          startDate,
+                          endDate,
+                          isUpcoming,
+                        });
                       }}
                       style={{
                         backgroundColor: "#2a2d35",
@@ -1212,7 +1340,6 @@ const AdminMovies = () => {
                           ? "0 0 0 0.2rem rgba(40, 167, 69, 0.25)"
                           : "none",
                       }}
-
                     />
                     <small className="text-white d-flex align-items-center mt-1">
                       <FaCalendarAlt className="me-1" size={12} />
@@ -1237,10 +1364,9 @@ const AdminMovies = () => {
                       disabled={!!formData.startDate}
                     />
                     <small className="text-white d-block mb-2">
-                      {formData.startDate ? 
-                        'Auto-detected based on showing period start date' : 
-                        'Will appear in the Upcoming section'
-                      }
+                      {formData.startDate
+                        ? "Auto-detected based on showing period start date"
+                        : "Will appear in the Upcoming section"}
                     </small>
 
                     {editingMovie && (
@@ -1281,17 +1407,21 @@ const AdminMovies = () => {
                 </Col>
               </Row>
 
-
-
               <Form.Group className="mb-4">
                 <Form.Label className="text-white fw-bold mb-3">
                   Movie Poster
                 </Form.Label>
                 <div className="d-flex gap-4 align-items-center">
                   <div className="position-relative">
-                    {posterPreview || editingMovie?.poster || formData.posterUrl ? (
+                    {posterPreview ||
+                    editingMovie?.poster ||
+                    formData.posterUrl ? (
                       <img
-                        src={posterPreview || getMoviePosterUrl(editingMovie?.poster) || formData.posterUrl}
+                        src={
+                          posterPreview ||
+                          getMoviePosterUrl(editingMovie?.poster) ||
+                          formData.posterUrl
+                        }
                         alt="Poster Preview"
                         className="rounded"
                         style={{
@@ -1332,14 +1462,20 @@ const AdminMovies = () => {
                     >
                       <div className="d-flex align-items-center mb-3">
                         <FaImage className="text-primary me-2" />
-                        <span className="text-white">Image URL (Recommended)</span>
+                        <span className="text-white">
+                          Image URL (Recommended)
+                        </span>
                       </div>
                       <Form.Control
                         type="url"
-                        value={formData.posterUrl || ''}
+                        value={formData.posterUrl || ""}
                         onChange={(e) => {
                           const url = e.target.value;
-                          setFormData({ ...formData, posterUrl: url, poster: null });
+                          setFormData({
+                            ...formData,
+                            posterUrl: url,
+                            poster: null,
+                          });
                           setPosterPreview(url);
                         }}
                         placeholder="https://example.com/movie-poster.jpg"
@@ -1351,11 +1487,11 @@ const AdminMovies = () => {
                           marginBottom: "15px",
                         }}
                       />
-                      
+
                       <div className="text-center text-white mb-3">
                         <span>OR</span>
                       </div>
-                      
+
                       <div className="d-flex align-items-center mb-3">
                         <FaUpload className="text-primary me-2" />
                         <span className="text-white">Upload Movie Poster</span>
@@ -1374,10 +1510,19 @@ const AdminMovies = () => {
                       />
                       <small className="text-white d-block mt-2">
                         <ul className="ps-3 mb-0">
-                          <li><strong>Image URL is recommended</strong> for better performance</li>
-                          <li>File upload: JPG, PNG, WebP (max 5MB) - works on all devices</li>
+                          <li>
+                            <strong>Image URL is recommended</strong> for better
+                            performance
+                          </li>
+                          <li>
+                            File upload: JPG, PNG, WebP (max 5MB) - works on all
+                            devices
+                          </li>
                           <li>Recommended size: 300x450 pixels</li>
-                          <li>Uploaded images work across all devices and platforms</li>
+                          <li>
+                            Uploaded images work across all devices and
+                            platforms
+                          </li>
                         </ul>
                       </small>
                     </div>
