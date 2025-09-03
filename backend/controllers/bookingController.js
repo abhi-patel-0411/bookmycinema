@@ -12,7 +12,8 @@ const getAllBookings = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;``
+    const skip = (page - 1) * limit;
+    ``;
     const search = req.query.search || "";
 
     // Build search query
@@ -117,8 +118,12 @@ const cleanExpiredLocks = (showId) => {
         : lock.type === "booking"
         ? 5 * 60 * 1000 // 5 minutes for actual bookings
         : 1 * 60 * 1000; // 1 minute for regular selections
-    
-    console.log(`⏰ Checking lock expiry: seat ${seatId}, type: ${lock.type}, duration: ${lockDuration/1000}s, age: ${(now - lock.timestamp)/1000}s`);
+
+    console.log(
+      `⏰ Checking lock expiry: seat ${seatId}, type: ${lock.type}, duration: ${
+        lockDuration / 1000
+      }s, age: ${(now - lock.timestamp) / 1000}s`
+    );
 
     if (now - lock.timestamp > lockDuration) {
       delete showLocks[seatId];
@@ -168,9 +173,13 @@ const lockSeats = (showId, seats, userId, lockType = "selection") => {
 
   // Set a timeout to automatically release these locks
   const timeoutDuration = lockType === "booking" ? 5 * 60 * 1000 : 60 * 1000; // 5 minutes for bookings, 1 minute for selections
-  
+
   // Debug logging
-  console.log(`🔒 Locking seats with type: ${lockType}, timeout: ${timeoutDuration/1000}s, userId: ${userId}, seats: ${seats.join(', ')}`);
+  console.log(
+    `🔒 Locking seats with type: ${lockType}, timeout: ${
+      timeoutDuration / 1000
+    }s, userId: ${userId}, seats: ${seats.join(", ")}`
+  );
 
   setTimeout(() => {
     const currentLocks = seatLocks.get(showId) || {};
@@ -273,7 +282,9 @@ const createBooking = async (req, res) => {
     }
 
     // Check seat locks next
-    console.log(`📝 Creating booking - calling lockSeats with 'booking' type for user: ${userId}`);
+    console.log(
+      `📝 Creating booking - calling lockSeats with 'booking' type for user: ${userId}`
+    );
     const lockResult = lockSeats(showId, seats, userId, "booking"); // Use 'booking' type for longer lock
     if (!lockResult.success) {
       // Send notification only to this specific user

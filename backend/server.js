@@ -83,7 +83,12 @@ app.use("*", (req, res) => {
 
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: 10,
+    minPoolSize: 5
+  })
   .then(async () => {
     console.log("✅ MongoDB connected successfully");
     console.log("📊 Database:", mongoose.connection.name);

@@ -77,7 +77,7 @@ const auth = async (req, res, next) => {
     }
     
     // Fallback to JWT
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
@@ -166,7 +166,7 @@ const optionalAuth = async (req, res, next) => {
       
       // Fallback to JWT
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
         const user = await User.findById(decoded.id).select('-password');
         if (user) {
           req.user = user;

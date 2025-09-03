@@ -201,8 +201,6 @@ const createMovie = async (req, res) => {
       movieData.genre = movieData.genre.split(",").map((g) => g.trim());
     }
 
-
-
     // Handle isUpcoming flag automatically based on showing period start date
     if (movieData.startDate) {
       const startDate = new Date(movieData.startDate);
@@ -278,8 +276,6 @@ const updateMovie = async (req, res) => {
     if (updateData.genre && typeof updateData.genre === "string") {
       updateData.genre = updateData.genre.split(",").map((g) => g.trim());
     }
-
-
 
     // Handle isUpcoming flag automatically based on showing period start date
     if (updateData.startDate) {
@@ -512,8 +508,6 @@ const checkMovieStatus = async (movieId) => {
     return false;
   }
 };
-
-
 
 // Manual refresh movie status
 const refreshMovieStatus = async (req, res) => {

@@ -101,9 +101,9 @@ const TheaterListLayout = ({ theaters, onMovieClick }) => {
                   >
                     <div className="movie-slot-info">
                       <div className="movie-name">{movie.title}</div>
-                      <div className="movie-screen">
-                        Screen {movie.shows[0]?.screenNumber || idx + 1}
-                      </div>
+                      {/* <div className="movie-screen">
+                        {movie.shows[0]?.screenNumber || idx + 1}
+                      </div> */}
                     </div>
                   </div>
                 ))
