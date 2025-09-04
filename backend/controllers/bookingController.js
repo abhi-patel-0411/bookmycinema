@@ -100,165 +100,116 @@ const getBookingById = async (req, res) => {
   }
 };
 
-// Seat locking mechanism
-const seatLocks = new Map(); // showId -> { seatId: { userId, timestamp, type } }
+// Simple seat locking mechanism
+const seatLocks = new Map(); // showId -> { seatId: { userId, timestamp } }
+const userTimeouts = new Map(); // userId -> timeout references
 
-// Function to clean expired locks for a show
-const cleanExpiredLocks = (showId) => {
-  const showLocks = seatLocks.get(showId) || {};
-  const now = Date.now();
-  let cleaned = false;
+const LOCK_DURATION = 30 * 1000; // 30 seconds
 
-  Object.keys(showLocks).forEach((seatId) => {
-    const lock = showLocks[seatId];
-    // Different lock durations based on lock type
-    const lockDuration =
-      lock.type === "payment_cancelled"
-        ? 2 * 60 * 1000 // 2 minutes for payment cancellations
-        : lock.type === "booking"
-        ? 5 * 60 * 1000 // 5 minutes for actual bookings
-        : 1 * 60 * 1000; // 1 minute for regular selections
-
-    console.log(
-      `⏰ Checking lock expiry: seat ${seatId}, type: ${lock.type}, duration: ${
-        lockDuration / 1000
-      }s, age: ${(now - lock.timestamp) / 1000}s`
-    );
-
-    if (now - lock.timestamp > lockDuration) {
-      delete showLocks[seatId];
-      cleaned = true;
-      console.log(`Auto-expired lock for seat ${seatId} in show ${showId}`);
-    }
-  });
-
-  if (cleaned) {
-    seatLocks.set(showId, showLocks);
-    // Instead of notifying all users, we'll notify specific users about their released seats
-    // This is handled in the auto-release timeout for each lock
-  }
-
-  return showLocks;
+const clearUserTimeouts = (userId) => {
+  const timeouts = userTimeouts.get(userId) || [];
+  timeouts.forEach(timeout => clearTimeout(timeout));
+  userTimeouts.delete(userId);
 };
 
-const lockSeats = (showId, seats, userId, lockType = "selection") => {
-  // First clean any expired locks
-  const showLocks = cleanExpiredLocks(showId);
+const lockSeats = (showId, seats, userId) => {
+  const showLocks = seatLocks.get(showId) || {};
   const now = Date.now();
-
-  // Check for conflicts with existing locks
-  const conflicts = [];
-
-  seats.forEach((seatId) => {
-    // Check if seat is locked by another user (not the same user)
-    if (showLocks[seatId] && showLocks[seatId].userId !== userId) {
-      // Double check if the lock is still valid
-      const lock = showLocks[seatId];
-      const lockDuration = lock.type === "booking" ? 5 * 60 * 1000 : 60 * 1000;
-      
-      if (now - lock.timestamp <= lockDuration) {
-        conflicts.push(seatId);
-      } else {
-        // Lock has expired, remove it
-        delete showLocks[seatId];
-      }
+  
+  // Clear expired locks
+  Object.keys(showLocks).forEach(seatId => {
+    if (now - showLocks[seatId].timestamp > LOCK_DURATION) {
+      delete showLocks[seatId];
     }
   });
 
+  // Check conflicts (only with other users)
+  const conflicts = seats.filter(seatId => 
+    showLocks[seatId] && 
+    showLocks[seatId].userId !== userId &&
+    (now - showLocks[seatId].timestamp <= LOCK_DURATION)
+  );
+
   if (conflicts.length > 0) {
-    console.log(`❌ Seat conflicts found for user ${userId}:`, conflicts);
     return { success: false, conflicts };
   }
 
-  // First unlock any existing locks by this user for these seats
-  seats.forEach((seatId) => {
-    if (showLocks[seatId] && showLocks[seatId].userId === userId) {
-      delete showLocks[seatId];
-    }
-  });
+  // Clear previous timeouts for this user
+  clearUserTimeouts(userId);
 
-  // Lock seats for this user
-  seats.forEach((seatId) => {
-    showLocks[seatId] = { userId, timestamp: now, type: lockType };
+  // Lock seats
+  seats.forEach(seatId => {
+    showLocks[seatId] = { userId, timestamp: now };
   });
-
   seatLocks.set(showId, showLocks);
 
-  // Set a timeout to automatically release these locks
-  const timeoutDuration = lockType === "booking" ? 5 * 60 * 1000 : 60 * 1000;
-
-  console.log(
-    `🔒 Successfully locked seats for user ${userId}: ${seats.join(", ")} (${lockType}, ${timeoutDuration/1000}s)`
-  );
-
-  setTimeout(() => {
+  // Set auto-release timeout
+  const timeout = setTimeout(() => {
     const currentLocks = seatLocks.get(showId) || {};
-    const expiredSeats = [];
-
-    seats.forEach((seatId) => {
-      if (
-        currentLocks[seatId] &&
-        currentLocks[seatId].userId === userId &&
-        currentLocks[seatId].timestamp === now
-      ) {
+    const releasedSeats = [];
+    
+    seats.forEach(seatId => {
+      if (currentLocks[seatId]?.userId === userId && currentLocks[seatId]?.timestamp === now) {
         delete currentLocks[seatId];
-        expiredSeats.push(seatId);
+        releasedSeats.push(seatId);
       }
     });
-
-    if (expiredSeats.length > 0) {
+    
+    if (releasedSeats.length > 0) {
       seatLocks.set(showId, currentLocks);
-      console.log(
-        `⏰ Auto-released expired seats for user ${userId}: ${expiredSeats.join(", ")}`
-      );
-      
-      // Notify only the specific user about their expired seats
-      emitToUser(userId, "seats-auto-released", {
-        showId,
-        seats: expiredSeats,
-        userId,
-        message: `Your seat selection has expired. Please select seats again.`,
-      });
-
-      // Notify all users that these seats are now available
-      emitToUsers("seats-available", {
-        showId,
-        seats: expiredSeats,
-      });
+      emitToUsers("seats-released", { showId, seats: releasedSeats, userId });
     }
-  }, timeoutDuration);
+  }, LOCK_DURATION);
+
+  // Store timeout reference
+  const timeouts = userTimeouts.get(userId) || [];
+  timeouts.push(timeout);
+  userTimeouts.set(userId, timeouts);
 
   return { success: true };
 };
 
 const unlockSeats = (showId, seats, userId) => {
   const showLocks = seatLocks.get(showId) || {};
-  const actuallyUnlocked = [];
+  const releasedSeats = [];
 
-  seats.forEach((seatId) => {
-    if (showLocks[seatId] && showLocks[seatId].userId === userId) {
+  seats.forEach(seatId => {
+    if (showLocks[seatId]?.userId === userId) {
       delete showLocks[seatId];
-      actuallyUnlocked.push(seatId);
-      console.log(`🔓 Unlocked seat ${seatId} for user ${userId}`);
+      releasedSeats.push(seatId);
     }
   });
 
-  if (actuallyUnlocked.length > 0) {
+  if (releasedSeats.length > 0) {
     seatLocks.set(showId, showLocks);
-    
-    // Notify other users about the released seats
-    emitToUsers("seats-released", { 
-      showId, 
-      seats: actuallyUnlocked, 
-      userId 
-    });
-    
-    console.log(`✅ Successfully unlocked ${actuallyUnlocked.length} seats for user ${userId}`);
+    clearUserTimeouts(userId);
+    emitToUsers("seats-released", { showId, seats: releasedSeats, userId });
     return true;
   }
-
-  console.log(`⚠️ No seats were unlocked for user ${userId} (not locked by this user)`);
   return false;
+};
+
+const clearUserLocks = (userId) => {
+  clearUserTimeouts(userId);
+  const clearedSeats = [];
+  
+  seatLocks.forEach((showLocks, showId) => {
+    const seatsToRelease = [];
+    Object.keys(showLocks).forEach(seatId => {
+      if (showLocks[seatId].userId === userId) {
+        delete showLocks[seatId];
+        seatsToRelease.push(seatId);
+      }
+    });
+    
+    if (seatsToRelease.length > 0) {
+      seatLocks.set(showId, showLocks);
+      emitToUsers("seats-released", { showId, seats: seatsToRelease, userId });
+      clearedSeats.push(...seatsToRelease.map(seat => ({ showId, seatId: seat })));
+    }
+  });
+  
+  return clearedSeats;
 };
 
 const createBooking = async (req, res) => {
@@ -299,25 +250,11 @@ const createBooking = async (req, res) => {
       });
     }
 
-    // Check seat locks next
-    console.log(
-      `📝 Creating booking - calling lockSeats with 'booking' type for user: ${userId}`
-    );
-    const lockResult = lockSeats(showId, seats, userId, "booking"); // Use 'booking' type for longer lock
+    // Check seat locks
+    const lockResult = lockSeats(showId, seats, userId);
     if (!lockResult.success) {
-      // Send notification only to this specific user
-      emitToUser(userId, "seat-conflict", {
-        showId,
-        conflicts: lockResult.conflicts,
-        userId: userId, // Include userId to ensure notification is only for this user
-        message: `Seats ${lockResult.conflicts.join(
-          ", "
-        )} are being selected by another user`,
-      });
       return res.status(409).json({
-        message: `Seats ${lockResult.conflicts.join(
-          ", "
-        )} are currently being selected by another user. Please try different seats.`,
+        message: `Seats ${lockResult.conflicts.join(", ")} are currently selected by another user`,
         conflicts: lockResult.conflicts,
         type: "locked",
       });
@@ -388,15 +325,8 @@ const createBooking = async (req, res) => {
       ],
     });
 
-    // Don't unlock seats after successful booking - they're now actually booked in the database
-    // Instead, remove them from the locks map directly
-    const showLocks = seatLocks.get(showId) || {};
-    seats.forEach((seat) => {
-      if (showLocks[seat] && showLocks[seat].userId === userId) {
-        delete showLocks[seat];
-      }
-    });
-    seatLocks.set(showId, showLocks);
+    // Clear locks after successful booking
+    unlockSeats(showId, seats, userId);
 
     // Send booking confirmation email
     try {
@@ -419,116 +349,63 @@ const createBooking = async (req, res) => {
     res.status(201).json(populatedBooking);
   } catch (error) {
     console.error("Booking creation error:", error);
-    // Unlock seats on error
-    if (req.body?.showId && req.body?.seats) {
-      const userId = req.user?.id || req.user?._id || `guest_${Date.now()}`;
-      unlockSeats(req.body.showId, req.body.seats, userId);
-    }
     res.status(500).json({ message: error.message });
   }
 };
 
-// New endpoint to handle seat selection (temporary lock)
 const selectSeats = async (req, res) => {
   try {
     const { showId, seats } = req.body;
     const userId = req.user?.id || req.user?._id || `guest_${Date.now()}`;
 
-    console.log(`🎯 User ${userId} attempting to select seats:`, seats);
-
-    // Validate input
-    if (!showId || !seats || !Array.isArray(seats) || seats.length === 0) {
-      return res.status(400).json({ message: "Invalid seat selection data" });
+    if (!showId || !seats?.length) {
+      return res.status(400).json({ message: "Invalid data" });
     }
 
-    // Check if show exists
     const show = await Show.findById(showId);
     if (!show) {
       return res.status(404).json({ message: "Show not found" });
     }
 
-    // Check for already booked seats in database
-    const alreadyBooked = seats.filter((seat) =>
-      show.bookedSeats.includes(seat)
-    );
+    // Check booked seats
+    const alreadyBooked = seats.filter(seat => show.bookedSeats.includes(seat));
     if (alreadyBooked.length > 0) {
-      console.log(`❌ Seats already booked:`, alreadyBooked);
       return res.status(409).json({
         message: `Seats ${alreadyBooked.join(", ")} are already booked`,
         conflicts: alreadyBooked,
-        type: "booked",
+        type: "booked"
       });
     }
 
-    // Try to lock the seats
-    const lockResult = lockSeats(showId, seats, userId, "selection");
-
+    // Try to lock seats
+    const lockResult = lockSeats(showId, seats, userId);
     if (!lockResult.success) {
-      const conflictMessage = `Seats ${lockResult.conflicts.join(
-        ", "
-      )} are currently being selected by another user`;
-
-      console.log(`❌ Seat lock conflict for user ${userId}:`, lockResult.conflicts);
-
-      // Send notification only to this specific user via socket
-      emitToUser(userId, "seat-conflict", {
-        showId,
-        conflicts: lockResult.conflicts,
-        userId,
-        message: conflictMessage,
-      });
-
       return res.status(409).json({
-        message: conflictMessage,
+        message: `Seats ${lockResult.conflicts.join(", ")} are currently selected`,
         conflicts: lockResult.conflicts,
-        type: "locked",
+        type: "locked"
       });
     }
 
-    console.log(`✅ Seats successfully selected by user ${userId}:`, seats);
-
-    // Emit seat selection to other users (not to the user who selected)
     emitToUsers("seats-selected", { showId, seats, userId });
-
-    res.json({
-      success: true,
-      message: "Seats selected successfully",
-      selectedSeats: seats,
-      expiresIn: 60,
-    });
+    res.json({ success: true, seats, expiresIn: 30 });
   } catch (error) {
-    console.error("❌ Error selecting seats:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// New endpoint to release seat selection
 const releaseSeats = async (req, res) => {
   try {
     const { showId, seats } = req.body;
     const userId = req.user?.id || req.user?._id || `guest_${Date.now()}`;
 
-    console.log(`🔓 User ${userId} releasing seats:`, seats);
-
-    // Validate input
-    if (!showId || !seats || !Array.isArray(seats)) {
-      return res.status(400).json({ message: "Invalid release data" });
+    if (!showId || !seats?.length) {
+      return res.status(400).json({ message: "Invalid data" });
     }
 
     const released = unlockSeats(showId, seats, userId);
-
-    console.log(`${released ? '✅' : '⚠️'} Release result for user ${userId}:`, released ? 'Success' : 'No locks found');
-
-    res.json({
-      success: true,
-      message: released
-        ? "Seats released successfully"
-        : "No seats were locked by this user",
-      released,
-      releasedSeats: released ? seats : [],
-    });
+    res.json({ success: true, released });
   } catch (error) {
-    console.error("❌ Release seats error:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -759,35 +636,30 @@ const deletePastShowBookings = async (req, res) => {
   }
 };
 
-// Get locked seats for a show
 const getLockedSeats = async (req, res) => {
   try {
     const { showId } = req.params;
-    const requestingUserId = req.user?.id || req.user?._id;
-
-    // Clean expired locks first
-    const showLocks = cleanExpiredLocks(showId);
-
-    // Get show data for booked seats
+    const userId = req.user?.id || req.user?._id;
+    
     const show = await Show.findById(showId);
     if (!show) {
       return res.status(404).json({ message: "Show not found" });
     }
 
-    // Separate locked seats by user
+    const showLocks = seatLocks.get(showId) || {};
+    const now = Date.now();
+    
+    // Clean expired and separate by user
     const lockedByOthers = [];
     const lockedByMe = [];
     
     Object.entries(showLocks).forEach(([seatId, lock]) => {
-      if (lock.userId === requestingUserId) {
-        lockedByMe.push({
-          seatId,
-          timestamp: lock.timestamp,
-          type: lock.type,
-          expiresIn: Math.max(0, (lock.type === 'booking' ? 5 * 60 * 1000 : 60 * 1000) - (Date.now() - lock.timestamp))
-        });
-      } else {
-        lockedByOthers.push(seatId);
+      if (now - lock.timestamp <= LOCK_DURATION) {
+        if (lock.userId === userId) {
+          lockedByMe.push(seatId);
+        } else {
+          lockedByOthers.push(seatId);
+        }
       }
     });
 
@@ -795,45 +667,14 @@ const getLockedSeats = async (req, res) => {
       showId,
       bookedSeats: show.bookedSeats || [],
       lockedByOthers,
-      lockedByMe,
-      totalLocked: Object.keys(showLocks).length,
+      lockedByMe
     });
   } catch (error) {
-    console.error("Error getting locked seats:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Helper function to clear all locks for a user (useful when user disconnects)
-const clearUserLocks = (userId) => {
-  let clearedSeats = [];
-  
-  seatLocks.forEach((showLocks, showId) => {
-    const seatsToRelease = [];
-    
-    Object.entries(showLocks).forEach(([seatId, lock]) => {
-      if (lock.userId === userId) {
-        delete showLocks[seatId];
-        seatsToRelease.push(seatId);
-        clearedSeats.push({ showId, seatId });
-      }
-    });
-    
-    if (seatsToRelease.length > 0) {
-      seatLocks.set(showId, showLocks);
-      // Notify other users about released seats
-      emitToUsers("seats-released", { 
-        showId, 
-        seats: seatsToRelease, 
-        userId,
-        reason: "user_disconnected"
-      });
-      console.log(`🧹 Cleared ${seatsToRelease.length} seat locks for disconnected user ${userId} in show ${showId}`);
-    }
-  });
-  
-  return clearedSeats;
-};
+
 
 module.exports = {
   getAllBookings,

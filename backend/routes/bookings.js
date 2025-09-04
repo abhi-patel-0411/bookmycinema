@@ -49,13 +49,9 @@ router.post('/clear-my-locks', optionalAuth, (req, res) => {
     }
     
     const { clearUserLocks } = require('../controllers/bookingController');
-    const clearedSeats = clearUserLocks(userId);
+    clearUserLocks(userId);
     
-    res.json({
-      success: true,
-      message: `Cleared ${clearedSeats.length} seat locks`,
-      clearedSeats
-    });
+    res.json({ success: true, message: 'Locks cleared' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

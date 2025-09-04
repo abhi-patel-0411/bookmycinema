@@ -61,15 +61,12 @@ const initializeSocket = (server) => {
         userSocketMap.delete(disconnectedUserId);
         console.log(`👤 User ${disconnectedUserId} unregistered`);
         
-        // Clear any seat locks for this user
+        // Clear seat locks for disconnected user
         try {
           const { clearUserLocks } = require('../controllers/bookingController');
-          const clearedSeats = clearUserLocks(disconnectedUserId);
-          if (clearedSeats.length > 0) {
-            console.log(`🧹 Cleared ${clearedSeats.length} seat locks for disconnected user ${disconnectedUserId}`);
-          }
+          clearUserLocks(disconnectedUserId);
         } catch (error) {
-          console.error('❌ Error clearing user locks on disconnect:', error.message);
+          console.error('❌ Error clearing locks:', error.message);
         }
       }
     });
