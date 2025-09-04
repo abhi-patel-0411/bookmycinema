@@ -40,7 +40,26 @@ router.get('/debug', async (req, res) => {
 router.post('/', optionalAuth, createBooking);
 router.post('/select-seats', optionalAuth, selectSeats);
 router.post('/release-seats', optionalAuth, releaseSeats);
-router.get('/locked-seats/:showId', getLockedSeats);
+router.get('/locked-seats/:showId', optionalAuth, getLockedSeats);
+router.post('/clear-my-locks', optionalAuth, (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    
+    const { clearUserLocks } = require('../controllers/bookingController');
+    const clearedSeats = clearUserLocks(userId);
+    
+    res.json({
+      success: true,
+      message: `Cleared ${clearedSeats.length} seat locks`,
+      clearedSeats
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 router.get('/my-bookings', auth, getUserBookings);
 router.get('/:id', optionalAuth, getBookingById);
 router.put('/:id/cancel', optionalAuth, cancelBooking);

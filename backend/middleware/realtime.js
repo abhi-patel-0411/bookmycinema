@@ -24,24 +24,52 @@ const initializeSocket = (server) => {
   });
 
   io.on('connection', (socket) => {
-    console.log('New client connected:', socket.id);
+    console.log('🔗 New client connected:', socket.id);
     
     // Register user ID when they connect
     socket.on('register-user', (userId) => {
       if (userId) {
+        // Clear any existing mapping for this user
+        const existingSocketId = userSocketMap.get(userId);
+        if (existingSocketId && existingSocketId !== socket.id) {
+          console.log(`🔄 User ${userId} reconnecting, clearing old socket ${existingSocketId}`);
+        }
+        
         userSocketMap.set(userId, socket.id);
-        console.log(`User ${userId} registered with socket ${socket.id}`);
+        socket.userId = userId; // Store userId on socket for easy access
+        console.log(`👤 User ${userId} registered with socket ${socket.id}`);
       }
     });
     
     socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
-      // Remove user from mapping when they disconnect
-      for (const [userId, socketId] of userSocketMap.entries()) {
-        if (socketId === socket.id) {
-          userSocketMap.delete(userId);
-          console.log(`User ${userId} unregistered`);
-          break;
+      console.log('🔌 Client disconnected:', socket.id);
+      
+      // Find and remove user from mapping
+      let disconnectedUserId = socket.userId;
+      
+      if (!disconnectedUserId) {
+        // Fallback: search through the map
+        for (const [userId, socketId] of userSocketMap.entries()) {
+          if (socketId === socket.id) {
+            disconnectedUserId = userId;
+            break;
+          }
+        }
+      }
+      
+      if (disconnectedUserId) {
+        userSocketMap.delete(disconnectedUserId);
+        console.log(`👤 User ${disconnectedUserId} unregistered`);
+        
+        // Clear any seat locks for this user
+        try {
+          const { clearUserLocks } = require('../controllers/bookingController');
+          const clearedSeats = clearUserLocks(disconnectedUserId);
+          if (clearedSeats.length > 0) {
+            console.log(`🧹 Cleared ${clearedSeats.length} seat locks for disconnected user ${disconnectedUserId}`);
+          }
+        } catch (error) {
+          console.error('❌ Error clearing user locks on disconnect:', error.message);
         }
       }
     });
@@ -52,16 +80,14 @@ const initializeSocket = (server) => {
 
 const emitToUsers = (event, data) => {
   try {
-    // io.emit(event, data) sends a message (event) to all connected clients.
-    // io is main socket manager 
     if (io && io.emit) {
       io.emit(event, data);
-      console.log(`Real-time event emitted to all users: ${event}`);
+      console.log(`📡 Real-time event emitted to all users: ${event}`);
     } else {
-      console.log('Socket.io not initialized, skipping real-time emit');
+      console.log('⚠️ Socket.io not initialized, skipping real-time emit');
     }
   } catch (error) {
-    console.error('Real-time emit error:', error.message);
+    console.error('❌ Real-time emit error:', error.message);
   }
 };
 
@@ -70,19 +96,19 @@ const emitToUser = (userId, event, data) => {
     if (io && io.to && userId) {
       const socketId = userSocketMap.get(userId);
       if (socketId) {
-        io.to(socketId).emit(event, data);//for 1 user specific
-        console.log(`Real-time event emitted to user ${userId}: ${event}`);
+        io.to(socketId).emit(event, data);
+        console.log(`🎯 Real-time event emitted to user ${userId}: ${event}`);
         return true;
       } else {
-        console.log(`User ${userId} not connected, couldn't emit ${event}`);
+        console.log(`⚠️ User ${userId} not connected, couldn't emit ${event}`);
         return false;
       }
     } else {
-      console.log('Socket.io not initialized or missing userId, skipping targeted emit');
+      console.log('⚠️ Socket.io not initialized or missing userId, skipping targeted emit');
       return false;
     }
   } catch (error) {
-    console.error('Targeted emit error:', error.message);
+    console.error('❌ Targeted emit error:', error.message);
     return false;
   }
 };
@@ -91,12 +117,12 @@ const emitToAdmin = (event, data) => {
   try {
     if (io && io.emit) {
       io.emit(event, data);
-      console.log(`Admin event emitted: ${event}`);
+      console.log(`👑 Admin event emitted: ${event}`);
     } else {
-      console.log('Socket.io not initialized, skipping admin emit');
+      console.log('⚠️ Socket.io not initialized, skipping admin emit');
     }
   } catch (error) {
-    console.error('Admin emit error:', error.message);
+    console.error('❌ Admin emit error:', error.message);
   }
 };
 
