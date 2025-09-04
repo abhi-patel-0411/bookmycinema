@@ -81,6 +81,7 @@ app.use("/api/reviews", require("./routes/reviews"));
 app.use("/api/ratings", require("./routes/ratings"));
 app.use("/api/webhooks", require("./routes/webhooks"));
 app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/sync", require("./routes/sync"));
 
 // Inngest endpoint (disabled for now)
 // app.use('/', require('./routes/inngestEndpoint'));
@@ -192,6 +193,33 @@ mongoose
     // Start seat lock cleanup
     const { startLockCleanup } = require('./cleanup-locks');
     startLockCleanup();
+    
+    // Start periodic seat status broadcast for cross-environment sync
+    setInterval(async () => {
+      try {
+        const mongoose = require('mongoose');
+        if (mongoose.models.SeatLock) {
+          await mongoose.models.SeatLock.deleteMany({ expiresAt: { $lt: new Date() } });
+          const activeLocks = await mongoose.models.SeatLock.find({});
+          
+          // Group locks by show
+          const locksByShow = {};
+          activeLocks.forEach(lock => {
+            if (!locksByShow[lock.showId]) locksByShow[lock.showId] = [];
+            locksByShow[lock.showId].push({ seatId: lock.seatId, userId: lock.userId });
+          });
+          
+          // Broadcast current seat status to all connected clients
+          Object.entries(locksByShow).forEach(([showId, locks]) => {
+            const { emitToUsers } = require('./middleware/realtime');
+            emitToUsers('seat-status-sync', { showId, locks });
+          });
+        }
+      } catch (error) {
+        console.error('❌ Seat sync error:', error.message);
+      }
+    }, 2000); // Every 2 seconds
+    console.log('🔄 Started cross-environment seat sync (every 2s)');
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);

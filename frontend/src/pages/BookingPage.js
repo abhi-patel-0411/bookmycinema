@@ -31,6 +31,8 @@ const BookingPage = () => {
   const [seatLayout, setSeatLayout] = useState([]);
   const [conflictMessage, setConflictMessage] = useState("");
   const [lockedSeats, setLockedSeats] = useState([]);
+  const [seatTimer, setSeatTimer] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(0);
 
   useEffect(() => {
     fetchShowDetails();
@@ -73,6 +75,37 @@ const BookingPage = () => {
     };
   }, [showId, user]);
 
+  // Start seat selection timer
+  const startSeatTimer = () => {
+    if (seatTimer) clearInterval(seatTimer);
+    
+    setTimeRemaining(60);
+    const timer = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    setSeatTimer(timer);
+  };
+
+  // Clear timer when seats are released or component unmounts
+  useEffect(() => {
+    if (selectedSeats.length === 0 && seatTimer) {
+      clearInterval(seatTimer);
+      setSeatTimer(null);
+      setTimeRemaining(0);
+    }
+    
+    return () => {
+      if (seatTimer) clearInterval(seatTimer);
+    };
+  }, [selectedSeats.length, seatTimer]);
+
   const setupRealTimeListeners = () => {
     window.addEventListener("seat-conflict", handleSeatConflict);
     window.addEventListener("seats-selected", handleSeatsSelected);
@@ -111,13 +144,9 @@ const BookingPage = () => {
 
   const handleSeatsSelected = (event) => {
     const { showId: eventShowId, seats, userId: eventUserId } = event.detail;
-    if (eventShowId === showId) {
+    if (eventShowId === showId && eventUserId !== user?.id && eventUserId !== clerkUser?.id) {
       setLockedSeats((prev) => [...new Set([...prev, ...seats])]);
-      
-      // If another user selected seats that we had selected, remove them from our selection
-      if (eventUserId !== user?.id && eventUserId !== clerkUser?.id) {
-        setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
-      }
+      setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
     }
   };
 
@@ -127,14 +156,10 @@ const BookingPage = () => {
       setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
 
       // If these were our seats that got released, also update selectedSeats
-      if (eventUserId === user?.id) {
-        setSelectedSeats((prev) =>
-          prev.filter((seat) => !seats.includes(seat.id))
-        );
+      if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
+        setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
         if (seats.length > 0) {
-          toast.warning(
-            "Your seat selection has expired. Please select seats again."
-          );
+          toast.warning("Your seat selection has expired. Please select seats again.");
         }
       }
     }
@@ -163,7 +188,12 @@ const BookingPage = () => {
       
       // If this user's seats were auto-released, clear their selected seats
       if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
-        setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
+        setSelectedSeats([]);
+        if (seatTimer) {
+          clearInterval(seatTimer);
+          setSeatTimer(null);
+          setTimeRemaining(0);
+        }
         if (seats.length > 0 && message) {
           toast.warning(message);
         }
@@ -341,6 +371,7 @@ const BookingPage = () => {
       } catch (error) {
         console.error("Error releasing seat:", error);
         setSelectedSeats((prev) => [...prev, seat]);
+        toast.error("Failed to release seat. Please try again.");
       }
     } else {
       if (selectedSeats.length >= 10) {
@@ -351,6 +382,7 @@ const BookingPage = () => {
       const result = await selectSeatsOnServer([seat]);
       if (result.success) {
         setSelectedSeats((prev) => [...prev, seat]);
+        startSeatTimer();
       }
     }
   };
@@ -607,9 +639,19 @@ const BookingPage = () => {
             <>
               {/* Selected Seats */}
               <div className="text-center mb-4">
-                <h6 className="text-light mb-3">
-                  Selected Seats ({selectedSeats.length})
-                </h6>
+                <div className="d-flex justify-content-center align-items-center gap-3 mb-3">
+                  <h6 className="text-light mb-0">
+                    Selected Seats ({selectedSeats.length})
+                  </h6>
+                  {timeRemaining > 0 && (
+                    <Badge 
+                      bg={timeRemaining <= 10 ? "danger" : "warning"} 
+                      className="d-flex align-items-center gap-1"
+                    >
+                      ⏱️ {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                    </Badge>
+                  )}
+                </div>
                 <div className="d-flex flex-wrap justify-content-center gap-2">
                   {selectedSeats.map((seat) => (
                     <Badge

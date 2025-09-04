@@ -11,7 +11,8 @@ const {
   deletePastShowBookings,
   selectSeats,
   releaseSeats,
-  getLockedSeats
+  getLockedSeats,
+  forceCleanExpiredLocks
 } = require('../controllers/bookingController');
 
 const router = express.Router();
@@ -65,5 +66,6 @@ router.get('/', getAllBookings);
 router.put('/:id/status', updateBookingStatus);
 router.delete('/:id', deleteBooking);
 router.delete('/cleanup/past-shows', deletePastShowBookings);
+router.post('/cleanup/expired-locks', forceCleanExpiredLocks);
 
 module.exports = router;

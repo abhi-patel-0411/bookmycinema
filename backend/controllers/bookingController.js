@@ -102,7 +102,7 @@ const getBookingById = async (req, res) => {
 
 // Database-based seat locking for cross-environment sync
 const mongoose = require("mongoose");
-const LOCK_DURATION = 30 * 1000; // 30 seconds
+const LOCK_DURATION = 60 * 1000; // 1 minute
 
 const seatLockSchema = new mongoose.Schema({
   showId: { type: String, required: true },
@@ -119,79 +119,131 @@ seatLockSchema.index({ showId: 1, seatId: 1 }, { unique: true });
 const SeatLock =
   mongoose.models.SeatLock || mongoose.model("SeatLock", seatLockSchema);
 
+// Cleanup expired locks periodically
+setInterval(async () => {
+  try {
+    const expiredLocks = await SeatLock.find({ expiresAt: { $lt: new Date() } });
+    if (expiredLocks.length > 0) {
+      const locksByShow = {};
+      expiredLocks.forEach(lock => {
+        if (!locksByShow[lock.showId]) locksByShow[lock.showId] = {};
+        if (!locksByShow[lock.showId][lock.userId]) locksByShow[lock.showId][lock.userId] = [];
+        locksByShow[lock.showId][lock.userId].push(lock.seatId);
+      });
+      
+      await SeatLock.deleteMany({ _id: { $in: expiredLocks.map(l => l._id) } });
+      
+      Object.entries(locksByShow).forEach(([showId, userSeats]) => {
+        Object.entries(userSeats).forEach(([userId, seats]) => {
+          // Notify user their seats expired
+          emitToUser(userId, "seats-auto-released", {
+            showId,
+            seats,
+            userId,
+            message: "Your seat selection has expired. Please select seats again."
+          });
+          
+          // Notify all users seats are available
+          emitToUsers("seats-released", { showId, seats, userId });
+        });
+      });
+      
+      console.log(`🧹 Cleaned up ${expiredLocks.length} expired seat locks`);
+    }
+  } catch (error) {
+    console.error('Cleanup error:', error);
+  }
+}, 5000); // Check every 5 seconds
+
 const lockSeats = async (showId, seats, userId) => {
   try {
-    console.log(
-      `🔒 [${process.env.NODE_ENV || "dev"}] User ${userId} locking seats:`,
-      seats
-    );
+    console.log(`🔒 User ${userId} locking seats:`, seats);
 
-    const cleanupResult = await SeatLock.deleteMany({
-      expiresAt: { $lt: new Date() },
-    });
-    if (cleanupResult.deletedCount > 0) {
-      console.log(`🧹 Cleaned ${cleanupResult.deletedCount} expired locks`);
-    }
+    // Clean expired locks
+    await SeatLock.deleteMany({ expiresAt: { $lt: new Date() } });
 
-    const existingLocks = await SeatLock.find({
+    // Check conflicts (only other users)
+    const conflicts = await SeatLock.find({
       showId,
       seatId: { $in: seats },
-      userId: { $ne: userId },
+      userId: { $ne: userId }
     });
 
-    if (existingLocks.length > 0) {
-      const conflicts = existingLocks.map((lock) => lock.seatId);
-      console.log(`❌ Conflicts found for user ${userId}:`, conflicts);
-      return { success: false, conflicts };
+    if (conflicts.length > 0) {
+      return { success: false, conflicts: conflicts.map(l => l.seatId) };
     }
 
+    // Remove user's existing locks for these seats
     await SeatLock.deleteMany({ showId, seatId: { $in: seats }, userId });
 
-    const locks = seats.map((seatId) => ({
-      showId,
-      seatId,
-      userId,
+    // Create new locks
+    const locks = seats.map(seatId => ({
+      showId, seatId, userId,
       timestamp: new Date(),
-      expiresAt: new Date(Date.now() + LOCK_DURATION),
+      expiresAt: new Date(Date.now() + LOCK_DURATION)
     }));
 
-    const result = await SeatLock.insertMany(locks);
-    console.log(
-      `✅ Successfully locked ${result.length} seats for user ${userId}`
-    );
+    await SeatLock.insertMany(locks);
+    
+    // Set auto-release timer
+    setTimeout(async () => {
+      try {
+        const stillLocked = await SeatLock.find({
+          showId,
+          seatId: { $in: seats },
+          userId
+        });
+        
+        if (stillLocked.length > 0) {
+          const lockedSeats = stillLocked.map(lock => lock.seatId);
+          await SeatLock.deleteMany({ _id: { $in: stillLocked.map(l => l._id) } });
+          
+          // Notify the user their seats expired
+          emitToUser(userId, "seats-auto-released", {
+            showId,
+            seats: lockedSeats,
+            userId,
+            message: "Your seat selection has expired. Please select seats again."
+          });
+          
+          // Notify all users that seats are now available
+          emitToUsers("seats-released", { showId, seats: lockedSeats, userId });
+          
+          console.log(`⏰ Auto-released seats for user ${userId}:`, lockedSeats);
+        }
+      } catch (error) {
+        console.error('Auto-release error:', error);
+      }
+    }, LOCK_DURATION);
+    
+    // Broadcast to other users only
+    emitToUsers("seats-selected", { showId, seats, userId });
+    console.log(`✅ Locked ${seats.length} seats for user ${userId}`);
 
     return { success: true };
   } catch (error) {
-    console.error(`❌ Lock seats error for user ${userId}:`, error);
+    console.error(`❌ Lock error:`, error);
     return { success: false, conflicts: [] };
   }
 };
 
 const unlockSeats = async (showId, seats, userId) => {
   try {
-    console.log(
-      `🔓 [${process.env.NODE_ENV || "dev"}] User ${userId} unlocking seats:`,
-      seats
-    );
+    console.log(`🔓 User ${userId} unlocking seats:`, seats);
 
     const result = await SeatLock.deleteMany({
       showId,
       seatId: { $in: seats },
-      userId,
+      userId
     });
 
-    if (result.deletedCount > 0) {
-      console.log(
-        `✅ Unlocked ${result.deletedCount} seats for user ${userId}`
-      );
-      emitToUsers("seats-released", { showId, seats, userId });
-      return true;
-    }
-
-    console.log(`⚠️ No seats unlocked for user ${userId}`);
-    return false;
+    // Emit release event to all users
+    emitToUsers("seats-released", { showId, seats, userId });
+    console.log(`✅ Released ${seats.length} seats for user ${userId}`);
+    
+    return true;
   } catch (error) {
-    console.error(`❌ Unlock seats error for user ${userId}:`, error);
+    console.error(`❌ Unlock error:`, error);
     return false;
   }
 };
@@ -199,6 +251,8 @@ const unlockSeats = async (showId, seats, userId) => {
 const clearUserLocks = async (userId) => {
   try {
     const userLocks = await SeatLock.find({ userId });
+    if (userLocks.length === 0) return [];
+    
     await SeatLock.deleteMany({ userId });
 
     const locksByShow = {};
@@ -211,10 +265,37 @@ const clearUserLocks = async (userId) => {
       emitToUsers("seats-released", { showId, seats, userId });
     });
 
+    console.log(`🗑️ Cleared ${userLocks.length} locks for user ${userId}`);
     return userLocks;
   } catch (error) {
     console.error("Clear user locks error:", error);
     return [];
+  }
+};
+
+const forceCleanExpiredLocks = async (req, res) => {
+  try {
+    const expiredLocks = await SeatLock.find({ expiresAt: { $lt: new Date() } });
+    if (expiredLocks.length > 0) {
+      await SeatLock.deleteMany({ _id: { $in: expiredLocks.map(l => l._id) } });
+      
+      const locksByShow = {};
+      expiredLocks.forEach(lock => {
+        if (!locksByShow[lock.showId]) locksByShow[lock.showId] = [];
+        locksByShow[lock.showId].push(lock.seatId);
+      });
+      
+      Object.entries(locksByShow).forEach(([showId, seats]) => {
+        emitToUsers("seats-released", { showId, seats });
+      });
+    }
+    
+    res.json({ 
+      message: `Cleaned ${expiredLocks.length} expired locks`,
+      cleaned: expiredLocks.length 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -358,6 +439,9 @@ const createBooking = async (req, res) => {
 
     // Clear locks after successful booking
     await unlockSeats(showId, seats, userId);
+    
+    // Clear any remaining locks for this user on this show
+    await SeatLock.deleteMany({ showId, userId });
 
     // Send booking confirmation email
     try {
@@ -427,8 +511,12 @@ const selectSeats = async (req, res) => {
     }
 
     console.log(`✅ Seats selected successfully for user ${userId}:`, seats);
-    emitToUsers("seats-selected", { showId, seats, userId });
-    res.json({ success: true, seats, expiresIn: 30 });
+    res.json({ 
+      success: true, 
+      seats, 
+      expiresIn: 60,
+      expiresAt: new Date(Date.now() + LOCK_DURATION).toISOString()
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -715,5 +803,6 @@ module.exports = {
   releaseSeats,
   getLockedSeats,
   clearUserLocks,
+  forceCleanExpiredLocks,
   isPastShow,
 };
