@@ -169,6 +169,10 @@ mongoose
       }
     }, 60000); // 1 minute
     console.log('🎬 Coming soon auto-update scheduler started (runs every minute)');
+    
+    // Start seat lock cleanup
+    const { startLockCleanup } = require('./cleanup-locks');
+    startLockCleanup();
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);

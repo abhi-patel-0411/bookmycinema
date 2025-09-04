@@ -41,7 +41,7 @@ router.post('/', optionalAuth, createBooking);
 router.post('/select-seats', optionalAuth, selectSeats);
 router.post('/release-seats', optionalAuth, releaseSeats);
 router.get('/locked-seats/:showId', optionalAuth, getLockedSeats);
-router.post('/clear-my-locks', optionalAuth, (req, res) => {
+router.post('/clear-my-locks', optionalAuth, async (req, res) => {
   try {
     const userId = req.user?.id || req.user?._id;
     if (!userId) {
@@ -49,7 +49,7 @@ router.post('/clear-my-locks', optionalAuth, (req, res) => {
     }
     
     const { clearUserLocks } = require('../controllers/bookingController');
-    clearUserLocks(userId);
+    await clearUserLocks(userId);
     
     res.json({ success: true, message: 'Locks cleared' });
   } catch (error) {

@@ -2,11 +2,12 @@
 
 ## Backend Changes Made
 
-### 1. Simplified Seat Locking
-- **Lock Duration**: 30 seconds (reduced from 60s)
-- **No Complex Types**: Only one lock type for selections
-- **Auto-cleanup**: Expired locks are automatically removed
+### 1. Database-Based Seat Locking
+- **Persistent Storage**: Uses MongoDB for seat locks (works in deployed environments)
+- **Lock Duration**: 30 seconds with automatic expiry
+- **Auto-cleanup**: Database TTL index removes expired locks
 - **User Disconnect**: All locks cleared when user disconnects
+- **Scalable**: Works across multiple server instances
 
 ### 2. API Endpoints
 
@@ -115,11 +116,11 @@ async function getSeatStatus(showId) {
 
 ## Key Improvements
 
-1. **No False Conflicts**: Users won't see conflicts for seats they don't actually compete for
-2. **Automatic Cleanup**: Disconnected users' locks are immediately cleared
-3. **Shorter Lock Time**: 30-second locks prevent seats being held too long
-4. **Simplified Logic**: Easier to debug and maintain
-5. **Real-time Updates**: Immediate feedback via socket events
+1. **Production Ready**: Database-based locks work in deployed environments
+2. **No Memory Loss**: Locks persist across server restarts/scaling
+3. **Automatic Cleanup**: TTL index and periodic cleanup remove expired locks
+4. **Real-time Updates**: Socket events work across server instances
+5. **Conflict Prevention**: Proper database-level conflict detection
 
 ## Testing
 

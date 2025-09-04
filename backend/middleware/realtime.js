@@ -62,12 +62,14 @@ const initializeSocket = (server) => {
         console.log(`👤 User ${disconnectedUserId} unregistered`);
         
         // Clear seat locks for disconnected user
-        try {
-          const { clearUserLocks } = require('../controllers/bookingController');
-          clearUserLocks(disconnectedUserId);
-        } catch (error) {
-          console.error('❌ Error clearing locks:', error.message);
-        }
+        (async () => {
+          try {
+            const { clearUserLocks } = require('../controllers/bookingController');
+            await clearUserLocks(disconnectedUserId);
+          } catch (error) {
+            console.error('❌ Error clearing locks:', error.message);
+          }
+        })();
       }
     });
   });

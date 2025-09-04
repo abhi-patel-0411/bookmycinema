@@ -100,116 +100,122 @@ const getBookingById = async (req, res) => {
   }
 };
 
-// Simple seat locking mechanism
-const seatLocks = new Map(); // showId -> { seatId: { userId, timestamp } }
-const userTimeouts = new Map(); // userId -> timeout references
+// Database-based seat locking for cross-environment sync
+const mongoose = require("mongoose");
+const LOCK_DURATION = 30 * 1000;
 
-const LOCK_DURATION = 30 * 1000; // 30 seconds
+const seatLockSchema = new mongoose.Schema({
+  showId: { type: String, required: true },
+  seatId: { type: String, required: true },
+  userId: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  expiresAt: {
+    type: Date,
+    default: () => new Date(Date.now() + LOCK_DURATION),
+    expires: 0,
+  },
+});
+seatLockSchema.index({ showId: 1, seatId: 1 }, { unique: true });
+const SeatLock =
+  mongoose.models.SeatLock || mongoose.model("SeatLock", seatLockSchema);
 
-const clearUserTimeouts = (userId) => {
-  const timeouts = userTimeouts.get(userId) || [];
-  timeouts.forEach(timeout => clearTimeout(timeout));
-  userTimeouts.delete(userId);
+const lockSeats = async (showId, seats, userId) => {
+  try {
+    await SeatLock.deleteMany({ expiresAt: { $lt: new Date() } });
+
+    const existingLocks = await SeatLock.find({
+      showId,
+      seatId: { $in: seats },
+      userId: { $ne: userId },
+    });
+
+    if (existingLocks.length > 0) {
+      return {
+        success: false,
+        conflicts: existingLocks.map((lock) => lock.seatId),
+      };
+    }
+
+    await SeatLock.deleteMany({ showId, seatId: { $in: seats }, userId });
+
+    const locks = seats.map((seatId) => ({
+      showId,
+      seatId,
+      userId,
+      timestamp: new Date(),
+      expiresAt: new Date(Date.now() + LOCK_DURATION),
+    }));
+
+    await SeatLock.insertMany(locks);
+    return { success: true };
+  } catch (error) {
+    console.error("Lock seats error:", error);
+    return { success: false, conflicts: [] };
+  }
 };
 
-const lockSeats = (showId, seats, userId) => {
-  const showLocks = seatLocks.get(showId) || {};
-  const now = Date.now();
-  
-  // Clear expired locks
-  Object.keys(showLocks).forEach(seatId => {
-    if (now - showLocks[seatId].timestamp > LOCK_DURATION) {
-      delete showLocks[seatId];
+const unlockSeats = async (showId, seats, userId) => {
+  try {
+    const result = await SeatLock.deleteMany({
+      showId,
+      seatId: { $in: seats },
+      userId,
+    });
+
+    if (result.deletedCount > 0) {
+      emitToUsers("seats-released", { showId, seats, userId });
+      return true;
     }
-  });
-
-  // Check conflicts (only with other users)
-  const conflicts = seats.filter(seatId => 
-    showLocks[seatId] && 
-    showLocks[seatId].userId !== userId &&
-    (now - showLocks[seatId].timestamp <= LOCK_DURATION)
-  );
-
-  if (conflicts.length > 0) {
-    return { success: false, conflicts };
+    return false;
+  } catch (error) {
+    console.error("Unlock seats error:", error);
+    return false;
   }
+};
 
-  // Clear previous timeouts for this user
-  clearUserTimeouts(userId);
+const clearUserLocks = async (userId) => {
+  try {
+    const userLocks = await SeatLock.find({ userId });
+    await SeatLock.deleteMany({ userId });
 
-  // Lock seats
-  seats.forEach(seatId => {
-    showLocks[seatId] = { userId, timestamp: now };
-  });
-  seatLocks.set(showId, showLocks);
+    const locksByShow = {};
+    userLocks.forEach((lock) => {
+      if (!locksByShow[lock.showId]) locksByShow[lock.showId] = [];
+      locksByShow[lock.showId].push(lock.seatId);
+    });
 
-  // Set auto-release timeout
-  const timeout = setTimeout(() => {
-    const currentLocks = seatLocks.get(showId) || {};
-    const releasedSeats = [];
-    
-    seats.forEach(seatId => {
-      if (currentLocks[seatId]?.userId === userId && currentLocks[seatId]?.timestamp === now) {
-        delete currentLocks[seatId];
-        releasedSeats.push(seatId);
+    Object.entries(locksByShow).forEach(([showId, seats]) => {
+      emitToUsers("seats-released", { showId, seats, userId });
+    });
+
+    return userLocks;
+  } catch (error) {
+    console.error("Clear user locks error:", error);
+    return [];
+  }
+};
+
+const getLockedSeatsData = async (showId, userId) => {
+  try {
+    await SeatLock.deleteMany({ expiresAt: { $lt: new Date() } });
+
+    const locks = await SeatLock.find({ showId });
+    const lockedByOthers = [];
+    const lockedByMe = [];
+
+    locks.forEach((lock) => {
+      if (lock.userId === userId) {
+        lockedByMe.push(lock.seatId);
+      } else {
+        lockedByOthers.push(lock.seatId);
       }
     });
-    
-    if (releasedSeats.length > 0) {
-      seatLocks.set(showId, currentLocks);
-      emitToUsers("seats-released", { showId, seats: releasedSeats, userId });
-    }
-  }, LOCK_DURATION);
 
-  // Store timeout reference
-  const timeouts = userTimeouts.get(userId) || [];
-  timeouts.push(timeout);
-  userTimeouts.set(userId, timeouts);
-
-  return { success: true };
-};
-
-const unlockSeats = (showId, seats, userId) => {
-  const showLocks = seatLocks.get(showId) || {};
-  const releasedSeats = [];
-
-  seats.forEach(seatId => {
-    if (showLocks[seatId]?.userId === userId) {
-      delete showLocks[seatId];
-      releasedSeats.push(seatId);
-    }
-  });
-
-  if (releasedSeats.length > 0) {
-    seatLocks.set(showId, showLocks);
-    clearUserTimeouts(userId);
-    emitToUsers("seats-released", { showId, seats: releasedSeats, userId });
-    return true;
+    return { lockedByOthers, lockedByMe };
+  } catch (error) {
+    console.error("Get locked seats error:", error);
+    return { lockedByOthers: [], lockedByMe: [] };
   }
-  return false;
-};
-
-const clearUserLocks = (userId) => {
-  clearUserTimeouts(userId);
-  const clearedSeats = [];
-  
-  seatLocks.forEach((showLocks, showId) => {
-    const seatsToRelease = [];
-    Object.keys(showLocks).forEach(seatId => {
-      if (showLocks[seatId].userId === userId) {
-        delete showLocks[seatId];
-        seatsToRelease.push(seatId);
-      }
-    });
-    
-    if (seatsToRelease.length > 0) {
-      seatLocks.set(showId, showLocks);
-      emitToUsers("seats-released", { showId, seats: seatsToRelease, userId });
-      clearedSeats.push(...seatsToRelease.map(seat => ({ showId, seatId: seat })));
-    }
-  });
-  
-  return clearedSeats;
 };
 
 const createBooking = async (req, res) => {
@@ -251,10 +257,12 @@ const createBooking = async (req, res) => {
     }
 
     // Check seat locks
-    const lockResult = lockSeats(showId, seats, userId);
+    const lockResult = await lockSeats(showId, seats, userId);
     if (!lockResult.success) {
       return res.status(409).json({
-        message: `Seats ${lockResult.conflicts.join(", ")} are currently selected by another user`,
+        message: `Seats ${lockResult.conflicts.join(
+          ", "
+        )} are currently selected by another user`,
         conflicts: lockResult.conflicts,
         type: "locked",
       });
@@ -326,7 +334,7 @@ const createBooking = async (req, res) => {
     });
 
     // Clear locks after successful booking
-    unlockSeats(showId, seats, userId);
+    await unlockSeats(showId, seats, userId);
 
     // Send booking confirmation email
     try {
@@ -368,22 +376,26 @@ const selectSeats = async (req, res) => {
     }
 
     // Check booked seats
-    const alreadyBooked = seats.filter(seat => show.bookedSeats.includes(seat));
+    const alreadyBooked = seats.filter((seat) =>
+      show.bookedSeats.includes(seat)
+    );
     if (alreadyBooked.length > 0) {
       return res.status(409).json({
         message: `Seats ${alreadyBooked.join(", ")} are already booked`,
         conflicts: alreadyBooked,
-        type: "booked"
+        type: "booked",
       });
     }
 
     // Try to lock seats
-    const lockResult = lockSeats(showId, seats, userId);
+    const lockResult = await lockSeats(showId, seats, userId);
     if (!lockResult.success) {
       return res.status(409).json({
-        message: `Seats ${lockResult.conflicts.join(", ")} are currently selected`,
+        message: `Seats ${lockResult.conflicts.join(
+          ", "
+        )} are currently selected`,
         conflicts: lockResult.conflicts,
-        type: "locked"
+        type: "locked",
       });
     }
 
@@ -403,7 +415,7 @@ const releaseSeats = async (req, res) => {
       return res.status(400).json({ message: "Invalid data" });
     }
 
-    const released = unlockSeats(showId, seats, userId);
+    const released = await unlockSeats(showId, seats, userId);
     res.json({ success: true, released });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -640,41 +652,27 @@ const getLockedSeats = async (req, res) => {
   try {
     const { showId } = req.params;
     const userId = req.user?.id || req.user?._id;
-    
+
     const show = await Show.findById(showId);
     if (!show) {
       return res.status(404).json({ message: "Show not found" });
     }
 
-    const showLocks = seatLocks.get(showId) || {};
-    const now = Date.now();
-    
-    // Clean expired and separate by user
-    const lockedByOthers = [];
-    const lockedByMe = [];
-    
-    Object.entries(showLocks).forEach(([seatId, lock]) => {
-      if (now - lock.timestamp <= LOCK_DURATION) {
-        if (lock.userId === userId) {
-          lockedByMe.push(seatId);
-        } else {
-          lockedByOthers.push(seatId);
-        }
-      }
-    });
+    const { lockedByOthers, lockedByMe } = await getLockedSeatsData(
+      showId,
+      userId
+    );
 
     res.json({
       showId,
       bookedSeats: show.bookedSeats || [],
       lockedByOthers,
-      lockedByMe
+      lockedByMe,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 module.exports = {
   getAllBookings,
