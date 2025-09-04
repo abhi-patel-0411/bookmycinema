@@ -38,12 +38,31 @@ app.use((req, res, next) => {
   next();
 });
 
-// Test route
-app.get("/api/test", (req, res) => {
-  res.json({
-    message: "Backend is working!",
-    timestamp: new Date().toISOString(),
-  });
+// Test route with database check
+app.get("/api/test", async (req, res) => {
+  try {
+    // Test database connection
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    
+    // Test seat lock collection
+    const SeatLock = mongoose.models.SeatLock;
+    const lockCount = SeatLock ? await SeatLock.countDocuments() : 0;
+    
+    res.json({
+      message: "Backend is working!",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: dbStatus,
+      seatLocks: lockCount,
+      version: '2.0'
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Backend error",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Routes

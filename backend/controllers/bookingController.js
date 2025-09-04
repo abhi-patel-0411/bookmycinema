@@ -102,7 +102,7 @@ const getBookingById = async (req, res) => {
 
 // Database-based seat locking for cross-environment sync
 const mongoose = require("mongoose");
-const LOCK_DURATION = 30 * 1000;
+const LOCK_DURATION = 30 * 1000; // 30 seconds
 
 const seatLockSchema = new mongoose.Schema({
   showId: { type: String, required: true },
@@ -121,7 +121,17 @@ const SeatLock =
 
 const lockSeats = async (showId, seats, userId) => {
   try {
-    await SeatLock.deleteMany({ expiresAt: { $lt: new Date() } });
+    console.log(
+      `🔒 [${process.env.NODE_ENV || "dev"}] User ${userId} locking seats:`,
+      seats
+    );
+
+    const cleanupResult = await SeatLock.deleteMany({
+      expiresAt: { $lt: new Date() },
+    });
+    if (cleanupResult.deletedCount > 0) {
+      console.log(`🧹 Cleaned ${cleanupResult.deletedCount} expired locks`);
+    }
 
     const existingLocks = await SeatLock.find({
       showId,
@@ -130,10 +140,9 @@ const lockSeats = async (showId, seats, userId) => {
     });
 
     if (existingLocks.length > 0) {
-      return {
-        success: false,
-        conflicts: existingLocks.map((lock) => lock.seatId),
-      };
+      const conflicts = existingLocks.map((lock) => lock.seatId);
+      console.log(`❌ Conflicts found for user ${userId}:`, conflicts);
+      return { success: false, conflicts };
     }
 
     await SeatLock.deleteMany({ showId, seatId: { $in: seats }, userId });
@@ -146,16 +155,25 @@ const lockSeats = async (showId, seats, userId) => {
       expiresAt: new Date(Date.now() + LOCK_DURATION),
     }));
 
-    await SeatLock.insertMany(locks);
+    const result = await SeatLock.insertMany(locks);
+    console.log(
+      `✅ Successfully locked ${result.length} seats for user ${userId}`
+    );
+
     return { success: true };
   } catch (error) {
-    console.error("Lock seats error:", error);
+    console.error(`❌ Lock seats error for user ${userId}:`, error);
     return { success: false, conflicts: [] };
   }
 };
 
 const unlockSeats = async (showId, seats, userId) => {
   try {
+    console.log(
+      `🔓 [${process.env.NODE_ENV || "dev"}] User ${userId} unlocking seats:`,
+      seats
+    );
+
     const result = await SeatLock.deleteMany({
       showId,
       seatId: { $in: seats },
@@ -163,12 +181,17 @@ const unlockSeats = async (showId, seats, userId) => {
     });
 
     if (result.deletedCount > 0) {
+      console.log(
+        `✅ Unlocked ${result.deletedCount} seats for user ${userId}`
+      );
       emitToUsers("seats-released", { showId, seats, userId });
       return true;
     }
+
+    console.log(`⚠️ No seats unlocked for user ${userId}`);
     return false;
   } catch (error) {
-    console.error("Unlock seats error:", error);
+    console.error(`❌ Unlock seats error for user ${userId}:`, error);
     return false;
   }
 };
@@ -390,6 +413,10 @@ const selectSeats = async (req, res) => {
     // Try to lock seats
     const lockResult = await lockSeats(showId, seats, userId);
     if (!lockResult.success) {
+      console.log(
+        `❌ Seat selection failed for user ${userId}:`,
+        lockResult.conflicts
+      );
       return res.status(409).json({
         message: `Seats ${lockResult.conflicts.join(
           ", "
@@ -399,6 +426,7 @@ const selectSeats = async (req, res) => {
       });
     }
 
+    console.log(`✅ Seats selected successfully for user ${userId}:`, seats);
     emitToUsers("seats-selected", { showId, seats, userId });
     res.json({ success: true, seats, expiresIn: 30 });
   } catch (error) {
