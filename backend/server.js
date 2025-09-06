@@ -38,13 +38,47 @@ app.use((req, res, next) => {
   next();
 });
 
+// Database connection check middleware
+app.use('/api', (req, res, next) => {
+  // Skip DB check for health and test endpoints
+  if (req.path === '/health' || req.path === '/test') {
+    return next();
+  }
+  
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "Database temporarily unavailable. Please try again.",
+      type: "network_error",
+      retry: true
+    });
+  }
+  next();
+});
+
+// Health check route that works even without DB
+app.get("/api/health", (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({
+    status: "ok",
+    database: dbStatus,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Test route with database check
 app.get("/api/test", async (req, res) => {
   try {
-    // Test database connection
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     
-    // Test seat lock collection
+    if (dbStatus === 'disconnected') {
+      return res.status(503).json({
+        message: "Database temporarily unavailable",
+        database: dbStatus,
+        timestamp: new Date().toISOString(),
+        type: "network_error"
+      });
+    }
+    
     const SeatLock = mongoose.models.SeatLock;
     const lockCount = SeatLock ? await SeatLock.countDocuments() : 0;
     
@@ -57,10 +91,11 @@ app.get("/api/test", async (req, res) => {
       version: '2.0'
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Backend error",
+    res.status(503).json({
+      message: "Database connection error",
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      type: "network_error"
     });
   }
 });
@@ -90,10 +125,22 @@ app.use("/api/sync", require("./routes/sync"));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
-  res
-    .status(500)
-    .json({ message: "Internal server error", error: err.message });
+  console.error("Error:", err.message);
+  
+  // Handle MongoDB connection errors
+  if (err.name === 'MongoNetworkError' || err.name === 'MongoTimeoutError' || err.code === 'ECONNREFUSED') {
+    return res.status(503).json({
+      message: "Database connection lost. Please try again.",
+      type: "network_error",
+      retry: true
+    });
+  }
+  
+  res.status(500).json({ 
+    message: "Internal server error", 
+    error: err.message,
+    type: "server_error"
+  });
 });
 
 // 404 handler
@@ -101,14 +148,15 @@ app.use("*", (req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    maxPoolSize: 10,
-    minPoolSize: 5
-  })
+// MongoDB Connection with retry logic
+const connectWithRetry = () => {
+  mongoose
+    .connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      minPoolSize: 5
+    })
   .then(async () => {
     console.log("✅ MongoDB connected successfully");
     console.log("📊 Database:", mongoose.connection.name);
@@ -222,9 +270,40 @@ mongoose
     console.log('🔄 Started cross-environment seat sync (every 2s)');
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1);
+    console.error("❌ MongoDB connection error:", err.message);
+    console.log("🔄 Retrying connection in 5 seconds...");
+    setTimeout(connectWithRetry, 5000);
   });
+};
+
+// Handle MongoDB connection events
+mongoose.connection.on('connected', () => {
+  console.log('✅ MongoDB connected successfully');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️ MongoDB disconnected. Attempting to reconnect...');
+  setTimeout(connectWithRetry, 5000);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('📴 MongoDB connection closed.');
+    process.exit(0);
+  } catch (err) {
+    console.error('❌ Error during shutdown:', err.message);
+    process.exit(1);
+  }
+});
+
+// Start initial connection
+connectWithRetry();
 
 const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {

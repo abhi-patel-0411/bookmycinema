@@ -33,6 +33,9 @@ const BookingPage = () => {
   const [lockedSeats, setLockedSeats] = useState([]);
   const [seatTimer, setSeatTimer] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [pendingSeats, setPendingSeats] = useState(new Set());
+  const [processingSeatIds, setProcessingSeatIds] = useState(new Set());
+  const [networkError, setNetworkError] = useState(false);
 
   useEffect(() => {
     fetchShowDetails();
@@ -42,6 +45,7 @@ const BookingPage = () => {
       if (selectedSeats.length > 0) {
         releaseSelectedSeats();
       }
+      setProcessingSeatIds(new Set());
     };
   }, [showId]);
 
@@ -78,7 +82,7 @@ const BookingPage = () => {
   // Start seat selection timer
   const startSeatTimer = () => {
     if (seatTimer) clearInterval(seatTimer);
-    
+
     setTimeRemaining(60);
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
@@ -89,7 +93,7 @@ const BookingPage = () => {
         return prev - 1;
       });
     }, 1000);
-    
+
     setSeatTimer(timer);
   };
 
@@ -100,11 +104,22 @@ const BookingPage = () => {
       setSeatTimer(null);
       setTimeRemaining(0);
     }
-    
+
     return () => {
       if (seatTimer) clearInterval(seatTimer);
     };
   }, [selectedSeats.length, seatTimer]);
+
+  // Clear pending seats after timeout
+  useEffect(() => {
+    if (pendingSeats.size > 0) {
+      const timeout = setTimeout(() => {
+        setPendingSeats(new Set());
+      }, 3000); // Clear pending after 3 seconds
+
+      return () => clearTimeout(timeout);
+    }
+  }, [pendingSeats.size]);
 
   const setupRealTimeListeners = () => {
     window.addEventListener("seat-conflict", handleSeatConflict);
@@ -119,7 +134,10 @@ const BookingPage = () => {
       window.removeEventListener("seats-selected", handleSeatsSelected);
       window.removeEventListener("seats-released", handleSeatsReleased);
       window.removeEventListener("seats-booked", handleSeatsBooked);
-      window.removeEventListener("seats-auto-released", handleAutoReleasedSeats);
+      window.removeEventListener(
+        "seats-auto-released",
+        handleAutoReleasedSeats
+      );
       window.removeEventListener("seats-available", handleSeatsAvailable);
     };
   };
@@ -144,22 +162,45 @@ const BookingPage = () => {
 
   const handleSeatsSelected = (event) => {
     const { showId: eventShowId, seats, userId: eventUserId } = event.detail;
-    if (eventShowId === showId && eventUserId !== user?.id && eventUserId !== clerkUser?.id) {
+    if (
+      eventShowId === showId &&
+      eventUserId !== user?.id &&
+      eventUserId !== clerkUser?.id
+    ) {
+      // Remove from pending first
+      setPendingSeats((prev) => {
+        const newSet = new Set(prev);
+        seats.forEach((seat) => newSet.delete(seat));
+        return newSet;
+      });
+
       setLockedSeats((prev) => [...new Set([...prev, ...seats])]);
-      setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
+      setSelectedSeats((prev) =>
+        prev.filter((seat) => !seats.includes(seat.id))
+      );
     }
   };
 
   const handleSeatsReleased = (event) => {
     const { showId: eventShowId, seats, userId: eventUserId } = event.detail;
     if (eventShowId === showId) {
+      // Clear from all states
+      setPendingSeats((prev) => {
+        const newSet = new Set(prev);
+        seats.forEach((seat) => newSet.delete(seat));
+        return newSet;
+      });
+
       setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
 
-      // If these were our seats that got released, also update selectedSeats
       if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
-        setSelectedSeats((prev) => prev.filter((seat) => !seats.includes(seat.id)));
+        setSelectedSeats((prev) =>
+          prev.filter((seat) => !seats.includes(seat.id))
+        );
         if (seats.length > 0) {
-          toast.warning("Your seat selection has expired. Please select seats again.");
+          toast.warning(
+            "Your seat selection has expired. Please select seats again."
+          );
         }
       }
     }
@@ -185,7 +226,7 @@ const BookingPage = () => {
     if (eventShowId === showId) {
       // Remove from locked seats for all users
       setLockedSeats((prev) => prev.filter((seat) => !seats.includes(seat)));
-      
+
       // If this user's seats were auto-released, clear their selected seats
       if (eventUserId === user?.id || eventUserId === clerkUser?.id) {
         setSelectedSeats([]);
@@ -215,26 +256,27 @@ const BookingPage = () => {
         showId: show._id,
         seats: seats.map((seat) => seat.id),
       });
+      setNetworkError(false);
       return { success: true };
     } catch (error) {
+      if (error.code === "ERR_NETWORK" || !navigator.onLine || error.response?.status === 503) {
+        setNetworkError(true);
+        const message = error.response?.data?.type === "network_error" 
+          ? "Database connection lost. Please try again."
+          : "Network connection lost. Please check your internet connection.";
+        toast.error(message);
+        return { success: false, message: "Network error" };
+      }
       if (error.response?.status === 409) {
-        // Handle conflict directly from the response
         const message = error.response.data.message;
         const conflicts = error.response.data.conflicts || [];
-
-        // Show conflict message immediately
         toast.error(message);
         setConflictMessage(message);
         setTimeout(() => setConflictMessage(""), 5000);
-
-        // Update locked seats to reflect the conflict
         setLockedSeats((prev) => [...new Set([...prev, ...conflicts])]);
-
-        console.log(`Seat conflict detected: ${conflicts.join(", ")}`);
-
         return { success: false, message, conflicts };
       }
-      console.error("Error selecting seats:", error);
+      toast.error("Server error. Please try again.");
       return { success: false, message: "Failed to select seats" };
     }
   };
@@ -259,10 +301,18 @@ const BookingPage = () => {
       setShow(showData);
       setBookedSeats(showData.bookedSeats || []);
       generateSeatLayout(showData.theater, showData.screenNumber);
+      setNetworkError(false);
     } catch (error) {
-      console.error("Error fetching show details:", error);
-      toast.error("Failed to load show details");
-      navigate("/movies");
+      if (error.code === "ERR_NETWORK" || !navigator.onLine || error.response?.status === 503) {
+        setNetworkError(true);
+        const message = error.response?.data?.type === "network_error"
+          ? "Database connection lost. Unable to load show details."
+          : "Network connection lost. Unable to load show details.";
+        toast.error(message);
+      } else {
+        toast.error("Failed to load show details");
+        navigate("/movies");
+      }
     } finally {
       setLoading(false);
     }
@@ -335,62 +385,96 @@ const BookingPage = () => {
 
   const handleSeatClick = async (seat) => {
     if (bookedSeats.includes(seat.id)) return;
+    if (pendingSeats.has(seat.id)) return;
+    if (processingSeatIds.has(seat.id)) return; // Prevent simultaneous operations
 
     if (
       lockedSeats.includes(seat.id) &&
-      !selectedSeats.some((s) => s.id === seat.id)
+      !selectedSeats.some((s) => s.id === seat.id) &&
+      !pendingSeats.has(seat.id)
     ) {
-      // Show conflict message immediately when clicking on a locked seat
       const conflictMessage = `Seat ${seat.id} is currently being selected by another user`;
       toast.error(conflictMessage);
       setConflictMessage(conflictMessage);
       setTimeout(() => setConflictMessage(""), 5000);
-
-      // Highlight the locked seat visually
-      const seatElement = document.querySelector(`button[title*="${seat.id}"]`);
-      if (seatElement) {
-        seatElement.classList.add("seat-conflict-highlight");
-        setTimeout(() => {
-          seatElement.classList.remove("seat-conflict-highlight");
-        }, 1000);
-      }
-
       return;
     }
 
-    const isSelected = selectedSeats.some((s) => s.id === seat.id);
+    await processSeatClick(seat);
+  };
 
-    if (isSelected) {
-      setSelectedSeats((prev) => prev.filter((s) => s.id !== seat.id));
+  const processSeatClick = async (seat) => {
+    // Mark seat as being processed
+    setProcessingSeatIds((prev) => new Set([...prev, seat.id]));
 
-      try {
-        await api.post("/bookings/release-seats", {
-          showId: show._id,
-          seats: [seat.id],
-        });
-      } catch (error) {
-        console.error("Error releasing seat:", error);
-        setSelectedSeats((prev) => [...prev, seat]);
-        toast.error("Failed to release seat. Please try again.");
-      }
-    } else {
-      if (selectedSeats.length >= 10) {
-        toast.warning("Maximum 10 seats can be selected");
-        return;
-      }
+    try {
+      const isSelected = selectedSeats.some((s) => s.id === seat.id);
 
-      const result = await selectSeatsOnServer([seat]);
-      if (result.success) {
-        setSelectedSeats((prev) => [...prev, seat]);
-        startSeatTimer();
+      if (isSelected) {
+        setPendingSeats((prev) => new Set([...prev, seat.id]));
+        setSelectedSeats((prev) => prev.filter((s) => s.id !== seat.id));
+
+        try {
+          await api.post("/bookings/release-seats", {
+            showId: show._id,
+            seats: [seat.id],
+          });
+          setNetworkError(false);
+        } catch (error) {
+          if (error.code === "ERR_NETWORK" || !navigator.onLine || error.response?.status === 503) {
+            setNetworkError(true);
+            const message = error.response?.data?.type === "network_error"
+              ? "Database connection lost. Seat may not be released properly."
+              : "Network error. Seat may not be released properly.";
+            toast.error(message);
+          } else {
+            toast.error("Failed to release seat. Please try again.");
+          }
+          setSelectedSeats((prev) => [...prev, seat]);
+        } finally {
+          setPendingSeats((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(seat.id);
+            return newSet;
+          });
+        }
+      } else {
+        if (selectedSeats.length + pendingSeats.size >= 10) {
+          toast.warning("Maximum 10 seats can be selected");
+          return;
+        }
+
+        setPendingSeats((prev) => new Set([...prev, seat.id]));
+
+        try {
+          const result = await selectSeatsOnServer([seat]);
+          if (result.success) {
+            setSelectedSeats((prev) => [...prev, seat]);
+            startSeatTimer();
+          }
+        } finally {
+          setPendingSeats((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(seat.id);
+            return newSet;
+          });
+        }
       }
+    } finally {
+      // Always remove from processing set
+      setProcessingSeatIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(seat.id);
+        return newSet;
+      });
     }
   };
 
   const getSeatStatus = (seat) => {
     if (bookedSeats.includes(seat.id)) return "booked";
+    if (pendingSeats.has(seat.id)) return "pending";
     if (selectedSeats.find((s) => s.id === seat.id)) return "selected";
-    if (lockedSeats.includes(seat.id)) return "locked";
+    if (lockedSeats.includes(seat.id) && !pendingSeats.has(seat.id)) return "locked";
     return "available";
   };
 
@@ -503,6 +587,26 @@ const BookingPage = () => {
           </Row>
         </motion.div>
 
+        {/* Network Error Message */}
+        {networkError && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-3 border-bottom border-danger"
+          >
+            <div className="text-danger d-flex align-items-center justify-content-center gap-2">
+              🌐 Network connection lost. Some features may not work properly.
+              <Button 
+                size="sm" 
+                variant="outline-light"
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Conflict Message */}
         {conflictMessage && (
           <motion.div
@@ -532,6 +636,7 @@ const BookingPage = () => {
               bookedSeats={bookedSeats}
               selectedSeats={selectedSeats}
               lockedSeats={lockedSeats}
+              pendingSeats={Array.from(pendingSeats)}
               onSeatClick={handleSeatClick}
               pricing={{
                 silver: show?.pricing?.silver || show?.price || 150,
@@ -568,7 +673,7 @@ const BookingPage = () => {
                     style={{
                       width: "20px",
                       height: "20px",
-                      background: "linear-gradient(135deg, #dc3545, #ff6b35)",
+                      background: "#ff9800",
                     }}
                   ></div>
                   <small className="text-light">Selected</small>
@@ -644,11 +749,12 @@ const BookingPage = () => {
                     Selected Seats ({selectedSeats.length})
                   </h6>
                   {timeRemaining > 0 && (
-                    <Badge 
-                      bg={timeRemaining <= 10 ? "danger" : "warning"} 
+                    <Badge
+                      bg={timeRemaining <= 10 ? "danger" : "warning"}
                       className="d-flex align-items-center gap-1"
                     >
-                      ⏱️ {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                      ⏱️ {Math.floor(timeRemaining / 60)}:
+                      {(timeRemaining % 60).toString().padStart(2, "0")}
                     </Badge>
                   )}
                 </div>

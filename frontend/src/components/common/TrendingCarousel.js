@@ -22,18 +22,21 @@ const TrendingCarousel = ({ movies = [], title = "Recommended Movies" }) => {
   
   React.useEffect(() => {
     const updateLayout = () => {
-      if (window.innerWidth <= 480) {
+      if (window.innerWidth <= 360) {
+        setItemsPerView(2.3);
+        setCardWidth(120);
+      } else if (window.innerWidth <= 480) {
         setItemsPerView(2.5);
-        setCardWidth(136);
+        setCardWidth(130);
       } else if (window.innerWidth <= 576) {
         setItemsPerView(2.8);
-        setCardWidth(156);
+        setCardWidth(140);
       } else if (window.innerWidth <= 768) {
         setItemsPerView(3.2);
-        setCardWidth(176);
+        setCardWidth(160);
       } else if (window.innerWidth <= 1024) {
         setItemsPerView(4);
-        setCardWidth(216);
+        setCardWidth(200);
       } else {
         setItemsPerView(5);
         setCardWidth(216);
@@ -125,7 +128,7 @@ const TrendingCarousel = ({ movies = [], title = "Recommended Movies" }) => {
                     )}
                   </div>
                   <div className="movie-info-carousel">
-                    <h3 className="movie-title-carousel">{movieTitle}</h3>
+                    <span className="movie-title-carousel">{movieTitle}</span>
                     <p className="movie-genre-carousel">{movieGenre}</p>
                     {movie.badge === 'Coming Soon' && movie.releaseDate && (
                       <p className="movie-release-date">

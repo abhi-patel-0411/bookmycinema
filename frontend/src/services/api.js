@@ -49,8 +49,9 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.code === "ERR_NETWORK") {
-      console.warn("Network error - using fallback data");
+    if (error.code === "ERR_NETWORK" || !navigator.onLine) {
+      error.isNetworkError = true;
+      console.warn("Network error detected:", error.message);
     }
     return Promise.reject(error);
   }

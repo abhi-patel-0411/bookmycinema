@@ -7,7 +7,12 @@ import { toast } from 'react-toastify';
 import api from '../../services/api';
 import './StripePayment.css';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RhYZR4N3NRD17DaFW7M17PFyliGDuPSD2wOxjDLS1NS1jQYk5J0tyELmtu1YawnIMQB1IoEZBS7QQPXh09tsHjv00SfIi8hhu');
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RhYZR4N3NRD17DaFW7M17PFyliGDuPSD2wOxjDLS1NS1jQYk5J0tyELmtu1YawnIMQB1IoEZBS7QQPXh09tsHjv00SfIi8hhu')
+  .catch(error => {
+    console.error('Failed to load Stripe.js:', error);
+    toast.error('Payment system unavailable. Please check your internet connection.');
+    return null;
+  });
 
 const CheckoutForm = ({ amount, onSuccess, onError, clientSecret }) => {
   const stripe = useStripe();
@@ -50,7 +55,12 @@ const CheckoutForm = ({ amount, onSuccess, onError, clientSecret }) => {
       }
     } catch (err) {
       console.error('Payment error:', err);
-      setError(err.response?.data?.error || err.message || 'Payment failed');
+      if (err.code === 'ERR_NETWORK' || !navigator.onLine) {
+        setError('Network connection lost during payment. Please check your connection and try again.');
+        toast.error('Payment failed due to network issues.');
+      } else {
+        setError(err.response?.data?.error || err.message || 'Payment failed');
+      }
       onError(err);
     } finally {
       setLoading(false);
@@ -186,7 +196,11 @@ const StripePayment = ({ amount, onSuccess, onError, bookingId }) => {
         }
       } catch (error) {
         console.error('❌ Error initializing payment:', error);
-        console.error('Error details:', error.response?.data);
+        if (error.code === 'ERR_NETWORK' || !navigator.onLine) {
+          toast.error('Network connection lost. Please check your internet connection and try again.');
+        } else {
+          toast.error('Payment system error. Please try again or contact support.');
+        }
         setStripeError(true);
         onError(error);
       } finally {

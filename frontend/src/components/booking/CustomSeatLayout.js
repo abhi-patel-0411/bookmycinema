@@ -6,6 +6,7 @@ const CustomSeatLayout = ({
   bookedSeats = [],
   selectedSeats = [],
   lockedSeats = [],
+  pendingSeats = [],
   onSeatClick,
   pricing = { silver: 150, gold: 200, premium: 300 },
 }) => {
@@ -16,6 +17,7 @@ const CustomSeatLayout = ({
   const getSeatStatus = (row, seatNumber) => {
     const seatId = getSeatId(row, seatNumber);
     if (bookedSeats.includes(seatId)) return "booked";
+    if (pendingSeats.includes(seatId)) return "pending";
     if (selectedSeats.some((s) => s.id === seatId)) return "selected";
     if (lockedSeats.includes(seatId)) return "locked";
     return "available";
@@ -48,6 +50,7 @@ const CustomSeatLayout = ({
   const getSeatColor = (seatClass, status) => {
     if (status === "booked") return "#dc3545";
     if (status === "selected") return "#28a745";
+    if (status === "pending") return "#f97316";
 
     return "rgba(184, 184, 184, 0.3)";
   };
@@ -58,7 +61,7 @@ const CustomSeatLayout = ({
     const seatId = getSeatId(row, seatNumber);
     const status = getSeatStatus(row, seatNumber);
 
-    if (status === "booked" || status === "locked") return;
+    if (status === "booked" || status === "locked" || status === "pending") return;
 
     const seatData = {
       id: seatId,
@@ -186,6 +189,8 @@ const CustomSeatLayout = ({
                     let seatClassName = "seat-professional ";
 
                     if (status === "booked") seatClassName += "seat-booked";
+                    else if (status === "pending")
+                      seatClassName += "seat-pending";
                     else if (status === "selected")
                       seatClassName += "seat-selected";
                     else if (status === "locked")
@@ -203,11 +208,13 @@ const CustomSeatLayout = ({
                         onClick={() =>
                           handleSeatClick(rowObj.row, seat, rowIndex, seatClass)
                         }
-                        disabled={status === "booked" || status === "locked"}
+                        disabled={status === "booked" || status === "locked" || status === "pending"}
                         title={`${
                           rowObj.row
                         }${seat} - ₹${price} (${seatClass.toUpperCase()}) ${
-                          status === "locked"
+                          status === "pending"
+                            ? "- Processing selection..."
+                            : status === "locked"
                             ? "- Being selected by another user"
                             : status === "selected"
                             ? "- Click to deselect"
@@ -217,6 +224,8 @@ const CustomSeatLayout = ({
                       >
                         {status === "booked"
                           ? "✕"
+                          : status === "pending"
+                          ? "⏳"
                           : status === "locked"
                           ? "⏳"
                           : seat}

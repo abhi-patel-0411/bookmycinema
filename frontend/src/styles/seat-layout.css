@@ -148,6 +148,14 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.seat-pending {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  cursor: not-allowed;
+  animation: pendingPulse 1.5s infinite;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+  border: 2px solid #fbbf24;
+}
+
 /* Premium seats */
 .seat-premium {
   background: rgba(184, 184, 184, 0.3);
@@ -291,6 +299,18 @@
   }
   50% {
     opacity: 0.6;
+  }
+}
+
+/* Animation for pending seats */
+@keyframes pendingPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
   }
 }
 

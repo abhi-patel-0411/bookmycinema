@@ -313,16 +313,29 @@
   }
   
   .movie-info-carousel {
-    padding: 0.6rem;
+    padding: 0.5rem;
+    min-height: 80px;
   }
   
   .movie-title-carousel {
-    font-size: 0.85rem;
-    line-height: 1.2;
+    font-size: 16px;
+    line-height: 1.1;
+    height: auto;
+    -webkit-line-clamp: 2;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   
   .movie-genre-carousel {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    line-height: 1.1;
+  }
+  
+  .movie-release-date {
+    font-size: 0.6rem;
   }
   
   .carousel-nav {
@@ -336,5 +349,34 @@
   
   .carousel-nav-right {
     right: 0.2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .movie-card-carousel {
+    flex: 0 0 120px;
+  }
+  
+  .movie-image-carousel {
+    height: 160px;
+  }
+  
+  .movie-info-carousel {
+    padding: 0.4rem;
+    min-height: 70px;
+  }
+  
+  .movie-title-carousel {
+    font-size: 0.75rem;
+    line-height: 1.0;
+    margin-bottom: 0.2rem;
+  }
+  
+  .movie-genre-carousel {
+    font-size: 0.6rem;
+  }
+  
+  .movie-release-date {
+    font-size: 0.55rem;
   }
 }

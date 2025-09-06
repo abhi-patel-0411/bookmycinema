@@ -464,7 +464,28 @@ const createBooking = async (req, res) => {
     res.status(201).json(populatedBooking);
   } catch (error) {
     console.error("Booking creation error:", error);
-    res.status(500).json({ message: error.message });
+    
+    // Handle MongoDB connection errors
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoTimeoutError' || error.code === 'ENOTFOUND') {
+      return res.status(503).json({ 
+        message: "Database connection lost. Please try again.",
+        type: "network_error",
+        retry: true
+      });
+    }
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: "Invalid booking data",
+        details: error.message
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Booking failed. Please try again.",
+      type: "server_error"
+    });
   }
 };
 
@@ -518,7 +539,20 @@ const selectSeats = async (req, res) => {
       expiresAt: new Date(Date.now() + LOCK_DURATION).toISOString()
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Seat selection error:", error);
+    
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoTimeoutError' || error.code === 'ENOTFOUND') {
+      return res.status(503).json({ 
+        message: "Database connection lost. Please try again.",
+        type: "network_error",
+        retry: true
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Seat selection failed. Please try again.",
+      type: "server_error"
+    });
   }
 };
 
@@ -534,7 +568,20 @@ const releaseSeats = async (req, res) => {
     const released = await unlockSeats(showId, seats, userId);
     res.json({ success: true, released });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Seat release error:", error);
+    
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoTimeoutError' || error.code === 'ENOTFOUND') {
+      return res.status(503).json({ 
+        message: "Database connection lost. Please try again.",
+        type: "network_error",
+        retry: true
+      });
+    }
+    
+    res.status(500).json({ 
+      message: "Seat release failed. Please try again.",
+      type: "server_error"
+    });
   }
 };
 
